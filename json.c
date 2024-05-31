@@ -5,8 +5,9 @@
 
 JSON *StringToJSON(char *str)
 {
-    if (str == NULL || (str[0] != )
+    if (str == NULL || (str[0] != CURLY_OPEN_CHAR && str[0] != BRACKET_OPEN_CHAR))
     {
+        printf("[ERROR]: invalid input to StringToJSON\n");
         return NULL;
     }
     return NULL;

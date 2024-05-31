@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <regex.h>
 #include <string.h>
 #include "./json.h"
 
@@ -11,6 +10,7 @@ int main(void)
     JSON *test = StringToJSON(simple_json);
     if (test == NULL)
     {
+        printf("JSON is NULL :/\n");
         return EXIT_FAILURE;
     }
     FreeJSON(test);

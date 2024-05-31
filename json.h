@@ -4,6 +4,9 @@
 #define BRACKET_OPEN_CHAR '['
 #define BRACKET_CLOSE_CHAR ']'
 
+#define CURLY_OPEN_CHAR '{'
+#define CURLY_CLOSE_CHAR '}'
+
 typedef struct JSON
 {
     struct JSON *next;
