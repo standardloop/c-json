@@ -7,6 +7,8 @@
 #define CURLY_OPEN_CHAR '{'
 #define CURLY_CLOSE_CHAR '}'
 
+#define NULL_CHAR '\0'
+
 typedef struct JSON
 {
     struct JSON *next;
@@ -16,7 +18,7 @@ typedef struct JSON
     void *value;
 } JSON;
 
-JSON *StringToJSON(char *);
+JSON *StringToJSON(const char *);
 char *JSONToString(JSON *);
 
 void FreeJSON(JSON *);

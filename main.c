@@ -5,12 +5,12 @@
 
 int main(void)
 {
-    char *simple_json = "{}";
+    char *simple_json = "[\"josh\"]";
 
     JSON *test = StringToJSON(simple_json);
     if (test == NULL)
     {
-        printf("JSON is NULL :/\n");
+        // printf("JSON is NULL :/\n");
         return EXIT_FAILURE;
     }
     FreeJSON(test);
