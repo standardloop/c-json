@@ -1,27 +1,122 @@
 #ifndef JSON_H
 #define JSON_H
 
-#define BRACKET_OPEN_CHAR '['
-#define BRACKET_CLOSE_CHAR ']'
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
 
-#define CURLY_OPEN_CHAR '{'
-#define CURLY_CLOSE_CHAR '}'
-
-#define NULL_CHAR '\0'
-
-typedef struct JSON
+// ————————— GLOBAL START —————————
+enum JSONValueType
 {
-    struct JSON *next;
-    struct JSON *prev;
+    OBJ_t,
+    NUMBER_t,
+    STRING_t,
+    BOOL_t,
+    NULL_t,
+    LIST_t,
+};
+// ————————— GLOBAL END —————————
 
-    char *name;
+// ————————— HASHMAP START —————————
+#define DEFAULT_MAP_SIZE 10
+#define DEFAULT_MAP_RESIZE_MULTIPLE 2
+
+typedef u_int32_t(HashFunction)(char *, u_int32_t);
+
+typedef struct hashMapEntry
+{
+    char *key;
     void *value;
+    enum JSONValueType value_type;
+    struct hashMapEntry *next;
+} HashMapEntry;
+
+typedef struct
+{
+    u_int32_t size;
+    u_int32_t capacity;
+    HashMapEntry **entries;
+    HashFunction *hashFunction;
+} HashMap;
+
+extern HashMapEntry *HashMapEntryInit(char *, void *, enum JSONValueType);
+
+extern HashMap *HashMapInit(u_int32_t, HashFunction *);
+extern HashMap *DefaultHashMapInit(void);
+
+extern HashMap *HashMapInitFromStr(char *);
+
+extern void FreeHashMap(HashMap *);
+
+extern void HashMapInsert(HashMap *, HashMapEntry *);
+extern HashMapEntry *HashMapGet(HashMap *, char *);
+extern void HashMapRemove(HashMap *, char *);
+
+extern void PrintHashMap(HashMap *);
+// ————————— HASHMAP END —————————
+
+// ————————— DYN ARRAY START —————————
+#define DEFAULT_DYN_ARR_SIZE 20
+#define DEFAULT_DYN_ARR_RESIZE_MULTIPLE 2
+
+typedef struct
+{
+    enum JSONValueType value_type;
+    void *value;
+    u_int32_t len;
+} DynamicArrayElement;
+
+typedef struct
+{
+    u_int32_t size;
+    u_int32_t capacity;
+    DynamicArrayElement **list;
+} DynamicArray;
+
+extern DynamicArray *DynamicArrayInit(u_int32_t);
+extern DynamicArray *DefaultDynamicArrayInit(void);
+extern DynamicArray *DynamicArrayInitFromStr(char *);
+extern DynamicArray *DynamicArrayReplicate(DynamicArray *);
+
+extern DynamicArrayElement *DynamicArrayElementInit(enum JSONValueType, void *, u_int32_t);
+
+extern void DynamicArrayAddFirst(DynamicArray *, DynamicArrayElement *);
+extern void DynamicArrayAddLast(DynamicArray *, DynamicArrayElement *);
+extern void DynamicArrayAdd(DynamicArray *, DynamicArrayElement *, u_int32_t);
+
+extern void DynamicArrayRemove(DynamicArray *, u_int32_t);
+extern void DynamicArrayRemoveFirst(DynamicArray *);
+extern void DynamicArrayRemoveLast(DynamicArray *);
+
+extern void PrintDynamicArray(DynamicArray *);
+extern void FreeDynamicArray(DynamicArray *);
+
+extern char *DynamicArrayToString(DynamicArray *);
+
+// ————————— DYN ARRAY END —————————
+
+// ————————— JSON START —————————
+#define JSON_BOOL_TRUE "true"
+#define JSON_BOOL_FALSE "false"
+#define JSON_NULL "null"
+
+typedef struct
+{
+    DynamicArray *array;
+    HashMap *map;
 } JSON;
 
-JSON *StringToJSON(const char *);
-char *JSONToString(JSON *);
+extern JSON *JSONInit(u_int32_t);
+extern JSON *DefaultJSONInit(void);
 
-void FreeJSON(JSON *);
-void PrintJSON(JSON *);
+extern JSON *StringToJSON(char *);
+extern char *JSONToString(JSON *);
+
+extern void FreeJSON(JSON *);
+extern void PrintJSON(JSON *);
+
+extern void PrintJSONValue(enum JSONValueType, void *);
+// ————————— JSON END —————————
 
 #endif

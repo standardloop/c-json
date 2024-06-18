@@ -3,13 +3,19 @@ include Makefile.properties
 all: build run
 
 clean:
-	rm main
+	rm $(EXECUTABLE_NAME)
 
 build:
 	@$(CC) $(CC_FLAGS) \
 	main.c \
 	json.c \
-	-o main
+	hashmap.c \
+	dynamic-array.c \
+	util.c \
+	-o $(EXECUTABLE_NAME)
 
 run:
-	./main
+	@./main
+
+check_leaks:
+	@leaks --atExit -- ./$(EXECUTABLE_NAME)
