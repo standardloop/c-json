@@ -103,6 +103,12 @@ extern char *DynamicArrayToString(DynamicArray *);
 
 typedef struct
 {
+    enum JSONValueType value_type;
+    void *value;
+} JSONValue;
+
+typedef struct
+{
     DynamicArray *array;
     HashMap *map;
 } JSON;
@@ -165,6 +171,8 @@ extern void PrintToken(Token *);
 extern void FreeToken(Token *);
 
 extern void LexerRunTest(char *);
+
+extern Token *NewToken(enum TokenType, u_int32_t, u_int32_t, char *);
 
 // ————————— LEXER END —————————
 

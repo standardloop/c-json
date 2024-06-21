@@ -10,7 +10,6 @@
 static void advanceChar(Lexer *);
 static void backtrackChar(Lexer *);
 static void skipWhitespace(Lexer *);
-static Token *newToken(enum TokenType, u_int32_t, u_int32_t, char *);
 static char *makeStringLiteral(Lexer *, char);
 static char *makeNumberLiteral(Lexer *);
 static char *makeNULLLiteral(Lexer *);
@@ -65,7 +64,7 @@ static void skipWhitespace(Lexer *lexer)
     }
 }
 
-static Token *newToken(enum TokenType type, u_int32_t start, u_int32_t end, char *literal)
+static Token *NewToken(enum TokenType type, u_int32_t start, u_int32_t end, char *literal)
 {
     Token *token = malloc(sizeof(Token));
     if (token == NULL)
@@ -97,42 +96,42 @@ extern Token *Lex(Lexer *lexer)
 
     if (lexer->current_char == NULL_CHAR)
     {
-        token = newToken(TokenEOF, lexer->position, lexer->position + 1, NULL_CHAR_STRING);
+        token = NewToken(TokenEOF, lexer->position, lexer->position + 1, NULL_CHAR_STRING);
     }
     else if (lexer->current_char == CURLY_OPEN_CHAR)
     {
-        token = newToken(TokenOpenCurlyBrace, lexer->position, lexer->position + 1, TOKEN_OPEN_CURLY_BRACE_STRING);
+        token = NewToken(TokenOpenCurlyBrace, lexer->position, lexer->position + 1, TOKEN_OPEN_CURLY_BRACE_STRING);
     }
     else if (lexer->current_char == CURLY_CLOSE_CHAR)
     {
-        token = newToken(TokenCloseCurlyBrace, lexer->position, lexer->position + 1, TOKEN_CLOSE_CURLY_BRACE_STRING);
+        token = NewToken(TokenCloseCurlyBrace, lexer->position, lexer->position + 1, TOKEN_CLOSE_CURLY_BRACE_STRING);
     }
     else if (lexer->current_char == BRACKET_OPEN_CHAR)
     {
-        token = newToken(TokenOpenBracket, lexer->position, lexer->position + 1, TOKEN_OPEN_BRACKET_STRING);
+        token = NewToken(TokenOpenBracket, lexer->position, lexer->position + 1, TOKEN_OPEN_BRACKET_STRING);
     }
     else if (lexer->current_char == BRACKET_CLOSE_CHAR)
     {
-        token = newToken(TokenCloseBracket, lexer->position, lexer->position + 1, TOKEN_CLOSE_BRACKET_STRING);
+        token = NewToken(TokenCloseBracket, lexer->position, lexer->position + 1, TOKEN_CLOSE_BRACKET_STRING);
     }
     else if (lexer->current_char == COMMA_CHAR)
     {
-        token = newToken(TokenComma, lexer->position, lexer->position + 1, TOKEN_COMMA_STRING);
+        token = NewToken(TokenComma, lexer->position, lexer->position + 1, TOKEN_COMMA_STRING);
     }
     else if (lexer->current_char == COLON_CHAR)
     {
-        token = newToken(TokenColon, lexer->position, lexer->position + 1, TOKEN_COLON_STRING);
+        token = NewToken(TokenColon, lexer->position, lexer->position + 1, TOKEN_COLON_STRING);
     }
     else if (lexer->current_char == DOUBLE_QUOTES_CHAR)
     {
         char *string_literal = makeStringLiteral(lexer, DOUBLE_QUOTES_CHAR);
         if (string_literal == NULL)
         {
-            token = newToken(TokenIllegal, lexer->position, lexer->position + 1, NULL);
+            token = NewToken(TokenIllegal, lexer->position, lexer->position + 1, NULL);
         }
         else
         {
-            token = newToken(TokenString, lexer->position, lexer->position + 1, string_literal);
+            token = NewToken(TokenString, lexer->position, lexer->position + 1, string_literal);
         }
     }
     else if (isDigitOrMinusSign(lexer->current_char))
@@ -140,11 +139,11 @@ extern Token *Lex(Lexer *lexer)
         char *number_literal = makeNumberLiteral(lexer);
         if (number_literal == NULL)
         {
-            token = newToken(TokenIllegal, lexer->position, lexer->position + 1, NULL);
+            token = NewToken(TokenIllegal, lexer->position, lexer->position + 1, NULL);
         }
         else
         {
-            token = newToken(TokenNumber, lexer->position, lexer->position + 1, number_literal);
+            token = NewToken(TokenNumber, lexer->position, lexer->position + 1, number_literal);
             backtrackChar(lexer);
         }
     }
@@ -153,11 +152,11 @@ extern Token *Lex(Lexer *lexer)
         char *bool_literal = makeBoolLiteral(lexer);
         if (bool_literal == NULL)
         {
-            token = newToken(TokenIllegal, lexer->position, lexer->position + 1, NULL);
+            token = NewToken(TokenIllegal, lexer->position, lexer->position + 1, NULL);
         }
         else
         {
-            token = newToken(TokenBool, lexer->position, lexer->position + 1, bool_literal);
+            token = NewToken(TokenBool, lexer->position, lexer->position + 1, bool_literal);
         }
     }
     else if (lexer->current_char == 'n')
@@ -165,16 +164,16 @@ extern Token *Lex(Lexer *lexer)
         char *null_literal = makeNULLLiteral(lexer);
         if (null_literal == NULL)
         {
-            token = newToken(TokenIllegal, lexer->position, lexer->position + 1, NULL);
+            token = NewToken(TokenIllegal, lexer->position, lexer->position + 1, NULL);
         }
         else
         {
-            token = newToken(TokenNULL, lexer->position, lexer->position + 1, null_literal);
+            token = NewToken(TokenNULL, lexer->position, lexer->position + 1, null_literal);
         }
     }
     else
     {
-        token = newToken(TokenIllegal, lexer->position, lexer->position + 1, NULL);
+        token = NewToken(TokenIllegal, lexer->position, lexer->position + 1, NULL);
     }
 
     return token;

@@ -30,27 +30,6 @@ extern JSON *StringToJSON(char *input_str)
         return NULL;
     }
 
-    // if (input_str[0] == BRACKET_OPEN_CHAR)
-    // {
-    //     json->map = NULL;
-    //     json->array = DynamicArrayInitFromStr(input_str);
-    //     if (json->array == NULL)
-    //     {
-    //         FreeJSON(json);
-    //         return NULL;
-    //     }
-    // }
-    // else if (input_str[0] == CURLY_OPEN_CHAR)
-    // {
-    //     json->array = NULL;
-    //     json->map = HashMapInitFromStr(input_str);
-    //     if (json->map == NULL)
-    //     {
-    //         FreeJSON(json);
-    //         return NULL;
-    //     }
-    // }
-
     // LexerRunTest(input_str);
     Lexer *lexer = LexerInit(input_str);
     if (lexer == NULL)
