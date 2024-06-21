@@ -8,6 +8,7 @@
 #include "./util.h"
 
 static void advanceChar(Lexer *);
+static void backtrackChar(Lexer *);
 static void skipWhitespace(Lexer *);
 static Token *newToken(enum TokenType, u_int32_t, u_int32_t, char *);
 static char *makeStringLiteral(Lexer *, char);
@@ -49,6 +50,13 @@ static void advanceChar(Lexer *lexer)
     lexer->read_position++;
 }
 
+static void backtrackChar(Lexer *lexer)
+{
+    lexer->position -= 2;
+    lexer->read_position--;
+    lexer->current_char = lexer->input[lexer->read_position];
+}
+
 static void skipWhitespace(Lexer *lexer)
 {
     while (lexer->current_char == SPACE_CHAR || lexer->current_char == TAB_CHAR || lexer->current_char == NEWLINE_CHAR || lexer->current_char == CARRIAGE_CHAR)
@@ -88,7 +96,7 @@ extern Token *Lex(Lexer *lexer)
 
     if (lexer->current_char == NULL_CHAR)
     {
-        token = newToken(TokenEOF, lexer->position, lexer->read_position + 1, NULL_CHAR_STRING);
+        token = newToken(TokenEOF, lexer->position, lexer->position + 1, NULL_CHAR_STRING);
     }
     else if (lexer->current_char == CURLY_OPEN_CHAR)
     {
@@ -136,6 +144,7 @@ extern Token *Lex(Lexer *lexer)
         else
         {
             token = newToken(TokenNumber, lexer->position, lexer->position + 1, number_literal);
+            backtrackChar(lexer);
         }
     }
     else if (lexer->current_char == 't' || lexer->current_char == 'f')
@@ -251,26 +260,28 @@ static char *makeNULLLiteral(Lexer *lexer)
 
 static char *makeNumberLiteral(Lexer *lexer)
 {
+    u_int32_t start_position = lexer->position;
     if (lexer->current_char == DASH_MINUS_CHAR)
     {
         advanceChar(lexer);
     }
-    u_int32_t start_position = lexer->position;
+
     u_int8_t decimal_count = 0;
     while (ALWAYS)
     {
         if (lexer->current_char == DOT_CHAR)
         {
-            if (++decimal_count > 1)
-            {
-                return NULL;
-            }
+            decimal_count++;
         }
         else if (lexer->current_char == NULL_CHAR || !isdigit(lexer->current_char))
         {
             break;
         }
         advanceChar(lexer);
+    }
+    if (decimal_count > 1)
+    {
+        return NULL;
     }
     u_int32_t number_literal_size = (lexer->position - start_position) + 1;
     char *number_literal = malloc(sizeof(char) * number_literal_size);
