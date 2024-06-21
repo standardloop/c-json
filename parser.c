@@ -76,10 +76,15 @@ static JSONValue *parseList(Parser *parser)
     }
     json_value->value_type = LIST_t;
     DynamicArray *list = DefaultDynamicArrayInit();
-    // nextToken(parser);
     while (ALWAYS)
     {
-        if (parser->current_token->type == TokenCloseBracket || parser->current_token->type == TokenEOF)
+        //PrintToken(parser->current_token);
+        if (parser->current_token->type == TokenCloseBracket && parser->peek_token->type == TokenComma)
+        {
+            nextToken(parser);
+            break;
+        }
+        if (parser->current_token->type == TokenCloseBracket && parser->peek_token->type == TokenEOF)
         {
             break;
         }
@@ -119,7 +124,7 @@ static JSONValue *initQuickJSONValue(enum JSONValueType value_type, void *value)
     }
     else if (value_type == NULL_t)
     {
-        free(value);
+        // free(value);
         value_len = 0;
         json_value->value = NULL;
     }
@@ -134,7 +139,7 @@ static JSONValue *initQuickJSONValue(enum JSONValueType value_type, void *value)
         {
             *new_bool = false;
         }
-        free(value);
+        // free(value);
         value_len = 1;
         json_value->value = new_bool;
     }
@@ -145,7 +150,7 @@ static JSONValue *initQuickJSONValue(enum JSONValueType value_type, void *value)
         *new_double = temp;
         value_len = 1;
         json_value->value = new_double;
-        free(value);
+        // free(value);
     }
     else if (value_type == NUMBER_INT_t)
     {
@@ -154,13 +159,13 @@ static JSONValue *initQuickJSONValue(enum JSONValueType value_type, void *value)
         *new_int = temp;
         value_len = 1;
         json_value->value = new_int;
-        free(value);
+        // free(value);
     }
     else
     {
         json_value->value = NULL;
         value_len = 0;
-        free(value);
+        // free(value);
     }
     json_value->value_type = value_type;
     json_value->value_len = value_len;
@@ -191,7 +196,7 @@ static JSONValue *parse(Parser *parser)
     }
     nextToken(parser);
     JSONValue *return_value = NULL;
-    //PrintToken(parser->current_token);
+    // PrintToken(parser->current_token);
     if (parser->current_token->type == TokenOpenCurlyBrace)
     {
         exit(1);
@@ -218,27 +223,32 @@ static JSONValue *parse(Parser *parser)
     {
         return_value = initQuickJSONValue(NULL_t, parser->current_token->literal);
     }
-    else if (parser->current_token->type == TokenEOF)
-    {
-        // FIXME
-        // printf("found token EOF!\n");
-        return NULL;
-    }
-    else if (parser->current_token->type == TokenComma)
-    {
-        // printf("found a comma!!\n");
-        return NULL;
-    }
+    // else
+    // {
+    //     return NULL;
+    // }
+    // else if (parser->current_token->type == TokenEOF)
+    // {
+    //     // FIXME
+    //     // printf("found token EOF!\n");
+    //     return NULL;
+    // }
+    // else if (parser->current_token->type == TokenComma)
+    // {
+    //     // printf("found a comma!!\n");
+    //     return NULL;
+    // }
     else if (parser->current_token->type == TokenCloseBracket)
     {
+        printf("found a TokenCloseBracket\n");
         return NULL;
     }
-    else
-    {
-        printf("big error in static JSONValue *parse\n");
-        exit(1);
-        return NULL;
-    }
+    // else
+    // {
+    //     printf("big error in static JSONValue *parse\n");
+    //     exit(1);
+    //     return NULL;
+    // }
     // FreeToken(parser->current_token);
     return return_value;
 }
