@@ -61,16 +61,18 @@ extern JSON *StringToJSON(char *input_str)
     {
 
         Token *token = Lex(lexer);
-        //printf("[CURRENT_CHAR]: %c\n", lexer->current_char);
+        // printf("[CURRENT_CHAR]: %c\n", lexer->current_char);
 
         PrintToken(token);
 
         if (token->type == TokenEOF)
         {
+            FreeToken(token);
             break;
         }
         FreeToken(token);
     }
+    FreeLexer(lexer);
 
     return json;
 }

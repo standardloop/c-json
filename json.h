@@ -162,6 +162,7 @@ typedef struct
 } Lexer;
 
 extern Lexer *LexerInit(char *);
+extern void FreeLexer(Lexer *);
 extern Token *Lex(Lexer *);
 extern void PrintToken(Token *);
 extern void FreeToken(Token *);

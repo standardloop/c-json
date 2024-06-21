@@ -88,6 +88,7 @@ static bool isDigitOrMinusSign(char test)
     return false;
 }
 
+// FIXME position needs changing!!!!
 extern Token *Lex(Lexer *lexer)
 {
     Token *token = NULL;
@@ -369,6 +370,22 @@ extern void FreeToken(Token *token)
 {
     if (token != NULL)
     {
+        if (token->type == TokenString || token->type == TokenNumber ||
+            token->type == TokenBool || token->type == TokenNULL)
+        {
+            if (token->literal != NULL)
+            {
+                free(token->literal);
+            }
+        }
         free(token);
+    }
+}
+
+extern void FreeLexer(Lexer *lexer)
+{
+    if (lexer != NULL)
+    {
+        free(lexer);
     }
 }
