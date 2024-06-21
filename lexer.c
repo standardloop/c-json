@@ -389,3 +389,29 @@ extern void FreeLexer(Lexer *lexer)
         free(lexer);
     }
 }
+
+extern void LexerRunTest(char *input_str)
+{
+    Lexer *lexer = LexerInit(input_str);
+
+    while (ALWAYS)
+    {
+        Token *token = Lex(lexer);
+        PrintToken(token);
+        if (token->type == TokenEOF)
+        {
+            FreeToken(token);
+            break;
+        }
+        // else if (token->type == TokenIllegal)
+        // {
+        //     FreeToken(token);
+        //     FreeLexer(lexer);
+        //     printf("JSON is invalid!\n");
+        //     return NULL;
+        // }
+
+        FreeToken(token);
+    }
+    FreeLexer(lexer);
+}

@@ -107,9 +107,6 @@ typedef struct
     HashMap *map;
 } JSON;
 
-extern JSON *JSONInit(u_int32_t);
-extern JSON *DefaultJSONInit(void);
-
 extern JSON *StringToJSON(char *);
 extern char *JSONToString(JSON *);
 
@@ -166,5 +163,23 @@ extern void FreeLexer(Lexer *);
 extern Token *Lex(Lexer *);
 extern void PrintToken(Token *);
 extern void FreeToken(Token *);
+
+extern void LexerRunTest(char *);
+
+// ————————— LEXER END —————————
+
+// ————————— PARSER START —————————
+typedef struct
+{
+    Lexer *lexer;
+    Token *current_token;
+    Token *peek_token;
+} Parser;
+
+extern Parser *ParserInit(Lexer *);
+extern void FreeParser(Parser *);
+
+extern JSON *ParseJSON(Parser *);
+// ————————— PARSER END —————————
 
 #endif

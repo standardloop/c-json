@@ -30,11 +30,6 @@ extern JSON *StringToJSON(char *input_str)
         return NULL;
     }
 
-    JSON *json = malloc(sizeof(JSON));
-    if (json == NULL)
-    {
-        return NULL;
-    }
     // if (input_str[0] == BRACKET_OPEN_CHAR)
     // {
     //     json->map = NULL;
@@ -55,35 +50,20 @@ extern JSON *StringToJSON(char *input_str)
     //         return NULL;
     //     }
     // }
+
+    // LexerRunTest(input_str);
     Lexer *lexer = LexerInit(input_str);
-
-    while (ALWAYS)
+    if (lexer == NULL)
     {
-
-        Token *token = Lex(lexer);
-        // printf("[CURRENT_CHAR]: %c\n", lexer->current_char);
-
-        // PrintToken(token);
-
-        if (token->type == TokenEOF)
-        {
-            FreeToken(token);
-            break;
-        }
-        else if (token->type == TokenIllegal)
-        {
-            FreeToken(token);
-            FreeLexer(lexer);
-            FreeJSON(json);
-            printf("JSON is invalid!\n");
-            return NULL;
-        }
-
-        FreeToken(token);
+        return NULL;
     }
-    FreeLexer(lexer);
+    Parser *parser = ParserInit(lexer);
+    if (parser == NULL)
+    {
+        return NULL;
+    }
 
-    return json;
+    return ParseJSON(parser);
 }
 
 // static void *stringToJSON(char *input_str, enum JSONValueType type)

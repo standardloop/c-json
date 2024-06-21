@@ -10,6 +10,7 @@ build:
 	main.c \
 	json.c \
 	lexer.c \
+	parser.c \
 	hashmap.c \
 	dynamic-array.c \
 	util.c \
