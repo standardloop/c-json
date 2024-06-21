@@ -226,6 +226,9 @@ static DynamicArrayElement *dynamicArrayElementReplicate(DynamicArrayElement *dy
     switch (dynamicArrayElement->value_type)
     {
     case NUMBER_DOUBLE_t:
+        value = (double *)malloc(sizeof(double) * dynamicArrayElement->len);
+        memcpy(value, dynamicArrayElement->value, sizeof(double) * dynamicArrayElement->len);
+        break;
     case NUMBER_INT_t:
         value = (int *)malloc(sizeof(int) * dynamicArrayElement->len);
         memcpy(value, dynamicArrayElement->value, sizeof(int) * dynamicArrayElement->len);
@@ -256,23 +259,4 @@ extern DynamicArray *DynamicArrayReplicate(DynamicArray *dynamic_array)
         deep_clone->size++;
     }
     return deep_clone;
-}
-
-extern DynamicArray *DynamicArrayInitFromStr(char *input_str)
-{
-    if (input_str == NULL)
-    {
-        return NULL;
-    }
-    return NULL;
-}
-
-char *DynamicArrayToString(DynamicArray *dynamic_array)
-{
-    if (dynamic_array == NULL)
-    {
-        return NULL;
-    }
-    FreeDynamicArray(dynamic_array);
-    return NULL;
 }

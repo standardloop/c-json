@@ -112,10 +112,31 @@ static JSONValue *initQuickJSONValue(enum JSONValueType value_type, void *value)
         return NULL;
     }
     u_int32_t value_len;
-    if (value_type == NULL_t || value_type == BOOL_t || value_type == STRING_t)
+    if (value_type == STRING_t)
     {
         value_len = strlen((char *)value) + 1;
         json_value->value = value;
+    }
+    else if (value_type == NULL_t)
+    {
+        free(value);
+        value_len = 0;
+        json_value->value = NULL;
+    }
+    else if (value_type == BOOL_t)
+    {
+        bool *new_bool = malloc(sizeof(bool));
+        if (((char *)value)[0] == 't')
+        {
+            *new_bool = true;
+        }
+        else
+        {
+            *new_bool = false;
+        }
+        free(value);
+        value_len = 1;
+        json_value->value = new_bool;
     }
     else if (value_type == NUMBER_DOUBLE_t)
     {
@@ -124,6 +145,7 @@ static JSONValue *initQuickJSONValue(enum JSONValueType value_type, void *value)
         *new_double = temp;
         value_len = 1;
         json_value->value = new_double;
+        free(value);
     }
     else if (value_type == NUMBER_INT_t)
     {
@@ -132,11 +154,13 @@ static JSONValue *initQuickJSONValue(enum JSONValueType value_type, void *value)
         *new_int = temp;
         value_len = 1;
         json_value->value = new_int;
+        free(value);
     }
     else
     {
         json_value->value = NULL;
         value_len = 0;
+        free(value);
     }
     json_value->value_type = value_type;
     json_value->value_len = value_len;
@@ -167,7 +191,7 @@ static JSONValue *parse(Parser *parser)
     }
     nextToken(parser);
     JSONValue *return_value = NULL;
-    PrintToken(parser->current_token);
+    //PrintToken(parser->current_token);
     if (parser->current_token->type == TokenOpenCurlyBrace)
     {
         exit(1);
@@ -188,11 +212,11 @@ static JSONValue *parse(Parser *parser)
     }
     else if (parser->current_token->type == TokenBool)
     {
-        return_value = initQuickJSONValue(NULL_t, parser->current_token->literal);
+        return_value = initQuickJSONValue(BOOL_t, parser->current_token->literal);
     }
     else if (parser->current_token->type == TokenNULL)
     {
-        return_value = initQuickJSONValue(BOOL_t, parser->current_token->literal);
+        return_value = initQuickJSONValue(NULL_t, parser->current_token->literal);
     }
     else if (parser->current_token->type == TokenEOF)
     {
@@ -215,6 +239,7 @@ static JSONValue *parse(Parser *parser)
         exit(1);
         return NULL;
     }
+    // FreeToken(parser->current_token);
     return return_value;
 }
 

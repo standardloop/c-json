@@ -7,7 +7,9 @@
 #include "./util.h"
 
 static void printJSONStringValue(char *);
-static void printJSONNumberValue(int *);
+static void printJSONNumberIntValue(int *value);
+static void printJSONNumberDoubleValue(double *value);
+
 static void printJSONBoolValue(bool *);
 static void printJSONNULLValue(void);
 static void printJSONListValue(DynamicArray *);
@@ -106,8 +108,10 @@ extern void PrintJSONValue(enum JSONValueType value_type, void *value)
         printJSONObjValue(value);
         break;
     case NUMBER_INT_t:
+        printJSONNumberIntValue(value);
+        break;
     case NUMBER_DOUBLE_t:
-        printJSONNumberValue(value);
+        printJSONNumberDoubleValue(value);
         break;
     case STRING_t:
         printJSONStringValue(value);
@@ -131,9 +135,14 @@ static void printJSONStringValue(char *value)
     printf("\"%s\"", value);
 }
 
-static void printJSONNumberValue(int *value)
+static void printJSONNumberIntValue(int *value)
 {
     printf("%d", *value);
+}
+
+static void printJSONNumberDoubleValue(double *value)
+{
+    printf("%f", *value);
 }
 
 static void printJSONBoolValue(bool *value)
