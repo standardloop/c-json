@@ -8,8 +8,8 @@ int main(void)
 {
     // char *simple_json = "[\"josh\", \"test\", [1, 2, 3, 4]]";
     // char *simple_json = "[[1, 2, 3], \"hi\"]";
-    char *simple_json = "[{\"key\": \"value\", \"test\": true, {\"data\": null}, \"numbers\": [-3.123]}]";
-    // char *simple_json = "{}";
+    // char *simple_json = "[{\"key\": \"value\", \"test\": true, {\"data\": null}, \"numbers\": [-3.123]}]";
+    char *simple_json = "[1, 2, 3]";
 
     JSON *test = StringToJSON(simple_json);
     if (test == NULL)

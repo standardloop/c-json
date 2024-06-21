@@ -8,6 +8,12 @@
 #include "./util.h"
 
 static void nextToken(Parser *);
+static JSONValue *parse(Parser *);
+static JSONValue *parseList(Parser *);
+static JSONValue *parseObj(Parser *);
+static JSONValue *parseNumber(Parser *);
+
+static JSONValue *initQuickJSONValue(enum JSONValueType, void *);
 
 extern Parser *ParserInit(Lexer *lexer)
 {
@@ -25,8 +31,7 @@ extern Parser *ParserInit(Lexer *lexer)
     parser->current_token = NewToken(TokenEOF, 0, 0, NULL_CHAR_STRING);
     parser->peek_token = NewToken(TokenEOF, 0, 0, NULL_CHAR_STRING);
 
-    // nextToken(parser);
-    // nextToken(parser);
+    nextToken(parser);
 
     return parser;
 }
@@ -62,18 +67,95 @@ static void nextToken(Parser *parser)
     parser->peek_token = Lex(parser->lexer);
 }
 
-DynamicArray *parserCreateDynamicArray(Parser *parser)
+static JSONValue *parseList(Parser *parser)
 {
-    DynamicArray *arr = DefaultDynamicArrayInit();
-    nextToken(parser);
+    JSONValue *json_value = malloc(sizeof(JSONValue));
+    if (json_value == NULL)
+    {
+        return NULL;
+    }
+    json_value->value_type = LIST_t;
+    DynamicArray *list = DefaultDynamicArrayInit();
+    // nextToken(parser);
     while (ALWAYS)
     {
         if (parser->current_token->type == TokenCloseBracket || parser->current_token->type == TokenEOF)
         {
             break;
         }
-        JSONValue *value = parse(parser);
-        DynamicArrayAddFirst(arr, NULL);
+        JSONValue *list_value = parse(parser);
+        if (list_value != NULL)
+        {
+            DynamicArrayAddLast(list, DynamicArrayElementInit(list_value->value_type, list_value->value, list_value->value_len));
+        }
+        // FreeJSONValue();
+    }
+    json_value->value_type = LIST_t;
+    json_value->value = list;
+    return json_value;
+}
+
+static JSONValue *parseObj(Parser *parser)
+{
+    if (parser == NULL)
+    {
+        return NULL;
+    }
+    return NULL;
+}
+
+static JSONValue *initQuickJSONValue(enum JSONValueType value_type, void *value)
+{
+    JSONValue *json_value = malloc(sizeof(JSONValue));
+    if (json_value == NULL)
+    {
+        return NULL;
+    }
+    u_int32_t value_len;
+    if (value_type == NULL_t || value_type == BOOL_t || value_type == STRING_t)
+    {
+        value_len = strlen((char *)value) + 1;
+        json_value->value = value;
+    }
+    else if (value_type == NUMBER_DOUBLE_t)
+    {
+        double *new_double = malloc(sizeof(double));
+        double temp = atof((char *)value);
+        *new_double = temp;
+        value_len = 1;
+        json_value->value = new_double;
+    }
+    else if (value_type == NUMBER_INT_t)
+    {
+        int *new_int = malloc(sizeof(int));
+        int temp = atoi((char *)value);
+        *new_int = temp;
+        value_len = 1;
+        json_value->value = new_int;
+    }
+    else
+    {
+        json_value->value = NULL;
+        value_len = 0;
+    }
+    json_value->value_type = value_type;
+    json_value->value_len = value_len;
+    return json_value;
+}
+
+static JSONValue *parseNumber(Parser *parser)
+{
+    if (parser == NULL)
+    {
+        return NULL;
+    }
+    if (IsCharInString(parser->current_token->literal, DOT_CHAR))
+    {
+        return initQuickJSONValue(NUMBER_DOUBLE_t, parser->current_token->literal);
+    }
+    else
+    {
+        return initQuickJSONValue(NUMBER_INT_t, parser->current_token->literal);
     }
 }
 
@@ -83,34 +165,57 @@ static JSONValue *parse(Parser *parser)
     {
         return NULL;
     }
-
     nextToken(parser);
+    JSONValue *return_value = NULL;
+    PrintToken(parser->current_token);
     if (parser->current_token->type == TokenOpenCurlyBrace)
     {
+        exit(1);
+        return_value = parseObj(parser);
     }
     else if (parser->current_token->type == TokenOpenBracket)
     {
+        // printf("Parsing List!\n");
+        return_value = parseList(parser);
     }
     else if (parser->current_token->type == TokenString)
     {
+        return_value = initQuickJSONValue(STRING_t, parser->current_token->literal);
     }
     else if (parser->current_token->type == TokenNumber)
     {
-    }
-    else if (parser->current_token->type == TokenNumber)
-    {
+        return_value = parseNumber(parser);
     }
     else if (parser->current_token->type == TokenBool)
     {
+        return_value = initQuickJSONValue(NULL_t, parser->current_token->literal);
     }
     else if (parser->current_token->type == TokenNULL)
     {
+        return_value = initQuickJSONValue(BOOL_t, parser->current_token->literal);
+    }
+    else if (parser->current_token->type == TokenEOF)
+    {
+        // FIXME
+        // printf("found token EOF!\n");
+        return NULL;
+    }
+    else if (parser->current_token->type == TokenComma)
+    {
+        // printf("found a comma!!\n");
+        return NULL;
+    }
+    else if (parser->current_token->type == TokenCloseBracket)
+    {
+        return NULL;
     }
     else
     {
         printf("big error in static JSONValue *parse\n");
+        exit(1);
         return NULL;
     }
+    return return_value;
 }
 
 extern JSON *ParseJSON(Parser *parser)
@@ -125,47 +230,7 @@ extern JSON *ParseJSON(Parser *parser)
         FreeParser(parser);
         return NULL;
     }
-
-    nextToken(parser);
-    enum JSONValueType root_type;
-    if (parser->current_token->type == TokenOpenBracket)
-    {
-        json->map = NULL;
-        json->array = DefaultDynamicArrayInit();
-        root_type = LIST_t;
-    }
-    else if (parser->current_token->type == TokenOpenCurlyBrace)
-    {
-        json->array = NULL;
-        json->map = DefaultHashMapInit();
-        root_type = OBJ_t;
-    }
-    else
-    {
-        FreeParser(parser);
-        printf("invalid JSON from Parser");
-        return NULL;
-    }
-    nextToken(parser);
-    while (ALWAYS)
-    {
-        if (parser->current_token->type != TokenEOF)
-        {
-            break;
-        }
-        JSONValue *json_value = parse(parser);
-        if (root_type == LIST_t)
-        {
-            DynamicArrayElement *array_ele = NULL;
-            DynamicArrayAddFirst(json->array, array_ele);
-        }
-        else if (root_type == OBJ_t)
-        {
-            HashMapEntry *entry = NULL;
-            HashMapInsert(json->map, entry);
-        }
-    }
-
-    FreeParser(parser);
+    json->root_value = parse(parser);
+    // FreeParser(parser);
     return json;
 }

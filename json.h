@@ -10,7 +10,8 @@
 enum JSONValueType
 {
     OBJ_t,
-    NUMBER_t,
+    NUMBER_INT_t,
+    NUMBER_DOUBLE_t,
     STRING_t,
     BOOL_t,
     NULL_t,
@@ -101,16 +102,28 @@ extern char *DynamicArrayToString(DynamicArray *);
 #define JSON_BOOL_FALSE "false"
 #define JSON_NULL "null"
 
+// union JSONValues
+// {
+//     void *null;
+//     int *number_int;
+//     double *number_double;
+//     DynamicArray *list;
+//     char *boolean;
+//     char *string;
+//     HashMap *obj;
+// };
+
 typedef struct
 {
     enum JSONValueType value_type;
+    // union JSONValues *value;
     void *value;
+    u_int32_t value_len;
 } JSONValue;
 
 typedef struct
 {
-    DynamicArray *array;
-    HashMap *map;
+    JSONValue *root_value;
 } JSON;
 
 extern JSON *StringToJSON(char *);

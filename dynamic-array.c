@@ -225,7 +225,8 @@ static DynamicArrayElement *dynamicArrayElementReplicate(DynamicArrayElement *dy
     void *value = NULL;
     switch (dynamicArrayElement->value_type)
     {
-    case NUMBER_t:
+    case NUMBER_DOUBLE_t:
+    case NUMBER_INT_t:
         value = (int *)malloc(sizeof(int) * dynamicArrayElement->len);
         memcpy(value, dynamicArrayElement->value, sizeof(int) * dynamicArrayElement->len);
         break;

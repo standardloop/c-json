@@ -64,7 +64,7 @@ static void skipWhitespace(Lexer *lexer)
     }
 }
 
-static Token *NewToken(enum TokenType type, u_int32_t start, u_int32_t end, char *literal)
+extern Token *NewToken(enum TokenType type, u_int32_t start, u_int32_t end, char *literal)
 {
     Token *token = malloc(sizeof(Token));
     if (token == NULL)

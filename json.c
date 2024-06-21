@@ -70,13 +70,13 @@ extern void FreeJSON(JSON *json)
     {
         return;
     }
-    if (json->array != NULL)
+    if (json->root_value->value_type == LIST_t)
     {
-        FreeDynamicArray(json->array);
+        FreeDynamicArray(json->root_value->value);
     }
-    if (json->map != NULL)
+    else if (json->root_value->value_type == OBJ_t)
     {
-        FreeHashMap(json->map);
+        FreeHashMap(json->root_value->value);
     }
     free(json);
 }
@@ -88,13 +88,13 @@ extern void PrintJSON(JSON *json)
     {
         return;
     }
-    if (json->array != NULL)
+    if (json->root_value->value_type == LIST_t)
     {
-        PrintDynamicArray(json->array);
+        PrintDynamicArray(json->root_value->value);
     }
-    else if (json->map != NULL)
+    else if (json->root_value->value_type == OBJ_t)
     {
-        PrintHashMap(json->map);
+        PrintHashMap(json->root_value->value);
     }
 }
 
@@ -105,7 +105,8 @@ extern void PrintJSONValue(enum JSONValueType value_type, void *value)
     case OBJ_t:
         printJSONObjValue(value);
         break;
-    case NUMBER_t:
+    case NUMBER_INT_t:
+    case NUMBER_DOUBLE_t:
         printJSONNumberValue(value);
         break;
     case STRING_t:
