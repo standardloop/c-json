@@ -5,20 +5,20 @@
 
 #include "./util.h"
 
-extern void CopyString(const char *src, char *des, size_t len, size_t des_offset)
+extern void CopyString(char *src, char *des, size_t len, size_t src_offset)
 {
     if (src == NULL || des == NULL || len <= 0)
     {
         return;
     }
 
-    char *dest_it = des + des_offset;
+    char *src_it = src + src_offset;
     size_t size = 0;
     while (size < len)
     {
-        *dest_it = *src;
-        dest_it++;
-        src++;
+        *des = *src_it;
+        des++;
+        src_it++;
         size++;
     }
 }
@@ -48,4 +48,20 @@ extern size_t NumCharInString(const char *input_str, char checker)
         input_str++;
     }
     return count;
+}
+
+extern char *QuickAllocatedString(char *copy)
+{
+    size_t true_len = strlen(copy) + 1;
+    char *allocated_string = malloc(sizeof(char) * true_len);
+    strcpy(allocated_string, copy);
+    return allocated_string;
+}
+
+extern inline void PrintSpaces(int depth)
+{
+    for (int i = 0; i < depth; i++)
+    {
+        printf(" ");
+    }
 }

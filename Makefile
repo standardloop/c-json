@@ -9,6 +9,7 @@ build:
 	@$(CC) $(CC_FLAGS) \
 	main.c \
 	json.c \
+	lexer.c \
 	hashmap.c \
 	dynamic-array.c \
 	util.c \

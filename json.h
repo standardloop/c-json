@@ -119,4 +119,51 @@ extern void PrintJSON(JSON *);
 extern void PrintJSONValue(enum JSONValueType, void *);
 // ————————— JSON END —————————
 
+// ————————— LEXER START —————————
+#define NULL_CHAR_STRING "\0"
+#define TOKEN_OPEN_CURLY_BRACE_STRING "{"
+#define TOKEN_CLOSE_CURLY_BRACE_STRING "}"
+#define TOKEN_OPEN_BRACKET_STRING "["
+#define TOKEN_CLOSE_BRACKET_STRING "]"
+#define TOKEN_COLON_STRING ":"
+#define TOKEN_COMMA_STRING ","
+
+enum TokenType
+{
+    TokenEOF,
+    TokenColon,
+    TokenOpenCurlyBrace,
+    TokenCloseCurlyBrace,
+    TokenOpenBracket,
+    TokenCloseBracket,
+    TokenComma,
+    TokenString,
+    TokenNumber,
+    TokenBool,
+    TokenNULL,
+    TokenIllegal,
+};
+
+typedef struct
+{
+    enum TokenType type;
+    u_int32_t start;
+    u_int32_t end;
+    char *literal;
+} Token;
+
+typedef struct
+{
+    char *input;
+    u_int32_t input_len;
+    char current_char;
+    u_int32_t position;
+    u_int32_t read_position;
+} Lexer;
+
+extern Lexer *LexerInit(char *);
+extern Token *Lex(Lexer *);
+extern void PrintToken(Token *);
+extern void FreeToken(Token *);
+
 #endif

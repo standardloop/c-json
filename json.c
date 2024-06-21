@@ -35,28 +35,54 @@ extern JSON *StringToJSON(char *input_str)
     {
         return NULL;
     }
-    if (input_str[0] == BRACKET_OPEN_CHAR)
+    // if (input_str[0] == BRACKET_OPEN_CHAR)
+    // {
+    //     json->map = NULL;
+    //     json->array = DynamicArrayInitFromStr(input_str);
+    //     if (json->array == NULL)
+    //     {
+    //         FreeJSON(json);
+    //         return NULL;
+    //     }
+    // }
+    // else if (input_str[0] == CURLY_OPEN_CHAR)
+    // {
+    //     json->array = NULL;
+    //     json->map = HashMapInitFromStr(input_str);
+    //     if (json->map == NULL)
+    //     {
+    //         FreeJSON(json);
+    //         return NULL;
+    //     }
+    // }
+    Lexer *lexer = LexerInit(input_str);
+
+    while (ALWAYS)
     {
-        json->map = NULL;
-        json->array = DynamicArrayInitFromStr(input_str);
-        if (json->array == NULL)
+
+        Token *token = Lex(lexer);
+        //printf("[CURRENT_CHAR]: %c\n", lexer->current_char);
+
+        PrintToken(token);
+
+        if (token->type == TokenEOF)
         {
-            FreeJSON(json);
-            return NULL;
+            break;
         }
+        FreeToken(token);
     }
-    else if (input_str[0] == CURLY_OPEN_CHAR)
-    {
-        json->array = NULL;
-        json->map = HashMapInitFromStr(input_str);
-        if (json->map == NULL)
-        {
-            FreeJSON(json);
-            return NULL;
-        }
-    }
+
     return json;
 }
+
+// static void *stringToJSON(char *input_str, enum JSONValueType type)
+// {
+//     if (input_str == NULL || (type != LIST_t && type != OBJ_t))
+//     {
+//         return NULL;
+//     }
+//     return NULL;
+// }
 
 extern char *JSONToString(JSON *json)
 {

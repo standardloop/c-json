@@ -6,8 +6,17 @@
 #include <stdbool.h>
 #include <string.h>
 
+#define ALWAYS 1
+
 #define SPACE_CHAR ' '
+#define TAB_CHAR '\t'
+#define NEWLINE_CHAR '\n'
+#define CARRIAGE_CHAR '\r'
+#define DASH_MINUS_CHAR '-'
+
+#define DOT_CHAR '.'
 #define COMMA_CHAR ','
+#define COLON_CHAR ':'
 
 #define DOUBLE_QUOTES_CHAR '\"'
 
@@ -21,8 +30,9 @@
 
 #define pass (void)0
 
-extern void CopyString(const char *, char *, size_t, size_t);
+extern void CopyString(char *, char *, size_t, size_t);
 extern bool IsCharInString(const char *, char);
 extern size_t NumCharInString(const char *, char);
-
+extern char *QuickAllocatedString(char *);
+extern inline void PrintSpaces(int);
 #endif

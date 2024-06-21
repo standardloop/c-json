@@ -156,6 +156,7 @@ extern void PrintDynamicArray(DynamicArray *dynamic_array)
         return;
     }
     printf("[");
+    // PrintSpaces(depth)
     for (u_int32_t i = 0; i < dynamic_array->size; i++)
     {
         PrintJSONValue(dynamic_array->list[i]->value_type, dynamic_array->list[i]->value);
@@ -165,7 +166,7 @@ extern void PrintDynamicArray(DynamicArray *dynamic_array)
             printf(", ");
         }
     }
-    printf("]\n");
+    printf("]");
 }
 
 extern void DynamicArrayRemove(DynamicArray *dynamic_array, u_int32_t index)
@@ -260,130 +261,9 @@ extern DynamicArray *DynamicArrayInitFromStr(char *input_str)
 {
     if (input_str == NULL)
     {
-        printf("invalid input to DynamicArrayInitFromStr\n");
         return NULL;
     }
-    size_t input_str_len = strlen(input_str);
-    if (input_str_len == 0 || input_str[0] != BRACKET_OPEN_CHAR || input_str[input_str_len - 1] != BRACKET_CLOSE_CHAR)
-    {
-        printf("invalid input to DynamicArrayInitFromStr\n");
-        return NULL;
-    }
-    DynamicArray *dynamic_array = DefaultDynamicArrayInit();
-    if (dynamic_array == NULL)
-    {
-        printf("out of memory for dynamic_array\n");
-        return NULL;
-    }
-
-    input_str++;
-    char *value_start = input_str;
-    char *value_end = NULL;
-    size_t char_count = 1;
-    bool nested = false;
-    if (*value_start == BRACKET_OPEN_CHAR)
-    {
-        nested = true;
-    }
-
-    while (*input_str != NULL_CHAR)
-    {
-        if (((*input_str == COMMA_CHAR) && !nested) || ((*input_str == BRACKET_CLOSE_CHAR) && nested) || char_count == input_str_len - 1)
-        {
-            enum JSONValueType element_type;
-            bool is_element_arr = false;
-            DynamicArrayElement *element = NULL;
-            if (*input_str == COMMA_CHAR || char_count == input_str_len - 1)
-            {
-                value_end = input_str - 1;
-            }
-            else
-            {
-                value_end = input_str;
-            }
-
-            if (*value_start == DOUBLE_QUOTES_CHAR && *value_end == DOUBLE_QUOTES_CHAR)
-            {
-                value_start++;
-                value_end--;
-            }
-            else if (*value_start == BRACKET_OPEN_CHAR && *value_end == BRACKET_CLOSE_CHAR)
-            {
-                is_element_arr = true;
-            }
-            // printf("%c %c\n", *value_start, *value_end);
-            size_t value_size = (value_end - value_start) + 1;
-
-            if (value_size > 0)
-            {
-                char *substring = malloc(sizeof(char) * (value_size + 1));
-                CopyString(value_start, substring, value_size, 0);
-
-                substring[value_size] = NULL_CHAR;
-
-                if (is_element_arr)
-                {
-                    element_type = LIST_t;
-                }
-                else
-                {
-                    // FIXME, zero value
-                    if (!atoi(substring))
-                    {
-                        element_type = STRING_t;
-                    }
-                    else
-                    {
-                        element_type = NUMBER_t;
-                    }
-                }
-
-                if (element_type == STRING_t)
-                {
-                    element = DynamicArrayElementInit(element_type, substring, (value_size + 1));
-                }
-                else if (element_type == NUMBER_t)
-                {
-                    int value_temp = atoi(substring);
-                    free(substring);
-                    int *value = malloc(sizeof(int) * 1);
-                    *value = value_temp;
-                    element = DynamicArrayElementInit(element_type, value, 1);
-                }
-                else if (element_type == LIST_t)
-                {
-                    DynamicArray *sub_dyn_array = DynamicArrayInitFromStr(substring);
-                    element = DynamicArrayElementInit(element_type, sub_dyn_array, sub_dyn_array->size);
-                    free(substring);
-                }
-                else
-                {
-                    exit(1);
-                }
-
-                DynamicArrayAddLast(dynamic_array, element);
-
-                input_str++;
-                char_count++;
-                if (*input_str == COMMA_CHAR)
-                {
-                    input_str++;
-                    char_count++;
-                }
-                while (*input_str == SPACE_CHAR)
-                {
-                    input_str++;
-                    char_count++;
-                }
-                value_start = input_str;
-                nested = (*value_start == BRACKET_OPEN_CHAR) && (char_count != input_str_len - 1);
-            }
-        }
-        input_str++;
-        char_count++;
-    }
-
-    return dynamic_array;
+    return NULL;
 }
 
 char *DynamicArrayToString(DynamicArray *dynamic_array)

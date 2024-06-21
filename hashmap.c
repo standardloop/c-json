@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include "./json.h"
+#include "./util.h"
 
 static void freeHashMapEntryValue(void *);
 static void freeHashMapEntrySingle(HashMapEntry *, bool);
