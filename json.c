@@ -23,7 +23,6 @@ extern JSON *StringToJSON(char *input_str)
         return NULL;
     }
     size_t input_str_len = strlen(input_str);
-    // printf("[STRLEN]: %d\n", (int)input_str_len);
     if ((input_str[0] != CURLY_OPEN_CHAR && input_str[0] != BRACKET_OPEN_CHAR) ||
         (input_str[0] == CURLY_OPEN_CHAR && input_str[input_str_len - 1] != CURLY_CLOSE_CHAR) ||
         (input_str[0] == BRACKET_OPEN_CHAR && input_str[input_str_len - 1] != BRACKET_CLOSE_CHAR))

@@ -6,7 +6,7 @@
 #include "./json.h"
 #include "./util.h"
 
-static void freeHashMapEntryValue(void *);
+static void freeHashMapEntryValue(void *, enum JSONValueType);
 static void freeHashMapEntrySingle(HashMapEntry *, bool);
 static void freeHashMapEntryList(HashMapEntry *, bool);
 static void freeHashMapEntries(HashMapEntry **, u_int32_t, bool, bool);
@@ -59,7 +59,6 @@ static HashMapEntry **hashMapEntriesInit(u_int32_t capacity)
     return entries;
 }
 
-// FIXME add resize as well
 extern HashMap *HashMapInit(u_int32_t initial_capacity, HashFunction *hashFunction)
 {
     HashMap *map = malloc(sizeof(HashMap));
@@ -153,26 +152,35 @@ extern HashMapEntry *HashMapGet(HashMap *map, char *key)
     return NULL;
 }
 
-static void freeHashMapEntryValue(void *value)
+static void freeHashMapEntryValue(void *value, enum JSONValueType value_type)
 {
-    // WIP, pass value type as well
     if (value != NULL)
     {
-        free(value);
+        if (value_type == LIST_t)
+        {
+            FreeDynamicArray(value);
+        }
+        else if (value_type == OBJ_t)
+        {
+            FreeHashMap(value);
+        }
+        else
+        {
+            free(value);
+        }
     }
 }
 
 static void freeHashMapEntryList(HashMapEntry *entry, bool deep)
 {
     HashMapEntry *temp = NULL;
-    // free(entry->key); // FIXME careful here
     while (entry != NULL)
     {
         temp = entry;
         entry = entry->next;
         if (deep)
         {
-            freeHashMapEntryValue(temp->value);
+            freeHashMapEntryValue(temp->value, temp->value_type);
         }
         if (temp->key != NULL)
         {
@@ -189,9 +197,13 @@ static void freeHashMapEntrySingle(HashMapEntry *entry, bool deep)
     {
         if (deep)
         {
-            freeHashMapEntryValue(entry->value);
+            freeHashMapEntryValue(entry->value, entry->value_type);
         }
-
+        if (entry->key != NULL)
+        {
+            free(entry->key);
+            entry->key = NULL;
+        }
         free(entry);
     }
 }
@@ -207,7 +219,6 @@ static void freeHashMapEntries(HashMapEntry **entries, u_int32_t size, bool deep
         for (u_int32_t i = 0; i < size; i++)
         {
             freeHashMapEntryList(entries[i], entry_values);
-            // free(entries[i]->key); // FIXME careful here
         }
     }
     free(entries);
@@ -269,8 +280,6 @@ extern void HashMapRemove(HashMap *map, char *key)
     if (strcmp(key, entry->key) == 0)
     {
         map->entries[index] = entry->next;
-        freeHashMapEntrySingle(entry, true);
-        // map->size--;
         return;
     }
 
@@ -283,7 +292,6 @@ extern void HashMapRemove(HashMap *map, char *key)
             iterator_prev->next = iterator->next;
             map->entries[index] = iterator_prev;
             freeHashMapEntrySingle(iterator, true);
-            // map->size--;
             break;
         }
         iterator_prev = iterator_prev->next;
@@ -297,27 +305,22 @@ extern void PrintHashMap(HashMap *map)
     {
         return;
     }
-    if (map->size == 0)
-    {
-        pass;
-        // printf("Map is currently Empty!\n");
-    }
-    // printf("[\n");
+    printf("{");
+    u_int32_t entry_count = 0;
     for (u_int32_t i = 0; i < map->capacity; i++)
     {
         HashMapEntry *entry = map->entries[i];
         if (entry != NULL)
         {
-            // printf("  ");
             printHashMapEntry(entry, i);
-            if (i < map->size - 1)
+            if (entry_count < map->size - 1)
             {
-                printf(",");
+                printf(", ");
             }
-            // printf("\n");
+            entry_count++;
         }
     }
-    // printf("]\n");
+    printf("}");
 }
 
 static void printHashMapEntry(HashMapEntry *entry, u_int32_t index)
@@ -326,11 +329,7 @@ static void printHashMapEntry(HashMapEntry *entry, u_int32_t index)
     {
         pass;
     }
-    // FIXME, check for value type
-
     HashMapEntry *iterator = entry;
-    // printf("%u: {", index);
-    printf("{");
     while (iterator != NULL)
     {
 
@@ -346,7 +345,6 @@ static void printHashMapEntry(HashMapEntry *entry, u_int32_t index)
             }
         }
     }
-    printf("}");
 }
 
 static void hashMapResize(HashMap *map)
