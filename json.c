@@ -71,6 +71,7 @@ extern void FreeJSON(JSON *json)
     {
         FreeHashMap(json->root_value->value);
     }
+    FreeJSONValue(json->root_value);
     free(json);
 }
 

@@ -358,14 +358,14 @@ extern void FreeToken(Token *token)
 {
     if (token != NULL)
     {
-        if (token->type == TokenString || token->type == TokenNumber ||
-            token->type == TokenBool || token->type == TokenNULL)
-        {
-            if (token->literal != NULL)
-            {
-                free(token->literal);
-            }
-        }
+        // if (token->type == TokenString || token->type == TokenNumber ||
+        //     token->type == TokenBool || token->type == TokenNULL)
+        // {
+        //     if (token->literal != NULL)
+        //     {
+        //         free(token->literal);
+        //     }
+        // }
         free(token);
     }
 }

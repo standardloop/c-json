@@ -62,7 +62,7 @@ static void nextToken(Parser *parser)
     {
         return;
     }
-    // FreeToken(parser->current_token);
+    FreeToken(parser->current_token);
     parser->current_token = parser->peek_token;
     parser->peek_token = Lex(parser->lexer);
 }
@@ -99,16 +99,46 @@ static JSONValue *parseList(Parser *parser)
         {
             break;
         }
+        if (parser->current_token->type == TokenIllegal)
+        {
+            FreeDynamicArray(list);
+            return NULL;
+        }
         JSONValue *list_value = parse(parser);
         if (list_value != NULL)
         {
             DynamicArrayAddLast(list, DynamicArrayElementInit(list_value->value_type, list_value->value, list_value->value_len));
         }
-        // FreeJSONValue();
+        FreeJSONValue(list_value);
+        // FreeToken(parser->current_token);
     }
     json_value->value_type = LIST_t;
     json_value->value = list;
     return json_value;
+}
+
+extern void FreeJSONValue(JSONValue *json_value)
+{
+    if (json_value != NULL)
+    {
+        if (json_value->value_type == LIST_t)
+        {
+            // FreeDynamicArray(json_value->value);
+        }
+        else if (json_value->value_type == OBJ_t)
+        {
+            // FreeHashMap(json_value->value);
+        }
+        else if (json_value->value_type != NULL_t)
+        {
+            // free(json_value->value);
+        }
+        else
+        {
+            pass;
+        }
+        free(json_value);
+    }
 }
 
 static JSONValue *parseObj(Parser *parser)
@@ -140,6 +170,11 @@ static JSONValue *parseObj(Parser *parser)
         {
             break;
         }
+        if (parser->current_token->type == TokenIllegal)
+        {
+            FreeHashMap(map);
+            return NULL;
+        }
         // nextToken(parser);
         JSONValue *obj_key = parse(parser);
         if (obj_key != NULL)
@@ -158,9 +193,11 @@ static JSONValue *parseObj(Parser *parser)
                     if (obj_value != NULL)
                     {
                         HashMapInsert(map, HashMapEntryInit(obj_key->value, obj_value->value, obj_value->value_type));
+                        FreeJSONValue(obj_value);
                     }
                 }
             }
+            FreeJSONValue(obj_key);
         }
 
         // FreeJSONValue();
@@ -185,9 +222,9 @@ static JSONValue *initQuickJSONValue(enum JSONValueType value_type, void *value)
     }
     else if (value_type == NULL_t)
     {
-        // free(value);
         value_len = 0;
         json_value->value = NULL;
+        free(value);
     }
     else if (value_type == BOOL_t)
     {
@@ -200,9 +237,9 @@ static JSONValue *initQuickJSONValue(enum JSONValueType value_type, void *value)
         {
             *new_bool = false;
         }
-        // free(value);
         value_len = 1;
         json_value->value = new_bool;
+        free(value);
     }
     else if (value_type == NUMBER_DOUBLE_t)
     {
@@ -211,7 +248,7 @@ static JSONValue *initQuickJSONValue(enum JSONValueType value_type, void *value)
         *new_double = temp;
         value_len = 1;
         json_value->value = new_double;
-        // free(value);
+        free(value);
     }
     else if (value_type == NUMBER_INT_t)
     {
@@ -220,13 +257,13 @@ static JSONValue *initQuickJSONValue(enum JSONValueType value_type, void *value)
         *new_int = temp;
         value_len = 1;
         json_value->value = new_int;
-        // free(value);
+        free(value);
     }
     else
     {
         json_value->value = NULL;
         value_len = 0;
-        // free(value);
+        // free(value); // FIXME
     }
     json_value->value_type = value_type;
     json_value->value_len = value_len;
@@ -318,6 +355,7 @@ static JSONValue *parse(Parser *parser)
     //     return NULL;
     // }
     // FreeToken(parser->current_token);
+
     return return_value;
 }
 
@@ -334,6 +372,6 @@ extern JSON *ParseJSON(Parser *parser)
         return NULL;
     }
     json->root_value = parse(parser);
-    // FreeParser(parser);
+    FreeParser(parser);
     return json;
 }

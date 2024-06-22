@@ -165,6 +165,7 @@ static void freeHashMapEntryValue(void *value)
 static void freeHashMapEntryList(HashMapEntry *entry, bool deep)
 {
     HashMapEntry *temp = NULL;
+    // free(entry->key); // FIXME careful here
     while (entry != NULL)
     {
         temp = entry;
@@ -173,7 +174,11 @@ static void freeHashMapEntryList(HashMapEntry *entry, bool deep)
         {
             freeHashMapEntryValue(temp->value);
         }
-
+        if (temp->key != NULL)
+        {
+            free(temp->key);
+            temp->key = NULL;
+        }
         free(temp);
     }
 }
@@ -202,6 +207,7 @@ static void freeHashMapEntries(HashMapEntry **entries, u_int32_t size, bool deep
         for (u_int32_t i = 0; i < size; i++)
         {
             freeHashMapEntryList(entries[i], entry_values);
+            // free(entries[i]->key); // FIXME careful here
         }
     }
     free(entries);

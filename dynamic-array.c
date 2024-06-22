@@ -156,7 +156,6 @@ extern void PrintDynamicArray(DynamicArray *dynamic_array)
         return;
     }
     printf("[");
-    // PrintSpaces(depth)
     for (u_int32_t i = 0; i < dynamic_array->size; i++)
     {
         PrintJSONValue(dynamic_array->list[i]->value_type, dynamic_array->list[i]->value);

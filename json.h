@@ -179,6 +179,7 @@ typedef struct
 
 extern Parser *ParserInit(Lexer *);
 extern void FreeParser(Parser *);
+extern void FreeJSONValue(JSONValue *);
 
 extern JSON *ParseJSON(Parser *);
 // ————————— PARSER END —————————
