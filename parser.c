@@ -69,16 +69,22 @@ static void nextToken(Parser *parser)
 
 static JSONValue *parseList(Parser *parser)
 {
+    // printf("parseList\n");
     JSONValue *json_value = malloc(sizeof(JSONValue));
     if (json_value == NULL)
     {
         return NULL;
     }
-    json_value->value_type = LIST_t;
+    if (parser->current_token->type == TokenOpenBracket)
+    {
+        // nextToken(parser);
+    }
+
     DynamicArray *list = DefaultDynamicArrayInit();
+    // while (parser->current_token->type == TokenEOF)
     while (ALWAYS)
     {
-        //PrintToken(parser->current_token);
+        // PrintToken(parser->current_token);
         if (parser->current_token->type == TokenCloseBracket && parser->peek_token->type == TokenComma)
         {
             nextToken(parser);
@@ -106,7 +112,53 @@ static JSONValue *parseObj(Parser *parser)
     {
         return NULL;
     }
-    return NULL;
+    JSONValue *json_value = malloc(sizeof(JSONValue));
+    if (json_value == NULL)
+    {
+        return NULL;
+    }
+
+    HashMap *map = DefaultHashMapInit();
+    while (ALWAYS)
+    {
+        // PrintToken(parser->current_token);
+        if (parser->current_token->type == TokenCloseCurlyBrace && parser->peek_token->type == TokenComma)
+        {
+            nextToken(parser);
+            break;
+        }
+        if (parser->current_token->type == TokenCloseCurlyBrace && parser->peek_token->type == TokenEOF)
+        {
+            break;
+        }
+        // nextToken(parser);
+        JSONValue *obj_key = parse(parser);
+        if (obj_key != NULL)
+        {
+            if (parser->peek_token->type == TokenColon)
+            {
+                nextToken(parser); // skip over colon
+                if (parser->current_token->type == TokenColon)
+                {
+                    // nextToken(parser); // skip over colon
+                    // if (parser->current_token->type == TokenString)
+                    // {
+                    //     printf("AYAYA\n");
+                    // }
+                    JSONValue *obj_value = parse(parser);
+                    if (obj_value != NULL)
+                    {
+                        HashMapInsert(map, HashMapEntryInit(obj_key->value, obj_value->value, obj_value->value_type));
+                    }
+                }
+            }
+        }
+
+        // FreeJSONValue();
+    }
+    json_value->value_type = OBJ_t;
+    json_value->value = map;
+    return json_value;
 }
 
 static JSONValue *initQuickJSONValue(enum JSONValueType value_type, void *value)
@@ -194,12 +246,13 @@ static JSONValue *parse(Parser *parser)
     {
         return NULL;
     }
+
     nextToken(parser);
-    JSONValue *return_value = NULL;
     // PrintToken(parser->current_token);
+    JSONValue *return_value = NULL;
+
     if (parser->current_token->type == TokenOpenCurlyBrace)
     {
-        exit(1);
         return_value = parseObj(parser);
     }
     else if (parser->current_token->type == TokenOpenBracket)
@@ -209,6 +262,7 @@ static JSONValue *parse(Parser *parser)
     }
     else if (parser->current_token->type == TokenString)
     {
+        // printf("TokenString\n");
         return_value = initQuickJSONValue(STRING_t, parser->current_token->literal);
     }
     else if (parser->current_token->type == TokenNumber)
@@ -222,6 +276,10 @@ static JSONValue *parse(Parser *parser)
     else if (parser->current_token->type == TokenNULL)
     {
         return_value = initQuickJSONValue(NULL_t, parser->current_token->literal);
+    }
+    else if (parser->current_token->type == TokenIllegal)
+    {
+        //exit(100);
     }
     // else
     // {
@@ -238,11 +296,11 @@ static JSONValue *parse(Parser *parser)
     //     // printf("found a comma!!\n");
     //     return NULL;
     // }
-    else if (parser->current_token->type == TokenCloseBracket)
-    {
-        printf("found a TokenCloseBracket\n");
-        return NULL;
-    }
+    // else if (parser->current_token->type == TokenCloseBracket)
+    // {
+    //     // printf("found a TokenCloseBracket\n");
+    //     return NULL;
+    // }
     // else
     // {
     //     printf("big error in static JSONValue *parse\n");
