@@ -35,4 +35,5 @@ extern bool IsCharInString(const char *, char);
 extern size_t NumCharInString(const char *, char);
 extern char *QuickAllocatedString(char *);
 extern inline void PrintSpaces(int);
+extern bool IsDigitOrMinusSign(char);
 #endif

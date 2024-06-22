@@ -284,6 +284,7 @@ static JSONValue *parse(Parser *parser)
     }
     else if (parser->current_token->type == TokenNULL)
     {
+        // printf("test\n");
         return_value = initQuickJSONValue(NULL_t, parser->current_token->literal);
     }
     else if (parser->current_token->type == TokenIllegal)
@@ -312,7 +313,7 @@ static JSONValue *parse(Parser *parser)
     // }
     // else
     // {
-    //     printf("big error in static JSONValue *parse\n");
+    //     printf("big error in JSONValue *parse\n");
     //     exit(1);
     //     return NULL;
     // }

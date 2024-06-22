@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "./util.h"
 
@@ -64,4 +65,13 @@ extern inline void PrintSpaces(int depth)
     {
         printf(" ");
     }
+}
+
+extern bool IsDigitOrMinusSign(char test)
+{
+    if (isdigit(test) || test == DASH_MINUS_CHAR)
+    {
+        return true;
+    }
+    return false;
 }

@@ -42,18 +42,13 @@ typedef struct
 } HashMap;
 
 extern HashMapEntry *HashMapEntryInit(char *, void *, enum JSONValueType);
+extern HashMapEntry *HashMapGet(HashMap *, char *);
 
 extern HashMap *HashMapInit(u_int32_t, HashFunction *);
 extern HashMap *DefaultHashMapInit(void);
-
-extern HashMap *HashMapInitFromStr(char *);
-
 extern void FreeHashMap(HashMap *);
-
 extern void HashMapInsert(HashMap *, HashMapEntry *);
-extern HashMapEntry *HashMapGet(HashMap *, char *);
 extern void HashMapRemove(HashMap *, char *);
-
 extern void PrintHashMap(HashMap *);
 // ————————— HASHMAP END —————————
 
@@ -75,12 +70,12 @@ typedef struct
     DynamicArrayElement **list;
 } DynamicArray;
 
+extern DynamicArrayElement *DynamicArrayElementInit(enum JSONValueType, void *, u_int32_t);
+
 extern DynamicArray *DynamicArrayInit(u_int32_t);
 extern DynamicArray *DefaultDynamicArrayInit(void);
 extern DynamicArray *DynamicArrayInitFromStr(char *);
 extern DynamicArray *DynamicArrayReplicate(DynamicArray *);
-
-extern DynamicArrayElement *DynamicArrayElementInit(enum JSONValueType, void *, u_int32_t);
 
 extern void DynamicArrayAddFirst(DynamicArray *, DynamicArrayElement *);
 extern void DynamicArrayAddLast(DynamicArray *, DynamicArrayElement *);
@@ -92,9 +87,6 @@ extern void DynamicArrayRemoveLast(DynamicArray *);
 
 extern void PrintDynamicArray(DynamicArray *);
 extern void FreeDynamicArray(DynamicArray *);
-
-extern char *DynamicArrayToString(DynamicArray *);
-
 // ————————— DYN ARRAY END —————————
 
 // ————————— JSON START —————————
@@ -102,21 +94,9 @@ extern char *DynamicArrayToString(DynamicArray *);
 #define JSON_BOOL_FALSE "false"
 #define JSON_NULL "null"
 
-// union JSONValues
-// {
-//     void *null;
-//     int *number_int;
-//     double *number_double;
-//     DynamicArray *list;
-//     char *boolean;
-//     char *string;
-//     HashMap *obj;
-// };
-
 typedef struct
 {
     enum JSONValueType value_type;
-    // union JSONValues *value;
     void *value;
     u_int32_t value_len;
 } JSONValue;
@@ -183,7 +163,7 @@ extern Token *Lex(Lexer *);
 extern void PrintToken(Token *);
 extern void FreeToken(Token *);
 
-extern void LexerRunTest(char *);
+extern void LexerDebugTest(char *);
 
 extern Token *NewToken(enum TokenType, u_int32_t, u_int32_t, char *);
 

@@ -32,7 +32,7 @@ extern JSON *StringToJSON(char *input_str)
         return NULL;
     }
 
-    // LexerRunTest(input_str);
+    // LexerDebugTest(input_str);
     Lexer *lexer = LexerInit(input_str);
     if (lexer == NULL)
     {
@@ -46,15 +46,6 @@ extern JSON *StringToJSON(char *input_str)
 
     return ParseJSON(parser);
 }
-
-// static void *stringToJSON(char *input_str, enum JSONValueType type)
-// {
-//     if (input_str == NULL || (type != LIST_t && type != OBJ_t))
-//     {
-//         return NULL;
-//     }
-//     return NULL;
-// }
 
 extern char *JSONToString(JSON *json)
 {
@@ -83,9 +74,9 @@ extern void FreeJSON(JSON *json)
     free(json);
 }
 
+// Pretty Print can be handled by piping into jq
 extern void PrintJSON(JSON *json)
 {
-    // TODO: pretty print with map and array
     if (json == NULL)
     {
         return;
@@ -149,17 +140,17 @@ static void printJSONBoolValue(bool *value)
 {
     if (*value == true)
     {
-        printf("true");
+        printf("%s", JSON_BOOL_TRUE);
     }
     else if (*value == false)
     {
-        printf("false");
+        printf("%s", JSON_BOOL_FALSE);
     }
 }
 
 static void printJSONNULLValue(void)
 {
-    printf("null");
+    printf("%s", JSON_NULL);
 }
 
 static void printJSONListValue(DynamicArray *value)

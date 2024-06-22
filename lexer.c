@@ -15,8 +15,6 @@ static char *makeNumberLiteral(Lexer *);
 static char *makeNULLLiteral(Lexer *);
 static char *makeBoolLiteral(Lexer *);
 
-static bool isDigitOrMinusSign(char);
-
 extern Lexer *LexerInit(char *input)
 {
     Lexer *lexer = malloc(sizeof(Lexer));
@@ -78,15 +76,6 @@ extern Token *NewToken(enum TokenType type, u_int32_t start, u_int32_t end, char
     return token;
 }
 
-static bool isDigitOrMinusSign(char test)
-{
-    if (isdigit(test) || test == DASH_MINUS_CHAR)
-    {
-        return true;
-    }
-    return false;
-}
-
 // FIXME position needs changing!!!!
 extern Token *Lex(Lexer *lexer)
 {
@@ -134,7 +123,7 @@ extern Token *Lex(Lexer *lexer)
             token = NewToken(TokenString, lexer->position, lexer->position + 1, string_literal);
         }
     }
-    else if (isDigitOrMinusSign(lexer->current_char))
+    else if (IsDigitOrMinusSign(lexer->current_char))
     {
         char *number_literal = makeNumberLiteral(lexer);
         if (number_literal == NULL)
@@ -210,7 +199,7 @@ static char *makeBoolLiteral(Lexer *lexer)
     CopyString(lexer->input, bool_literal, bool_literal_size, start_position);
     bool_literal[bool_literal_size - 1] = NULL_CHAR;
 
-    if (strcmp(bool_literal, "true") != 0 && strcmp(bool_literal, "false") != 0)
+    if (strcmp(bool_literal, JSON_BOOL_TRUE) != 0 && strcmp(bool_literal, JSON_BOOL_FALSE) != 0)
     {
         free(bool_literal);
         return NULL;
@@ -251,7 +240,7 @@ static char *makeNULLLiteral(Lexer *lexer)
     CopyString(lexer->input, null_literal, null_literal_size, start_position);
     null_literal[null_literal_size - 1] = NULL_CHAR;
 
-    if (strcmp(null_literal, "null") != 0)
+    if (strcmp(null_literal, JSON_NULL) != 0)
     {
         return NULL;
     }
@@ -389,7 +378,7 @@ extern void FreeLexer(Lexer *lexer)
     }
 }
 
-extern void LexerRunTest(char *input_str)
+extern void LexerDebugTest(char *input_str)
 {
     Lexer *lexer = LexerInit(input_str);
 

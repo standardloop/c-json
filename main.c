@@ -6,18 +6,19 @@
 
 int main(void)
 {
-    // char *simple_json = "[\"josh\", \"test\", [1, 2, 3, 4]]";
-    // char *simple_json = "[[1, 2, 3], \"hi\"]";
-    // char *simple_json = "[{\"key\": \"value\", \"test\": true, {\"data\": null}, \"numbers\": [-3.123]}]";
-    // char *simple_json = "[null, [1, 2, 3, 5], [\"hello\", \"hello\", \"hello\", \"hello\", \"hello\"], null, null, -4.1, 493213023, false]";
+    // char *example_json_string = "[\"josh\", \"test\", [1, 2, 3, 4]]";
+    // char *example_json_string = "[[1, 2, 3], \"hi\"]";
+    // char *example_json_string = "[{\"key\": \"value\", \"test\": true, {\"data\": null}, \"numbers\": [-3.123]}]";
+    // char *example_json_string = "[null, [1, 2, 3, 5], [\"hello\", \"hello\", \"hello\", \"hello\", \"hello\"], null, null, -4.1, 493213023, false]";
+    // char *example_json_string = "[{\"key\": {\"data\": [1,2,3]}}]";
 
-    char *simple_json = "[{\"key\": {\"data\": [1,2,3]}}]";
-    JSON *test = StringToJSON(simple_json);
-    if (test == NULL)
+    char *example_json_string = "{\"example\": null}";
+    JSON *json = StringToJSON(example_json_string);
+    if (json == NULL)
     {
         return EXIT_FAILURE;
     }
-    PrintJSON(test);
-    FreeJSON(test);
+    PrintJSON(json);
+    FreeJSON(json);
     return EXIT_SUCCESS;
 }

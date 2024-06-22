@@ -92,7 +92,7 @@ static inline bool isMapFull(HashMap *map)
 
 extern void HashMapInsert(HashMap *map, HashMapEntry *entry)
 {
-    if (map == NULL || entry->key == NULL || entry->value == NULL)
+    if (map == NULL || entry->key == NULL || (entry->value == NULL && entry->value_type != NULL_t))
     {
         return;
     }
@@ -222,7 +222,7 @@ extern void FreeHashMap(HashMap *map)
 
 extern HashMapEntry *HashMapEntryInit(char *key, void *value, enum JSONValueType value_type)
 {
-    if (key == NULL || value == NULL)
+    if (key == NULL || (value == NULL && value_type != NULL_t))
     {
         return NULL;
     }
@@ -293,7 +293,8 @@ extern void PrintHashMap(HashMap *map)
     }
     if (map->size == 0)
     {
-        printf("Map is currently Empty!\n");
+        pass;
+        // printf("Map is currently Empty!\n");
     }
     // printf("[\n");
     for (u_int32_t i = 0; i < map->capacity; i++)
@@ -382,13 +383,4 @@ static void hashMapResize(HashMap *map)
     map->size = new_size;
     map->capacity = new_capacity;
     map->entries = new_entries;
-}
-
-extern HashMap *HashMapInitFromStr(char *input_str)
-{
-    if (input_str == NULL)
-    {
-        return NULL;
-    }
-    return NULL;
 }
