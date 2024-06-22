@@ -10,7 +10,8 @@ int main(void)
     // char *simple_json = "[[1, 2, 3], \"hi\"]";
     // char *simple_json = "[{\"key\": \"value\", \"test\": true, {\"data\": null}, \"numbers\": [-3.123]}]";
     // char *simple_json = "[null, [1, 2, 3, 5], [\"hello\", \"hello\", \"hello\", \"hello\", \"hello\"], null, null, -4.1, 493213023, false]";
-    char *simple_json = "{\"key\": [1]}";
+
+    char *simple_json = "[{\"key\": {\"data\": [1,2,3]}}]";
     JSON *test = StringToJSON(simple_json);
     if (test == NULL)
     {

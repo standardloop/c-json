@@ -70,6 +70,7 @@ static void nextToken(Parser *parser)
 static JSONValue *parseList(Parser *parser)
 {
     // printf("parseList\n");
+    // PrintToken(parser->current_token);
     JSONValue *json_value = malloc(sizeof(JSONValue));
     if (json_value == NULL)
     {
@@ -91,6 +92,10 @@ static JSONValue *parseList(Parser *parser)
             break;
         }
         if (parser->current_token->type == TokenCloseBracket && parser->peek_token->type == TokenEOF)
+        {
+            break;
+        }
+        if (parser->peek_token->type == TokenCloseCurlyBrace)
         {
             break;
         }
@@ -128,6 +133,10 @@ static JSONValue *parseObj(Parser *parser)
             break;
         }
         if (parser->current_token->type == TokenCloseCurlyBrace && parser->peek_token->type == TokenEOF)
+        {
+            break;
+        }
+        if (parser->peek_token->type == TokenCloseBracket)
         {
             break;
         }
@@ -279,7 +288,7 @@ static JSONValue *parse(Parser *parser)
     }
     else if (parser->current_token->type == TokenIllegal)
     {
-        //exit(100);
+        // exit(100);
     }
     // else
     // {

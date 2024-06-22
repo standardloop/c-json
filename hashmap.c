@@ -295,40 +295,48 @@ extern void PrintHashMap(HashMap *map)
     {
         printf("Map is currently Empty!\n");
     }
-    printf("[\n");
+    // printf("[\n");
     for (u_int32_t i = 0; i < map->capacity; i++)
     {
         HashMapEntry *entry = map->entries[i];
         if (entry != NULL)
         {
-            printf("  ");
+            // printf("  ");
             printHashMapEntry(entry, i);
-            if (i != map->capacity - 1)
+            if (i < map->size - 1)
             {
                 printf(",");
             }
-            printf("\n");
+            // printf("\n");
         }
     }
-    printf("]\n");
+    // printf("]\n");
 }
 
 static void printHashMapEntry(HashMapEntry *entry, u_int32_t index)
 {
+    if (index)
+    {
+        pass;
+    }
     // FIXME, check for value type
 
     HashMapEntry *iterator = entry;
-    printf("%u: {", index);
+    // printf("%u: {", index);
+    printf("{");
     while (iterator != NULL)
     {
 
-        printf("%s: ", iterator->key);
+        printf("\"%s\": ", iterator->key);
         PrintJSONValue(iterator->value_type, iterator->value);
 
         iterator = iterator->next;
         if (iterator != NULL)
         {
-            printf(", ");
+            if (iterator->next != NULL)
+            {
+                printf(", ");
+            }
         }
     }
     printf("}");
