@@ -112,6 +112,10 @@ static void freeDynamicArrayListElement(DynamicArrayElement *element)
         {
             FreeDynamicArray(element->value);
         }
+        else if (element->value_type == OBJ_t)
+        {
+            FreeHashMap(element->value);
+        }
         else
         {
             free(element->value);
