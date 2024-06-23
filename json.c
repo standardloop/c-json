@@ -31,8 +31,7 @@ extern JSON *StringToJSON(char *input_str)
         return NULL;
     }
 
-    LexerDebugTest(input_str);
-    exit(1);
+    // LexerDebugTest(input_str, true);
     Lexer *lexer = LexerInit(input_str);
     if (lexer == NULL)
     {
@@ -43,8 +42,12 @@ extern JSON *StringToJSON(char *input_str)
     {
         return NULL;
     }
-
-    return ParseJSON(parser);
+    JSON *json = ParseJSON(parser);
+    if (json == NULL)
+    {
+        return NULL;
+    }
+    return json;
 }
 
 extern JSON *JSONFromFile(char *filename)
@@ -93,15 +96,18 @@ extern void FreeJSON(JSON *json)
     {
         return;
     }
-    if (json->root->value_type == LIST_t)
+    if (json->root != NULL)
     {
-        FreeDynamicArray(json->root->value);
+        if (json->root->value_type == LIST_t)
+        {
+            FreeDynamicArray(json->root->value);
+        }
+        else if (json->root->value_type == OBJ_t)
+        {
+            FreeHashMap(json->root->value);
+        }
+        FreeJSONValue(json->root, false);
     }
-    else if (json->root->value_type == OBJ_t)
-    {
-        FreeHashMap(json->root->value);
-    }
-    FreeJSONValue(json->root, false);
     free(json);
 }
 

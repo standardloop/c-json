@@ -165,8 +165,9 @@ extern void FreeLexer(Lexer *);
 extern Token *Lex(Lexer *);
 extern void PrintToken(Token *);
 extern void FreeToken(Token *);
+extern bool IsTokenValueType(Token *, bool);
 
-extern void LexerDebugTest(char *);
+extern void LexerDebugTest(char *, bool);
 
 extern Token *NewToken(enum TokenType, u_int32_t, u_int32_t, u_int32_t, char *);
 
@@ -178,9 +179,11 @@ typedef struct
     Lexer *lexer;
     Token *current_token;
     Token *peek_token;
+    char *error;
 } Parser;
 
 extern Parser *ParserInit(Lexer *);
+extern void PrintParserError(Parser *);
 extern void FreeParser(Parser *);
 extern void FreeJSONValue(JSONValue *, bool);
 

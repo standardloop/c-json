@@ -27,6 +27,7 @@ extern Parser *ParserInit(Lexer *lexer)
     {
         return NULL;
     }
+    parser->error = NULL;
     parser->lexer = lexer;
     parser->current_token = NewToken(TokenEOF, 0, 0, 0, NULL_CHAR_STRING);
     parser->peek_token = NewToken(TokenEOF, 0, 0, 0, NULL_CHAR_STRING);
@@ -53,6 +54,14 @@ extern void FreeParser(Parser *parser)
             FreeToken(parser->peek_token);
         }
         free(parser);
+    }
+}
+
+extern void PrintParserError(Parser *parser)
+{
+    if (parser->error != NULL)
+    {
+        printf("%s\n", parser->error);
     }
 }
 
@@ -85,7 +94,6 @@ static JSONValue *parseList(Parser *parser)
     // while (parser->current_token->type == TokenEOF)
     while (ALWAYS)
     {
-        // PrintToken(parser->current_token);
         if (parser->current_token->type == TokenCloseBracket && parser->peek_token->type == TokenComma)
         {
             nextToken(parser);
@@ -102,10 +110,29 @@ static JSONValue *parseList(Parser *parser)
         if (parser->current_token->type == TokenIllegal)
         {
             FreeDynamicArray(list);
+            FreeJSONValue(json_value, false);
+            PrintToken(parser->current_token);
+            parser->error = "[ERROR]: Invalid token";
             return NULL;
         }
         JSONValue *list_value = parse(parser);
-        if (list_value != NULL)
+        if (list_value == NULL)
+        {
+            if ((parser->current_token->type == TokenCloseBracket && parser->peek_token->type != TokenEOF && parser->peek_token->type != TokenComma && parser->peek_token->type != TokenCloseBracket) || (parser->current_token->type == COLON_CHAR && !IsTokenValueType(parser->current_token, true)))
+            {
+                FreeDynamicArray(list);
+                FreeJSONValue(json_value, false);
+                FreeJSONValue(list_value, false);
+                PrintToken(parser->current_token);
+                parser->error = "[ERROR]: Expected value";
+                return NULL;
+            }
+            else
+            {
+                continue;
+            }
+        }
+        else
         {
             DynamicArrayAddLast(list, DynamicArrayElementInit(list_value->value_type, list_value->value, list_value->value_len));
         }
@@ -369,6 +396,13 @@ extern JSON *ParseJSON(Parser *parser)
         return NULL;
     }
     json->root = parse(parser);
+    if (json->root == NULL)
+    {
+        PrintParserError(parser);
+        FreeParser(parser);
+        FreeJSON(json);
+        return NULL;
+    }
     FreeParser(parser);
     return json;
 }
