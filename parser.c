@@ -109,7 +109,7 @@ static JSONValue *parseList(Parser *parser)
         {
             DynamicArrayAddLast(list, DynamicArrayElementInit(list_value->value_type, list_value->value, list_value->value_len));
         }
-        FreeJSONValue(list_value);
+        FreeJSONValue(list_value, false);
         // FreeToken(parser->current_token);
     }
     json_value->value_type = LIST_t;
@@ -117,25 +117,24 @@ static JSONValue *parseList(Parser *parser)
     return json_value;
 }
 
-extern void FreeJSONValue(JSONValue *json_value)
+extern void FreeJSONValue(JSONValue *json_value, bool deep)
 {
     if (json_value != NULL)
     {
-        if (json_value->value_type == LIST_t)
+        if (deep)
         {
-            // FreeDynamicArray(json_value->value);
-        }
-        else if (json_value->value_type == OBJ_t)
-        {
-            // FreeHashMap(json_value->value);
-        }
-        else if (json_value->value_type != NULL_t)
-        {
-            // free(json_value->value);
-        }
-        else
-        {
-            pass;
+            if (json_value->value_type == LIST_t)
+            {
+                // FreeDynamicArray(json_value->value);
+            }
+            else if (json_value->value_type == OBJ_t)
+            {
+                // FreeHashMap(json_value->value);
+            }
+            else if (json_value->value_type != NULL_t)
+            {
+                // free(json_value->value);
+            }
         }
         free(json_value);
     }
@@ -184,20 +183,18 @@ static JSONValue *parseObj(Parser *parser)
                 nextToken(parser); // skip over colon
                 if (parser->current_token->type == TokenColon)
                 {
-                    // nextToken(parser); // skip over colon
-                    // if (parser->current_token->type == TokenString)
-                    // {
-                    //     printf("AYAYA\n");
-                    // }
                     JSONValue *obj_value = parse(parser);
                     if (obj_value != NULL)
                     {
                         HashMapInsert(map, HashMapEntryInit(obj_key->value, obj_value->value, obj_value->value_type));
-                        FreeJSONValue(obj_value);
+                        FreeJSONValue(obj_value, false);
                     }
                 }
             }
-            FreeJSONValue(obj_key);
+            else
+            {
+            }
+            FreeJSONValue(obj_key, false);
         }
 
         // FreeJSONValue();

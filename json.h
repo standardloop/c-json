@@ -107,6 +107,7 @@ typedef struct
 } JSON;
 
 extern JSON *StringToJSON(char *);
+extern JSON *JSONFromFile(char *);
 extern char *JSONToString(JSON *);
 
 extern void FreeJSON(JSON *);
@@ -179,7 +180,7 @@ typedef struct
 
 extern Parser *ParserInit(Lexer *);
 extern void FreeParser(Parser *);
-extern void FreeJSONValue(JSONValue *);
+extern void FreeJSONValue(JSONValue *, bool);
 
 extern JSON *ParseJSON(Parser *);
 // ————————— PARSER END —————————

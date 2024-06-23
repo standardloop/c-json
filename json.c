@@ -46,6 +46,33 @@ extern JSON *StringToJSON(char *input_str)
     return ParseJSON(parser);
 }
 
+extern JSON *JSONFromFile(char *filename)
+{
+
+    FILE *file_ptr = fopen(filename, "rb");
+
+    if (file_ptr == NULL)
+    {
+        return NULL;
+    }
+    char *buffer = NULL;
+    fseek(file_ptr, 0, SEEK_END);
+    long length = ftell(file_ptr);
+    fseek(file_ptr, 0, SEEK_SET);
+    buffer = malloc(length);
+    if (buffer)
+    {
+        fread(buffer, 1, length, file_ptr);
+    }
+    fclose(file_ptr);
+
+    if (buffer == NULL)
+    {
+        return NULL;
+    }
+    return StringToJSON(buffer);
+}
+
 extern char *JSONToString(JSON *json)
 {
     if (json == NULL)
@@ -70,7 +97,7 @@ extern void FreeJSON(JSON *json)
     {
         FreeHashMap(json->root_value->value);
     }
-    FreeJSONValue(json->root_value);
+    FreeJSONValue(json->root_value, false);
     free(json);
 }
 

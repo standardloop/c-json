@@ -105,6 +105,10 @@ extern void HashMapInsert(HashMap *map, HashMapEntry *entry)
     {
         map->size++;
     }
+    // else
+    // {
+    //     printf("COLLISOIN!\n");
+    // }
 }
 
 static bool hashMapEntriesInsert(HashMapEntry **entries, u_int32_t index, HashMapEntry *entry)
@@ -339,10 +343,7 @@ static void printHashMapEntry(HashMapEntry *entry, u_int32_t index)
         iterator = iterator->next;
         if (iterator != NULL)
         {
-            if (iterator->next != NULL)
-            {
-                printf(", ");
-            }
+            printf(", ");
         }
     }
 }
