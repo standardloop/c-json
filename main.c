@@ -22,7 +22,7 @@ int main(void)
     // PrintJSON(json);
     FreeJSON(json);
 
-    json = JSONFromFile("lab/45000.json");
+    json = JSONFromFile("lab/1mil.json");
     PrintJSON(json);
     FreeJSON(json);
     return EXIT_SUCCESS;
