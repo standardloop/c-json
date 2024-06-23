@@ -70,7 +70,10 @@ extern JSON *JSONFromFile(char *filename)
     {
         return NULL;
     }
-    return StringToJSON(buffer);
+    JSON *json_from_string = StringToJSON(buffer);
+    free(buffer);
+
+    return json_from_string;
 }
 
 extern char *JSONToString(JSON *json)
