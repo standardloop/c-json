@@ -27,6 +27,7 @@ extern Lexer *LexerInit(char *input)
     lexer->current_char = NULL_CHAR;
     lexer->position = -2;
     lexer->read_position = -1;
+    lexer->line = 1;
 
     advanceChar(lexer);
 
@@ -58,11 +59,15 @@ static void skipWhitespace(Lexer *lexer)
 {
     while (lexer->current_char == SPACE_CHAR || lexer->current_char == TAB_CHAR || lexer->current_char == NEWLINE_CHAR || lexer->current_char == CARRIAGE_CHAR)
     {
+        if (lexer->current_char == NEWLINE_CHAR)
+        {
+            lexer->line++;
+        }
         advanceChar(lexer);
     }
 }
 
-extern Token *NewToken(enum TokenType type, u_int32_t start, u_int32_t end, char *literal)
+extern Token *NewToken(enum TokenType type, u_int32_t start, u_int32_t end, u_int32_t line_num, char *literal)
 {
     Token *token = malloc(sizeof(Token));
     if (token == NULL)
@@ -73,6 +78,7 @@ extern Token *NewToken(enum TokenType type, u_int32_t start, u_int32_t end, char
     token->start = start;
     token->end = end;
     token->literal = literal;
+    token->line = line_num;
     return token;
 }
 
@@ -83,44 +89,45 @@ extern Token *Lex(Lexer *lexer)
     advanceChar(lexer);
     skipWhitespace(lexer);
 
+    u_int32_t curr_pos = lexer->position;
     if (lexer->current_char == NULL_CHAR)
     {
-        token = NewToken(TokenEOF, lexer->position, lexer->position + 1, NULL_CHAR_STRING);
+        token = NewToken(TokenEOF, curr_pos, lexer->position + 1, lexer->line, NULL_CHAR_STRING);
     }
     else if (lexer->current_char == CURLY_OPEN_CHAR)
     {
-        token = NewToken(TokenOpenCurlyBrace, lexer->position, lexer->position + 1, TOKEN_OPEN_CURLY_BRACE_STRING);
+        token = NewToken(TokenOpenCurlyBrace, curr_pos, lexer->position + 1, lexer->line, TOKEN_OPEN_CURLY_BRACE_STRING);
     }
     else if (lexer->current_char == CURLY_CLOSE_CHAR)
     {
-        token = NewToken(TokenCloseCurlyBrace, lexer->position, lexer->position + 1, TOKEN_CLOSE_CURLY_BRACE_STRING);
+        token = NewToken(TokenCloseCurlyBrace, curr_pos, lexer->position + 1, lexer->line, TOKEN_CLOSE_CURLY_BRACE_STRING);
     }
     else if (lexer->current_char == BRACKET_OPEN_CHAR)
     {
-        token = NewToken(TokenOpenBracket, lexer->position, lexer->position + 1, TOKEN_OPEN_BRACKET_STRING);
+        token = NewToken(TokenOpenBracket, curr_pos, lexer->position + 1, lexer->line, TOKEN_OPEN_BRACKET_STRING);
     }
     else if (lexer->current_char == BRACKET_CLOSE_CHAR)
     {
-        token = NewToken(TokenCloseBracket, lexer->position, lexer->position + 1, TOKEN_CLOSE_BRACKET_STRING);
+        token = NewToken(TokenCloseBracket, curr_pos, lexer->position + 1, lexer->line, TOKEN_CLOSE_BRACKET_STRING);
     }
     else if (lexer->current_char == COMMA_CHAR)
     {
-        token = NewToken(TokenComma, lexer->position, lexer->position + 1, TOKEN_COMMA_STRING);
+        token = NewToken(TokenComma, curr_pos, lexer->position + 1, lexer->line, TOKEN_COMMA_STRING);
     }
     else if (lexer->current_char == COLON_CHAR)
     {
-        token = NewToken(TokenColon, lexer->position, lexer->position + 1, TOKEN_COLON_STRING);
+        token = NewToken(TokenColon, curr_pos, lexer->position + 1, lexer->line, TOKEN_COLON_STRING);
     }
     else if (lexer->current_char == DOUBLE_QUOTES_CHAR)
     {
         char *string_literal = makeStringLiteral(lexer, DOUBLE_QUOTES_CHAR);
         if (string_literal == NULL)
         {
-            token = NewToken(TokenIllegal, lexer->position, lexer->position + 1, NULL);
+            token = NewToken(TokenIllegal, curr_pos, lexer->position + 1, lexer->line, NULL);
         }
         else
         {
-            token = NewToken(TokenString, lexer->position, lexer->position + 1, string_literal);
+            token = NewToken(TokenString, curr_pos, lexer->position + 1, lexer->line, string_literal);
         }
     }
     else if (IsDigitOrMinusSign(lexer->current_char))
@@ -128,11 +135,11 @@ extern Token *Lex(Lexer *lexer)
         char *number_literal = makeNumberLiteral(lexer);
         if (number_literal == NULL)
         {
-            token = NewToken(TokenIllegal, lexer->position, lexer->position + 1, NULL);
+            token = NewToken(TokenIllegal, curr_pos, lexer->position + 1, lexer->line, NULL);
         }
         else
         {
-            token = NewToken(TokenNumber, lexer->position, lexer->position + 1, number_literal);
+            token = NewToken(TokenNumber, curr_pos, lexer->position + 1, lexer->line, number_literal);
             backtrackChar(lexer);
         }
     }
@@ -141,11 +148,11 @@ extern Token *Lex(Lexer *lexer)
         char *bool_literal = makeBoolLiteral(lexer);
         if (bool_literal == NULL)
         {
-            token = NewToken(TokenIllegal, lexer->position, lexer->position + 1, NULL);
+            token = NewToken(TokenIllegal, curr_pos, lexer->position + 1, lexer->line, NULL);
         }
         else
         {
-            token = NewToken(TokenBool, lexer->position, lexer->position + 1, bool_literal);
+            token = NewToken(TokenBool, curr_pos, lexer->position + 1, lexer->line, bool_literal);
         }
     }
     else if (lexer->current_char == 'n')
@@ -153,16 +160,16 @@ extern Token *Lex(Lexer *lexer)
         char *null_literal = makeNULLLiteral(lexer);
         if (null_literal == NULL)
         {
-            token = NewToken(TokenIllegal, lexer->position, lexer->position + 1, NULL);
+            token = NewToken(TokenIllegal, curr_pos, lexer->position + 1, lexer->line, NULL);
         }
         else
         {
-            token = NewToken(TokenNULL, lexer->position, lexer->position + 1, null_literal);
+            token = NewToken(TokenNULL, curr_pos, lexer->position + 1, lexer->line, null_literal);
         }
     }
     else
     {
-        token = NewToken(TokenIllegal, lexer->position, lexer->position + 1, NULL);
+        token = NewToken(TokenIllegal, curr_pos, lexer->position + 1, lexer->line, NULL);
     }
 
     return token;
@@ -315,41 +322,41 @@ extern void PrintToken(Token *token)
     switch (token->type)
     {
     case TokenEOF:
-        printf("Token: Kind: TokenEOF\n");
+        printf("Token: Line: %u Place: %u %u Kind: TokenEOF\n", token->line, token->start, token->end);
         break;
     case TokenColon:
-        printf("Token: Kind: TokenColon, Literal: %s\n", token->literal);
+        printf("Token: Line: %u Place: %u %u Kind: TokenColon, Literal: %s\n", token->line, token->start, token->end, token->literal);
         break;
     case TokenOpenCurlyBrace:
-        printf("Token: Kind: TokenOpenCurlyBrace, Literal: %s\n", token->literal);
+        printf("Token: Line: %u Place: %u %u Kind: TokenOpenCurlyBrace, Literal: %s\n", token->line, token->start, token->end, token->literal);
         break;
     case TokenCloseCurlyBrace:
-        printf("Token: Kind: TokenCloseCurlyBrace, Literal: %s\n", token->literal);
+        printf("Token: Line: %u Place: %u %u Kind: TokenCloseCurlyBrace, Literal: %s\n", token->line, token->start, token->end, token->literal);
         break;
     case TokenOpenBracket:
-        printf("Token: Kind: TokenOpenBracket, Literal: %s\n", token->literal);
+        printf("Token: Line: %u Place: %u %u Kind: TokenOpenBracket, Literal: %s\n", token->line, token->start, token->end, token->literal);
         break;
     case TokenCloseBracket:
-        printf("Token: Kind: TokenCloseBracket, Literal: %s\n", token->literal);
+        printf("Token: Line: %u Place: %u %u Kind: TokenCloseBracket, Literal: %s\n", token->line, token->start, token->end, token->literal);
         break;
     case TokenComma:
-        printf("Token: Kind: TokenComma, Literal: %s\n", token->literal);
+        printf("Token: Line: %u Place: %u %u Kind: TokenComma, Literal: %s\n", token->line, token->start, token->end, token->literal);
         break;
     case TokenString:
-        printf("Token: Kind: TokenString, Literal: \"%s\"\n", token->literal);
+        printf("Token: Line: %u Place: %u %u Kind: TokenString, Literal: \"%s\"\n", token->line, token->start, token->end, token->literal);
         break;
     case TokenNumber:
-        printf("Token: Kind: TokenNumber, Literal: %s\n", token->literal);
+        printf("Token: Line: %u Place: %u %u Kind: TokenNumber, Literal: %s\n", token->line, token->start, token->end, token->literal);
         break;
     case TokenBool:
-        printf("Token: Kind: TokenBool, Literal: %s\n", token->literal);
+        printf("Token: Line: %u Place: %u %u Kind: TokenBool, Literal: %s\n", token->line, token->start, token->end, token->literal);
         break;
     case TokenNULL:
-        printf("Token: Kind: TokenNULL, Literal: %s\n", token->literal);
+        printf("Token: Line: %u Place: %u %u Kind: TokenNULL, Literal: %s\n", token->line, token->start, token->end, token->literal);
         break;
     case TokenIllegal:
     default:
-        printf("Token: Kind: TokenIllegal\n");
+        printf("Token: Line: %u Place: %u %u Kind: TokenIllegal\n", token->line, token->start, token->end);
         break;
     }
 }

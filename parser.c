@@ -28,8 +28,8 @@ extern Parser *ParserInit(Lexer *lexer)
         return NULL;
     }
     parser->lexer = lexer;
-    parser->current_token = NewToken(TokenEOF, 0, 0, NULL_CHAR_STRING);
-    parser->peek_token = NewToken(TokenEOF, 0, 0, NULL_CHAR_STRING);
+    parser->current_token = NewToken(TokenEOF, 0, 0, 0, NULL_CHAR_STRING);
+    parser->peek_token = NewToken(TokenEOF, 0, 0, 0, NULL_CHAR_STRING);
 
     nextToken(parser);
 
@@ -368,7 +368,7 @@ extern JSON *ParseJSON(Parser *parser)
         FreeParser(parser);
         return NULL;
     }
-    json->root_value = parse(parser);
+    json->root = parse(parser);
     FreeParser(parser);
     return json;
 }

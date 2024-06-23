@@ -103,7 +103,7 @@ typedef struct
 
 typedef struct
 {
-    JSONValue *root_value;
+    JSONValue *root;
 } JSON;
 
 extern JSON *StringToJSON(char *);
@@ -146,6 +146,7 @@ typedef struct
     enum TokenType type;
     u_int32_t start;
     u_int32_t end;
+    u_int32_t line;
     char *literal;
 } Token;
 
@@ -156,6 +157,7 @@ typedef struct
     char current_char;
     u_int32_t position;
     u_int32_t read_position;
+    u_int32_t line;
 } Lexer;
 
 extern Lexer *LexerInit(char *);
@@ -166,7 +168,7 @@ extern void FreeToken(Token *);
 
 extern void LexerDebugTest(char *);
 
-extern Token *NewToken(enum TokenType, u_int32_t, u_int32_t, char *);
+extern Token *NewToken(enum TokenType, u_int32_t, u_int32_t, u_int32_t, char *);
 
 // ————————— LEXER END —————————
 

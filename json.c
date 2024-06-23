@@ -31,7 +31,8 @@ extern JSON *StringToJSON(char *input_str)
         return NULL;
     }
 
-    // LexerDebugTest(input_str);
+    LexerDebugTest(input_str);
+    exit(1);
     Lexer *lexer = LexerInit(input_str);
     if (lexer == NULL)
     {
@@ -92,15 +93,15 @@ extern void FreeJSON(JSON *json)
     {
         return;
     }
-    if (json->root_value->value_type == LIST_t)
+    if (json->root->value_type == LIST_t)
     {
-        FreeDynamicArray(json->root_value->value);
+        FreeDynamicArray(json->root->value);
     }
-    else if (json->root_value->value_type == OBJ_t)
+    else if (json->root->value_type == OBJ_t)
     {
-        FreeHashMap(json->root_value->value);
+        FreeHashMap(json->root->value);
     }
-    FreeJSONValue(json->root_value, false);
+    FreeJSONValue(json->root, false);
     free(json);
 }
 
@@ -111,13 +112,13 @@ extern void PrintJSON(JSON *json)
     {
         return;
     }
-    if (json->root_value->value_type == LIST_t)
+    if (json->root->value_type == LIST_t)
     {
-        PrintDynamicArray(json->root_value->value);
+        PrintDynamicArray(json->root->value);
     }
-    else if (json->root_value->value_type == OBJ_t)
+    else if (json->root->value_type == OBJ_t)
     {
-        PrintHashMap(json->root_value->value);
+        PrintHashMap(json->root->value);
     }
 }
 
