@@ -7,7 +7,7 @@
 int main(void)
 {
 
-    JSON *json = JSONFromFile("lab/invalid/list.json");
+    JSON *json = JSONFromFile("lab/1mil.json");
     if (json == NULL)
     {
         return EXIT_FAILURE;

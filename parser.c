@@ -25,6 +25,7 @@ extern Parser *ParserInit(Lexer *lexer)
     Parser *parser = malloc(sizeof(Parser));
     if (parser == NULL)
     {
+        FreeLexer(lexer);
         return NULL;
     }
     parser->error = NULL;
@@ -118,19 +119,20 @@ static JSONValue *parseList(Parser *parser)
         JSONValue *list_value = parse(parser);
         if (list_value == NULL)
         {
-            if ((parser->current_token->type == TokenCloseBracket && parser->peek_token->type != TokenEOF && parser->peek_token->type != TokenComma && parser->peek_token->type != TokenCloseBracket) || (parser->current_token->type == COLON_CHAR && !IsTokenValueType(parser->current_token, true)))
-            {
-                FreeDynamicArray(list);
-                FreeJSONValue(json_value, false);
-                FreeJSONValue(list_value, false);
-                PrintToken(parser->current_token);
-                parser->error = "[ERROR]: Expected value";
-                return NULL;
-            }
-            else
-            {
-                continue;
-            }
+            // FIXME
+            // if ((parser->current_token->type == TokenCloseBracket && parser->peek_token->type != TokenEOF && parser->peek_token->type != TokenComma && parser->peek_token->type != TokenCloseBracket) || (parser->current_token->type == COLON_CHAR && !IsTokenValueType(parser->current_token, true)))
+            // {
+            //     FreeDynamicArray(list);
+            //     FreeJSONValue(json_value, false);
+            //     FreeJSONValue(list_value, false);
+            //     PrintToken(parser->current_token);
+            //     parser->error = "[ERROR]: Expected value";
+            //     return NULL;
+            // }
+            // else
+            // {
+            //     continue;
+            // }
         }
         else
         {
