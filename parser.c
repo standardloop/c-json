@@ -136,11 +136,8 @@ static JSONValue *parseList(Parser *parser)
         }
         else
         {
-            // DynamicArrayAddLast(list, JSONValueInit(list_value->value_type, list_value->value, list_value->value_len));
             DynamicArrayAddLast(list, list_value);
         }
-        // FreeJSONValue(list_value, false);
-        // // FreeToken(parser->current_token);
     }
     json_value->value_type = LIST_t;
     json_value->value = list;
