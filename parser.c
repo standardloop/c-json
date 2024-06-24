@@ -234,6 +234,7 @@ static JSONValue *parseObj(Parser *parser)
     return json_value;
 }
 
+// Can this be combined with JSONValueInit?
 static JSONValue *initQuickJSONValue(enum JSONValueType value_type, void *value)
 {
     JSONValue *json_value = malloc(sizeof(JSONValue));
