@@ -128,30 +128,34 @@ extern void PrintJSON(JSON *json)
     }
 }
 
-extern void PrintJSONValue(enum JSONValueType value_type, void *value)
+extern void PrintJSONValue(JSONValue *json_value)
 {
-    switch (value_type)
+    if (json_value == NULL)
+    {
+        return;
+    }
+    switch (json_value->value_type)
     {
     case OBJ_t:
-        printJSONObjValue(value);
+        printJSONObjValue(json_value->value);
         break;
     case NUMBER_INT_t:
-        printJSONNumberIntValue(value);
+        printJSONNumberIntValue(json_value->value);
         break;
     case NUMBER_DOUBLE_t:
-        printJSONNumberDoubleValue(value);
+        printJSONNumberDoubleValue(json_value->value);
         break;
     case STRING_t:
-        printJSONStringValue(value);
+        printJSONStringValue(json_value->value);
         break;
     case BOOL_t:
-        printJSONBoolValue(value);
+        printJSONBoolValue(json_value->value);
         break;
     case NULL_t:
         printJSONNULLValue();
         break;
     case LIST_t:
-        printJSONListValue(value);
+        printJSONListValue(json_value->value);
         break;
     default:
         break;

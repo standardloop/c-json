@@ -12,7 +12,6 @@ int main(void)
         return EXIT_FAILURE;
     }
     PrintJSON(json);
-    // PrintDynamicArray(HashMapGet(json->root->value, "data")->value);
     FreeJSON(json);
     return EXIT_SUCCESS;
 }

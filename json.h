@@ -22,11 +22,13 @@ enum JSONValueType
     LIST_t,
 };
 
-typedef struct
+typedef struct jsonValue
 {
+    char *key;
     enum JSONValueType value_type;
     void *value;
     u_int32_t value_len;
+    struct jsonValue *next;
 } JSONValue;
 
 typedef struct
@@ -41,10 +43,7 @@ extern char *JSONToString(JSON *);
 extern void FreeJSON(JSON *);
 extern void PrintJSON(JSON *);
 
-extern void PrintJSONValue(enum JSONValueType, void *);
-
-extern JSONValue *JSONValueInit(enum JSONValueType, void *, u_int32_t);
-
+extern void PrintJSONValue(JSONValue *);
 // ————————— JSON END —————————
 
 // ————————— HASHMAP START —————————
@@ -53,29 +52,20 @@ extern JSONValue *JSONValueInit(enum JSONValueType, void *, u_int32_t);
 
 typedef u_int32_t(HashFunction)(char *, u_int32_t);
 
-typedef struct hashMapEntry
-{
-    char *key;
-    void *value;
-    enum JSONValueType value_type;
-    struct hashMapEntry *next;
-} HashMapEntry;
-
 typedef struct
 {
     u_int32_t size;
     u_int32_t capacity;
-    HashMapEntry **entries;
+    JSONValue **entries;
     HashFunction *hashFunction;
 } HashMap;
 
-extern HashMapEntry *HashMapEntryInit(char *, void *, enum JSONValueType);
-extern HashMapEntry *HashMapGet(HashMap *, char *);
+extern JSONValue *HashMapGet(HashMap *, char *);
 
 extern HashMap *HashMapInit(u_int32_t, HashFunction *);
 extern HashMap *DefaultHashMapInit(void);
 extern void FreeHashMap(HashMap *);
-extern void HashMapInsert(HashMap *, HashMapEntry *);
+extern void HashMapInsert(HashMap *, JSONValue *);
 extern void HashMapRemove(HashMap *, char *);
 extern void PrintHashMap(HashMap *);
 // ————————— HASHMAP END —————————
@@ -108,8 +98,6 @@ extern JSONValue *DynamicArrayGetAtIndex(DynamicArray *, u_int32_t);
 
 extern void PrintDynamicArray(DynamicArray *);
 extern void FreeDynamicArray(DynamicArray *);
-
-extern char *DynamicArrayToString(DynamicArray *);
 // ————————— DYN ARRAY END —————————
 
 // ————————— LEXER START —————————
@@ -182,8 +170,10 @@ extern Parser *ParserInit(Lexer *);
 extern void PrintParserError(Parser *);
 extern void FreeParser(Parser *);
 extern void FreeJSONValue(JSONValue *, bool);
-
 extern JSON *ParseJSON(Parser *);
+extern JSONValue *JSONValueReplicate(JSONValue *);
+extern JSONValue *JSONValueInit(enum JSONValueType, void *, char *, u_int32_t);
+
 // ————————— PARSER END —————————
 
 #endif

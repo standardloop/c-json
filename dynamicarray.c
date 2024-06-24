@@ -11,8 +11,6 @@ static inline bool isDynamicArrayEmpty(DynamicArray *);
 static void freeDynamicArrayList(JSONValue **, u_int32_t, bool);
 static void dynamicArrayResize(DynamicArray *);
 
-static JSONValue *json_elementReplicate(JSONValue *);
-
 extern DynamicArray *DefaultDynamicArrayInit(void)
 {
     return DynamicArrayInit(DEFAULT_DYN_ARR_SIZE);
@@ -108,7 +106,7 @@ static void freeDynamicArrayList(JSONValue **list, u_int32_t size, bool deep)
     {
         for (u_int32_t i = 0; i < size; i++)
         {
-            FreeJSONValue(list[i], true);
+            FreeJSONValue(list[i], deep);
         }
     }
     free(list);
@@ -136,7 +134,7 @@ extern void PrintDynamicArray(DynamicArray *dynamic_array)
     printf("[");
     for (u_int32_t i = 0; i < dynamic_array->size; i++)
     {
-        PrintJSONValue(dynamic_array->list[i]->value_type, dynamic_array->list[i]->value);
+        PrintJSONValue(dynamic_array->list[i]);
         if (i != dynamic_array->size - 1)
         {
 
@@ -180,35 +178,6 @@ extern void DynamicArrayRemoveLastElement(DynamicArray *dynamic_array)
     DynamicArrayRemove(dynamic_array, dynamic_array->size - 1);
 }
 
-static JSONValue *json_elementReplicate(JSONValue *json_element)
-{
-    if (json_element == NULL)
-    {
-        return NULL;
-    }
-    void *value = NULL;
-    switch (json_element->value_type)
-    {
-    case NUMBER_DOUBLE_t:
-        value = (double *)malloc(sizeof(double) * json_element->value_len);
-        memcpy(value, json_element->value, sizeof(double) * json_element->value_len);
-        break;
-    case NUMBER_INT_t:
-        value = (int *)malloc(sizeof(int) * json_element->value_len);
-        memcpy(value, json_element->value, sizeof(int) * json_element->value_len);
-        break;
-    case STRING_t:
-        value = (char *)malloc(sizeof(char) * json_element->value_len);
-        memcpy(value, json_element->value, sizeof(char) * json_element->value_len);
-        break;
-    case LIST_t:
-        value = (DynamicArray *)DynamicArrayReplicate(json_element->value);
-    default:
-        break;
-    }
-    return JSONValueInit(json_element->value_type, value, json_element->value_len);
-}
-
 extern DynamicArray *DynamicArrayReplicate(DynamicArray *dynamic_array)
 {
     if (dynamic_array == NULL)
@@ -219,19 +188,10 @@ extern DynamicArray *DynamicArrayReplicate(DynamicArray *dynamic_array)
 
     for (u_int32_t i = 0; i < dynamic_array->size; i++)
     {
-        deep_clone->list[i] = json_elementReplicate(dynamic_array->list[i]);
+        deep_clone->list[i] = JSONValueReplicate(dynamic_array->list[i]);
         deep_clone->size++;
     }
     return deep_clone;
-}
-
-extern char *DynamicArrayToString(DynamicArray *dynamic_array)
-{
-    if (dynamic_array == NULL)
-    {
-        return NULL;
-    }
-    return NULL;
 }
 
 extern JSONValue *DynamicArrayGetAtIndex(DynamicArray *dynamic_array, u_int32_t index)

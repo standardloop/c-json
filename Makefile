@@ -12,7 +12,7 @@ build:
 	lexer.c \
 	parser.c \
 	hashmap.c \
-	dynamic-array.c \
+	dynamicarray.c \
 	util.c \
 	-o $(EXECUTABLE_NAME)
 
