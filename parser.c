@@ -222,7 +222,6 @@ static JSONValue *parseObj(Parser *parser)
                     if (obj_value != NULL)
                     {
                         HashMapInsert(map, obj_value);
-                        FreeJSONValue(obj_value, false);
                     }
                 }
             }
