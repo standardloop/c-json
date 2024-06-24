@@ -6,7 +6,11 @@
 #include <string.h>
 #include <stdbool.h>
 
-// ————————— GLOBAL START —————————
+// ————————— JSON START —————————
+#define JSON_BOOL_TRUE "true"
+#define JSON_BOOL_FALSE "false"
+#define JSON_NULL "null"
+
 enum JSONValueType
 {
     OBJ_t,
@@ -17,7 +21,31 @@ enum JSONValueType
     NULL_t,
     LIST_t,
 };
-// ————————— GLOBAL END —————————
+
+typedef struct
+{
+    enum JSONValueType value_type;
+    void *value;
+    u_int32_t value_len;
+} JSONValue;
+
+typedef struct
+{
+    JSONValue *root;
+} JSON;
+
+extern JSON *StringToJSON(char *);
+extern JSON *JSONFromFile(char *);
+extern char *JSONToString(JSON *);
+
+extern void FreeJSON(JSON *);
+extern void PrintJSON(JSON *);
+
+extern void PrintJSONValue(enum JSONValueType, void *);
+
+extern JSONValue *JSONValueInit(enum JSONValueType, void *, u_int32_t);
+
+// ————————— JSON END —————————
 
 // ————————— HASHMAP START —————————
 #define DEFAULT_MAP_SIZE 10
@@ -58,63 +86,31 @@ extern void PrintHashMap(HashMap *);
 
 typedef struct
 {
-    enum JSONValueType value_type;
-    void *value;
-    u_int32_t len;
-} DynamicArrayElement;
-
-typedef struct
-{
     u_int32_t size;
     u_int32_t capacity;
-    DynamicArrayElement **list;
+    JSONValue **list;
 } DynamicArray;
-
-extern DynamicArrayElement *DynamicArrayElementInit(enum JSONValueType, void *, u_int32_t);
 
 extern DynamicArray *DynamicArrayInit(u_int32_t);
 extern DynamicArray *DefaultDynamicArrayInit(void);
 extern DynamicArray *DynamicArrayInitFromStr(char *);
 extern DynamicArray *DynamicArrayReplicate(DynamicArray *);
 
-extern void DynamicArrayAddFirst(DynamicArray *, DynamicArrayElement *);
-extern void DynamicArrayAddLast(DynamicArray *, DynamicArrayElement *);
-extern void DynamicArrayAdd(DynamicArray *, DynamicArrayElement *, u_int32_t);
+extern void DynamicArrayAddFirst(DynamicArray *, JSONValue *);
+extern void DynamicArrayAddLast(DynamicArray *, JSONValue *);
+extern void DynamicArrayAdd(DynamicArray *, JSONValue *, u_int32_t);
 
 extern void DynamicArrayRemove(DynamicArray *, u_int32_t);
 extern void DynamicArrayRemoveFirst(DynamicArray *);
 extern void DynamicArrayRemoveLast(DynamicArray *);
 
+extern JSONValue *DynamicArrayGetAtIndex(DynamicArray *, u_int32_t);
+
 extern void PrintDynamicArray(DynamicArray *);
 extern void FreeDynamicArray(DynamicArray *);
+
+extern char *DynamicArrayToString(DynamicArray *);
 // ————————— DYN ARRAY END —————————
-
-// ————————— JSON START —————————
-#define JSON_BOOL_TRUE "true"
-#define JSON_BOOL_FALSE "false"
-#define JSON_NULL "null"
-
-typedef struct
-{
-    enum JSONValueType value_type;
-    void *value;
-    u_int32_t value_len;
-} JSONValue;
-
-typedef struct
-{
-    JSONValue *root;
-} JSON;
-
-extern JSON *StringToJSON(char *);
-extern JSON *JSONFromFile(char *);
-extern char *JSONToString(JSON *);
-
-extern void FreeJSON(JSON *);
-extern void PrintJSON(JSON *);
-
-extern void PrintJSONValue(enum JSONValueType, void *);
-// ————————— JSON END —————————
 
 // ————————— LEXER START —————————
 #define NULL_CHAR_STRING "\0"

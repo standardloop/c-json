@@ -136,10 +136,11 @@ static JSONValue *parseList(Parser *parser)
         }
         else
         {
-            DynamicArrayAddLast(list, DynamicArrayElementInit(list_value->value_type, list_value->value, list_value->value_len));
+            // DynamicArrayAddLast(list, JSONValueInit(list_value->value_type, list_value->value, list_value->value_len));
+            DynamicArrayAddLast(list, list_value);
         }
-        FreeJSONValue(list_value, false);
-        // FreeToken(parser->current_token);
+        // FreeJSONValue(list_value, false);
+        // // FreeToken(parser->current_token);
     }
     json_value->value_type = LIST_t;
     json_value->value = list;
@@ -154,15 +155,15 @@ extern void FreeJSONValue(JSONValue *json_value, bool deep)
         {
             if (json_value->value_type == LIST_t)
             {
-                // FreeDynamicArray(json_value->value);
+                FreeDynamicArray(json_value->value);
             }
             else if (json_value->value_type == OBJ_t)
             {
-                // FreeHashMap(json_value->value);
+                FreeHashMap(json_value->value);
             }
             else if (json_value->value_type != NULL_t)
             {
-                // free(json_value->value);
+                free(json_value->value);
             }
         }
         free(json_value);
@@ -407,4 +408,17 @@ extern JSON *ParseJSON(Parser *parser)
     }
     FreeParser(parser);
     return json;
+}
+
+extern JSONValue *JSONValueInit(enum JSONValueType type, void *value, u_int32_t len)
+{
+    JSONValue *json_element = malloc(sizeof(JSONValue));
+    if (json_element == NULL)
+    {
+        return NULL;
+    }
+    json_element->value_type = type;
+    json_element->value = value;
+    json_element->value_len = len;
+    return json_element;
 }
