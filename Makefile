@@ -12,12 +12,14 @@ build:
 	lexer.c \
 	parser.c \
 	hashmap.c \
-	dynamic-array.c \
+	dynamicarray.c \
 	util.c \
 	-o $(EXECUTABLE_NAME)
 
 run:
 	@./main
 
-check_leaks:
+check_leaks: build run_leaks
+
+run_leaks:
 	@leaks --atExit -- ./$(EXECUTABLE_NAME)

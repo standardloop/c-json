@@ -136,11 +136,8 @@ static JSONValue *parseList(Parser *parser)
         }
         else
         {
-            // DynamicArrayAddLast(list, JSONValueInit(list_value->value_type, list_value->value, list_value->value_len));
             DynamicArrayAddLast(list, list_value);
         }
-        // FreeJSONValue(list_value, false);
-        // // FreeToken(parser->current_token);
     }
     json_value->value_type = LIST_t;
     json_value->value = list;
@@ -206,6 +203,10 @@ static JSONValue *parseObj(Parser *parser)
         }
         // nextToken(parser);
         JSONValue *obj_key = parse(parser);
+        // if (obj_key != NULL && obj_key->value_type != STRING_t)
+        // {
+        //     printf("FIXME\n");
+        // }
         if (obj_key != NULL)
         {
             if (parser->peek_token->type == TokenColon)
@@ -214,15 +215,16 @@ static JSONValue *parseObj(Parser *parser)
                 if (parser->current_token->type == TokenColon)
                 {
                     JSONValue *obj_value = parse(parser);
+                    obj_value->key = obj_key->value;
                     if (obj_value != NULL)
                     {
-                        HashMapInsert(map, HashMapEntryInit(obj_key->value, obj_value->value, obj_value->value_type));
-                        FreeJSONValue(obj_value, false);
+                        HashMapInsert(map, obj_value);
                     }
                 }
             }
             else
             {
+                pass;
             }
             FreeJSONValue(obj_key, false);
         }
@@ -411,15 +413,47 @@ extern JSON *ParseJSON(Parser *parser)
     return json;
 }
 
-extern JSONValue *JSONValueInit(enum JSONValueType type, void *value, u_int32_t len)
+extern JSONValue *JSONValueInit(enum JSONValueType type, void *value, char *key, u_int32_t len)
 {
-    JSONValue *json_element = malloc(sizeof(JSONValue));
-    if (json_element == NULL)
+    JSONValue *json_value = malloc(sizeof(JSONValue));
+    if (json_value == NULL)
     {
         return NULL;
     }
-    json_element->value_type = type;
-    json_element->value = value;
-    json_element->value_len = len;
-    return json_element;
+    json_value->key = key;
+    json_value->value_type = type;
+    json_value->value = value;
+    json_value->value_len = len;
+    json_value->next = NULL;
+    return json_value;
+}
+
+// FIXME, object support
+extern JSONValue *JSONValueReplicate(JSONValue *json_value)
+{
+    if (json_value == NULL)
+    {
+        return NULL;
+    }
+    void *value = NULL;
+    switch (json_value->value_type)
+    {
+    case NUMBER_DOUBLE_t:
+        value = (double *)malloc(sizeof(double) * json_value->value_len);
+        memcpy(value, json_value->value, sizeof(double) * json_value->value_len);
+        break;
+    case NUMBER_INT_t:
+        value = (int *)malloc(sizeof(int) * json_value->value_len);
+        memcpy(value, json_value->value, sizeof(int) * json_value->value_len);
+        break;
+    case STRING_t:
+        value = (char *)malloc(sizeof(char) * json_value->value_len);
+        memcpy(value, json_value->value, sizeof(char) * json_value->value_len);
+        break;
+    case LIST_t:
+        value = (DynamicArray *)DynamicArrayReplicate(json_value->value);
+    default:
+        break;
+    }
+    return JSONValueInit(json_value->value_type, value, NULL, json_value->value_len);
 }

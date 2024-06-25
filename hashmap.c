@@ -7,15 +7,15 @@
 #include "./util.h"
 
 static void freeHashMapEntryValue(void *, enum JSONValueType);
-static void freeHashMapEntrySingle(HashMapEntry *, bool);
-static void freeHashMapEntryList(HashMapEntry *, bool);
-static void freeHashMapEntries(HashMapEntry **, u_int32_t, bool, bool);
-static void printHashMapEntry(HashMapEntry *, u_int32_t);
+static void freeHashMapEntrySingle(JSONValue *, bool);
+static void freeHashMapEntryList(JSONValue *, bool);
+static void freeHashMapEntries(JSONValue **, u_int32_t, bool, bool);
+static void printHashMapEntry(JSONValue *, u_int32_t);
 static u_int32_t defaultHashFunction(char *, u_int32_t);
 
-static bool hashMapEntriesInsert(HashMapEntry **, u_int32_t, HashMapEntry *);
+static bool hashMapEntriesInsert(JSONValue **, u_int32_t, JSONValue *);
 
-static HashMapEntry **hashMapEntriesInit(u_int32_t);
+static JSONValue **hashMapEntriesInit(u_int32_t);
 
 static inline bool isMapFull(HashMap *);
 static void hashMapResize(HashMap *map);
@@ -43,9 +43,9 @@ extern HashMap *DefaultHashMapInit(void)
     return HashMapInit(DEFAULT_MAP_SIZE, NULL);
 }
 
-static HashMapEntry **hashMapEntriesInit(u_int32_t capacity)
+static JSONValue **hashMapEntriesInit(u_int32_t capacity)
 {
-    HashMapEntry **entries = malloc(sizeof(HashMapEntry *) * capacity);
+    JSONValue **entries = malloc(sizeof(JSONValue *) * capacity);
     if (entries == NULL)
     {
         return NULL;
@@ -89,7 +89,7 @@ static inline bool isMapFull(HashMap *map)
     return map->capacity == map->size;
 }
 
-extern void HashMapInsert(HashMap *map, HashMapEntry *entry)
+extern void HashMapInsert(HashMap *map, JSONValue *entry)
 {
     if (map == NULL || entry->key == NULL || (entry->value == NULL && entry->value_type != NULL_t))
     {
@@ -111,17 +111,17 @@ extern void HashMapInsert(HashMap *map, HashMapEntry *entry)
     // }
 }
 
-static bool hashMapEntriesInsert(HashMapEntry **entries, u_int32_t index, HashMapEntry *entry)
+static bool hashMapEntriesInsert(JSONValue **entries, u_int32_t index, JSONValue *entry)
 {
-    HashMapEntry *collision = entries[index];
+    JSONValue *collision = entries[index];
     if (collision == NULL)
     {
         entries[index] = entry;
         return false;
     }
 
-    HashMapEntry *iterator_prev = collision;
-    HashMapEntry *iterator = collision->next;
+    JSONValue *iterator_prev = collision;
+    JSONValue *iterator = collision->next;
     while (iterator != NULL)
     {
         iterator = iterator->next;
@@ -131,20 +131,20 @@ static bool hashMapEntriesInsert(HashMapEntry **entries, u_int32_t index, HashMa
     return true;
 }
 
-extern HashMapEntry *HashMapGet(HashMap *map, char *key)
+extern JSONValue *HashMapGet(HashMap *map, char *key)
 {
     if (map == NULL || key == NULL)
     {
         return NULL;
     }
     u_int32_t index = map->hashFunction(key, map->capacity);
-    HashMapEntry *entry = map->entries[index];
+    JSONValue *entry = map->entries[index];
     if (entry == NULL)
     {
         return NULL;
     }
 
-    HashMapEntry *iterator = entry;
+    JSONValue *iterator = entry;
     while (iterator != NULL)
     {
         if (strcmp(key, iterator->key) == 0)
@@ -175,9 +175,9 @@ static void freeHashMapEntryValue(void *value, enum JSONValueType value_type)
     }
 }
 
-static void freeHashMapEntryList(HashMapEntry *entry, bool deep)
+static void freeHashMapEntryList(JSONValue *entry, bool deep)
 {
-    HashMapEntry *temp = NULL;
+    JSONValue *temp = NULL;
     while (entry != NULL)
     {
         temp = entry;
@@ -195,7 +195,7 @@ static void freeHashMapEntryList(HashMapEntry *entry, bool deep)
     }
 }
 
-static void freeHashMapEntrySingle(HashMapEntry *entry, bool deep)
+static void freeHashMapEntrySingle(JSONValue *entry, bool deep)
 {
     if (entry != NULL)
     {
@@ -212,7 +212,7 @@ static void freeHashMapEntrySingle(HashMapEntry *entry, bool deep)
     }
 }
 
-static void freeHashMapEntries(HashMapEntry **entries, u_int32_t size, bool deep, bool entry_values)
+static void freeHashMapEntries(JSONValue **entries, u_int32_t size, bool deep, bool entry_values)
 {
     if (entries == NULL)
     {
@@ -241,26 +241,6 @@ extern void FreeHashMap(HashMap *map)
     free(map);
 }
 
-extern HashMapEntry *HashMapEntryInit(char *key, void *value, enum JSONValueType value_type)
-{
-    if (key == NULL || (value == NULL && value_type != NULL_t))
-    {
-        return NULL;
-    }
-
-    HashMapEntry *entry = malloc(sizeof(HashMapEntry));
-    if (entry == NULL)
-    {
-        return NULL;
-    }
-    entry->key = key;
-    entry->value = value;
-    entry->value_type = value_type;
-    entry->next = NULL;
-
-    return entry;
-}
-
 extern void HashMapRemove(HashMap *map, char *key)
 {
     if (map == NULL)
@@ -268,7 +248,7 @@ extern void HashMapRemove(HashMap *map, char *key)
         return;
     }
     u_int32_t index = map->hashFunction(key, map->capacity);
-    HashMapEntry *entry = map->entries[index];
+    JSONValue *entry = map->entries[index];
     if (entry == NULL)
     {
         return;
@@ -287,8 +267,8 @@ extern void HashMapRemove(HashMap *map, char *key)
         return;
     }
 
-    HashMapEntry *iterator_prev = entry;
-    HashMapEntry *iterator = entry->next;
+    JSONValue *iterator_prev = entry;
+    JSONValue *iterator = entry->next;
     while (iterator != NULL)
     {
         if (strcmp(key, iterator->key) == 0)
@@ -313,7 +293,7 @@ extern void PrintHashMap(HashMap *map)
     u_int32_t entry_count = 0;
     for (u_int32_t i = 0; i < map->capacity; i++)
     {
-        HashMapEntry *entry = map->entries[i];
+        JSONValue *entry = map->entries[i];
         if (entry != NULL)
         {
             printHashMapEntry(entry, i);
@@ -327,18 +307,21 @@ extern void PrintHashMap(HashMap *map)
     printf("}");
 }
 
-static void printHashMapEntry(HashMapEntry *entry, u_int32_t index)
+static void printHashMapEntry(JSONValue *entry, u_int32_t index)
 {
+    if (entry == NULL)
+    {
+        return;
+    }
     if (index)
     {
         pass;
     }
-    HashMapEntry *iterator = entry;
+    JSONValue *iterator = entry;
     while (iterator != NULL)
     {
-
         printf("\"%s\": ", iterator->key);
-        PrintJSONValue(iterator->value_type, iterator->value);
+        PrintJSONValue(iterator);
 
         iterator = iterator->next;
         if (iterator != NULL)
@@ -348,6 +331,7 @@ static void printHashMapEntry(HashMapEntry *entry, u_int32_t index)
     }
 }
 
+// JOSH
 static void hashMapResize(HashMap *map)
 {
     if (map == NULL)
@@ -359,7 +343,7 @@ static void hashMapResize(HashMap *map)
     u_int32_t new_capacity = map->capacity * DEFAULT_MAP_RESIZE_MULTIPLE;
     u_int32_t new_size = 0;
 
-    HashMapEntry **new_entries = hashMapEntriesInit(new_capacity);
+    JSONValue **new_entries = hashMapEntriesInit(new_capacity);
 
     if (new_entries == NULL)
     {
@@ -368,22 +352,24 @@ static void hashMapResize(HashMap *map)
 
     for (u_int32_t i = 0; i < map->capacity; i++)
     {
-        HashMapEntry *entry = map->entries[i];
-        HashMapEntry *iterator = entry;
+        JSONValue *entry = map->entries[i];
+        JSONValue *iterator = entry;
 
         while (iterator != NULL)
         {
-            HashMapEntry *new_entry = HashMapEntryInit(iterator->key, iterator->value, iterator->value_type); // need to move entry and not have to worry about next field
+            JSONValue *new_entry = JSONValueInit(iterator->value_type, iterator->value, iterator->key, 0);
             u_int32_t new_index = map->hashFunction(iterator->key, new_capacity);
             bool collision = hashMapEntriesInsert(new_entries, new_index, new_entry);
             if (!collision)
             {
                 new_size++;
             }
+            JSONValue *temp = iterator;
             iterator = iterator->next;
+            FreeJSONValue(temp, false);
         }
     }
-    freeHashMapEntries(map->entries, map->capacity, true, false);
+    freeHashMapEntries(map->entries, map->capacity, false, false);
 
     map->size = new_size;
     map->capacity = new_capacity;
