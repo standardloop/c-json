@@ -105,10 +105,6 @@ extern void HashMapInsert(HashMap *map, JSONValue *entry)
     {
         map->size++;
     }
-    // else
-    // {
-    //     printf("COLLISOIN!\n");
-    // }
 }
 
 static bool hashMapEntriesInsert(JSONValue **entries, u_int32_t index, JSONValue *entry)
@@ -119,7 +115,6 @@ static bool hashMapEntriesInsert(JSONValue **entries, u_int32_t index, JSONValue
         entries[index] = entry;
         return false;
     }
-
     JSONValue *iterator_prev = collision;
     JSONValue *iterator = collision->next;
     while (iterator != NULL)
@@ -338,7 +333,6 @@ static void hashMapResize(HashMap *map)
     {
         return;
     }
-    printf("Resizing Hash Map!\n");
 
     u_int32_t new_capacity = map->capacity * DEFAULT_MAP_RESIZE_MULTIPLE;
     u_int32_t new_size = 0;

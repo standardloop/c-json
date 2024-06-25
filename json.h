@@ -47,7 +47,7 @@ extern void PrintJSONValue(JSONValue *);
 // ————————— JSON END —————————
 
 // ————————— HASHMAP START —————————
-#define DEFAULT_MAP_SIZE 1
+#define DEFAULT_MAP_SIZE 16
 #define DEFAULT_MAP_RESIZE_MULTIPLE 2
 
 typedef u_int32_t(HashFunction)(char *, u_int32_t);
@@ -71,7 +71,7 @@ extern void PrintHashMap(HashMap *);
 // ————————— HASHMAP END —————————
 
 // ————————— DYN ARRAY START —————————
-#define DEFAULT_DYN_ARR_SIZE 20
+#define DEFAULT_DYN_ARR_SIZE 10
 #define DEFAULT_DYN_ARR_RESIZE_MULTIPLE 2
 
 typedef struct

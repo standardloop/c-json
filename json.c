@@ -7,7 +7,7 @@
 #include "./util.h"
 
 static void printJSONStringValue(char *);
-static void printJSONNumberIntValue(int *value);
+static void printJSONNumberIntValue(int64_t *value);
 static void printJSONNumberDoubleValue(double *value);
 
 static void printJSONBoolValue(bool *);
@@ -167,14 +167,14 @@ static void printJSONStringValue(char *value)
     printf("\"%s\"", value);
 }
 
-static void printJSONNumberIntValue(int *value)
+static void printJSONNumberIntValue(int64_t *value)
 {
-    printf("%d", *value);
+    printf("%lld", *value);
 }
 
 static void printJSONNumberDoubleValue(double *value)
 {
-    printf("%f", *value);
+    printf("%lf", *value);
 }
 
 static void printJSONBoolValue(bool *value)

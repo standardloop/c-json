@@ -274,17 +274,15 @@ static JSONValue *initQuickJSONValue(enum JSONValueType value_type, void *value)
     else if (value_type == NUMBER_DOUBLE_t)
     {
         double *new_double = malloc(sizeof(double));
-        double temp = atof((char *)value);
-        *new_double = temp;
+        *new_double = atof((char *)value);
         value_len = 1;
         json_value->value = new_double;
         free(value);
     }
     else if (value_type == NUMBER_INT_t)
     {
-        int *new_int = malloc(sizeof(int));
-        int temp = atoi((char *)value);
-        *new_int = temp;
+        int64_t *new_int = malloc(sizeof(int64_t));
+        *new_int = (int64_t)atof((char *)value);
         value_len = 1;
         json_value->value = new_int;
         free(value);
