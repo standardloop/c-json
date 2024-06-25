@@ -19,5 +19,7 @@ build:
 run:
 	@./main
 
-check_leaks:
+check_leaks: build run_leaks
+
+run_leaks:
 	@leaks --atExit -- ./$(EXECUTABLE_NAME)

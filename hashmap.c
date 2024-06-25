@@ -331,6 +331,7 @@ static void printHashMapEntry(JSONValue *entry, u_int32_t index)
     }
 }
 
+// JOSH
 static void hashMapResize(HashMap *map)
 {
     if (map == NULL)
@@ -363,10 +364,12 @@ static void hashMapResize(HashMap *map)
             {
                 new_size++;
             }
+            JSONValue *temp = iterator;
             iterator = iterator->next;
+            FreeJSONValue(temp, false);
         }
     }
-    freeHashMapEntries(map->entries, map->capacity, true, false);
+    freeHashMapEntries(map->entries, map->capacity, false, false);
 
     map->size = new_size;
     map->capacity = new_capacity;

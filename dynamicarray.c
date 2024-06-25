@@ -65,6 +65,7 @@ extern void DynamicArrayAdd(DynamicArray *dynamic_array, JSONValue *element, u_i
 
 static void dynamicArrayResize(DynamicArray *dynamic_array)
 {
+    printf("resizing array!\n");
     if (dynamic_array == NULL)
     {
         return;
