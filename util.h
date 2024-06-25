@@ -13,6 +13,7 @@
 #define NEWLINE_CHAR '\n'
 #define CARRIAGE_CHAR '\r'
 #define DASH_MINUS_CHAR '-'
+#define PLUS_CHAR '+'
 
 #define DOT_CHAR '.'
 #define COMMA_CHAR ','

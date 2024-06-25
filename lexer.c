@@ -269,17 +269,70 @@ static char *makeNULLLiteral(Lexer *lexer)
 static char *makeNumberLiteral(Lexer *lexer)
 {
     u_int32_t start_position = lexer->position;
+    u_int8_t minus_count = 0;
     if (lexer->current_char == DASH_MINUS_CHAR)
     {
         advanceChar(lexer);
+        minus_count++;
     }
 
     u_int8_t decimal_count = 0;
+    u_int8_t science_count = 0;
+    u_int8_t plus_count = 0;
+    bool error = false;
     while (ALWAYS)
     {
         if (lexer->current_char == DOT_CHAR)
         {
             decimal_count++;
+            if (decimal_count > 1)
+            {
+                error = true;
+            }
+            advanceChar(lexer);
+            if (!isdigit(lexer->current_char))
+            {
+                error = true;
+            }
+        }
+        else if (lexer->current_char == 'e' || lexer->current_char == 'E')
+        {
+            science_count++;
+            if (science_count > 1)
+            {
+                error = true;
+            }
+            advanceChar(lexer);
+            if (!IsDigitOrMinusSign(lexer->current_char) && lexer->current_char != PLUS_CHAR)
+            {
+                error = true;
+            }
+        }
+        else if (lexer->current_char == DASH_MINUS_CHAR)
+        {
+            minus_count++;
+            if (minus_count > 2)
+            {
+                error = true;
+            }
+            advanceChar(lexer);
+            if (!isdigit(lexer->current_char))
+            {
+                error = true;
+            }
+        }
+        else if (lexer->current_char == PLUS_CHAR)
+        {
+            plus_count++;
+            if (plus_count > 1)
+            {
+                error = true;
+            }
+            advanceChar(lexer);
+            if (!isdigit(lexer->current_char))
+            {
+                error = true;
+            }
         }
         else if (lexer->current_char == NULL_CHAR || !isdigit(lexer->current_char))
         {
@@ -287,10 +340,12 @@ static char *makeNumberLiteral(Lexer *lexer)
         }
         advanceChar(lexer);
     }
-    if (decimal_count > 1)
+    if (error)
     {
+        // printf("number literal error");
         return NULL;
     }
+
     u_int32_t number_literal_size = (lexer->position - start_position) + 1;
     char *number_literal = malloc(sizeof(char) * number_literal_size);
     if (number_literal == NULL)
@@ -299,6 +354,7 @@ static char *makeNumberLiteral(Lexer *lexer)
     }
     CopyString(lexer->input, number_literal, number_literal_size, start_position);
     number_literal[number_literal_size - 1] = NULL_CHAR;
+    // printf("number_literal: %s\n", number_literal);
     return number_literal;
 }
 
