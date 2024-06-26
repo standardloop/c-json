@@ -10,7 +10,7 @@
 static void advanceChar(Lexer *);
 static void backtrackChar(Lexer *);
 static void skipWhitespace(Lexer *);
-static char *makeStringLiteral(Lexer *, char);
+static char *makeStringLiteral(Lexer *);
 static char *makeNumberLiteral(Lexer *);
 static char *makeNULLLiteral(Lexer *);
 static char *makeBoolLiteral(Lexer *);
@@ -132,7 +132,7 @@ extern Token *Lex(Lexer *lexer)
     }
     else if (lexer->current_char == DOUBLE_QUOTES_CHAR)
     {
-        char *string_literal = makeStringLiteral(lexer, DOUBLE_QUOTES_CHAR);
+        char *string_literal = makeStringLiteral(lexer);
         if (string_literal == NULL)
         {
             token = NewToken(TokenIllegal, curr_pos, lexer->position + 1, lexer->line, NULL);
@@ -358,18 +358,78 @@ static char *makeNumberLiteral(Lexer *lexer)
     return number_literal;
 }
 
-static char *makeStringLiteral(Lexer *lexer, char delimiter)
+static char *makeStringLiteral(Lexer *lexer)
 {
     u_int32_t start_position = lexer->position + 1;
+    u_int8_t quote_count = 1;
+    advanceChar(lexer);
+    bool is_error = false;
     while (ALWAYS)
     {
-        advanceChar(lexer);
+        // printf("%d\n", lexer->current_char);
+        if (lexer->current_char == 92)
+        {
+            advanceChar(lexer);
 
-        if (lexer->current_char == delimiter || lexer->current_char == NULL_CHAR)
+            if (lexer->current_char == 'n')
+            {
+                continue;
+            }
+            else if (lexer->current_char == BACKSLASH_CHAR)
+            {
+                continue;
+            }
+            else if (lexer->current_char == FORWARDLASH_CHAR)
+            {
+                continue;
+            }
+            else if (lexer->current_char == 'f')
+            {
+                continue;
+            }
+            else if (lexer->current_char == 'r')
+            {
+                continue;
+            }
+            else if (lexer->current_char == 't')
+            {
+                continue;
+            }
+            else if (lexer->current_char == 'u')
+            {
+                advanceChar(lexer);
+                for (u_int8_t i = 0; i < 3; i++)
+                {
+                    if (!isxdigit(lexer->current_char))
+                    {
+                        is_error = true;
+                    }
+                    advanceChar(lexer);
+                }
+            }
+            else
+            {
+                printf("josh error\n");
+                is_error = true;
+            }
+        }
+        if (lexer->current_char == DOUBLE_QUOTES_CHAR)
+        {
+            quote_count++;
+        }
+
+        if (lexer->current_char == NULL_CHAR || quote_count == 2)
         {
             break;
         }
+        advanceChar(lexer);
     }
+
+    if (is_error)
+    {
+        return NULL;
+    }
+
     u_int32_t string_literal_size = (lexer->position - start_position) + 1;
     char *string_literal = malloc(sizeof(char) * string_literal_size);
     if (string_literal == NULL)
@@ -378,6 +438,7 @@ static char *makeStringLiteral(Lexer *lexer, char delimiter)
     }
     CopyString(lexer->input, string_literal, string_literal_size, start_position);
     string_literal[string_literal_size - 1] = NULL_CHAR;
+    // printf("[JOSH]: %s\n", string_literal);
     return string_literal;
 }
 

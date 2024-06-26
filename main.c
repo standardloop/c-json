@@ -6,12 +6,13 @@
 
 int main(void)
 {
-    JSON *json = JSONFromFile("lab/1mil.json");
+    JSON *json = JSONFromFile("lab/invalid/string.json");
+    // JSON *json = StringToJSON("[\"\"]");
     if (json == NULL)
     {
         return EXIT_FAILURE;
     }
-    //PrintJSON(json);
+    PrintJSON(json);
     FreeJSON(json);
     return EXIT_SUCCESS;
 }
