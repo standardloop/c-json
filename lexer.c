@@ -361,17 +361,21 @@ static char *makeNumberLiteral(Lexer *lexer)
 static char *makeStringLiteral(Lexer *lexer)
 {
     u_int32_t start_position = lexer->position + 1;
-    u_int8_t quote_count = 1;
+    char prev_char = lexer->current_char;
     advanceChar(lexer);
     bool is_error = false;
     while (ALWAYS)
     {
         // printf("%d\n", lexer->current_char);
-        if (lexer->current_char == 92)
+        if (lexer->current_char == BACKSLASH_CHAR)
         {
+            prev_char = lexer->current_char;
             advanceChar(lexer);
-
-            if (lexer->current_char == 'n')
+            if (lexer->current_char == DOUBLE_QUOTES_CHAR)
+            {
+                continue;
+            }
+            else if (lexer->current_char == 'n')
             {
                 continue;
             }
@@ -397,6 +401,7 @@ static char *makeStringLiteral(Lexer *lexer)
             }
             else if (lexer->current_char == 'u')
             {
+                prev_char = lexer->current_char;
                 advanceChar(lexer);
                 for (u_int8_t i = 0; i < 3; i++)
                 {
@@ -404,24 +409,20 @@ static char *makeStringLiteral(Lexer *lexer)
                     {
                         is_error = true;
                     }
+                    prev_char = lexer->current_char;
                     advanceChar(lexer);
                 }
             }
             else
             {
-                printf("josh error\n");
                 is_error = true;
             }
         }
-        if (lexer->current_char == DOUBLE_QUOTES_CHAR)
-        {
-            quote_count++;
-        }
-
-        if (lexer->current_char == NULL_CHAR || quote_count == 2)
+        if ((lexer->current_char == DOUBLE_QUOTES_CHAR && prev_char != BACKSLASH_CHAR) || lexer->current_char == NULL_CHAR)
         {
             break;
         }
+        prev_char = lexer->current_char;
         advanceChar(lexer);
     }
 
