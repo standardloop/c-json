@@ -27,7 +27,7 @@ typedef struct jsonValue
     char *key;
     enum JSONValueType value_type;
     void *value;
-    u_int32_t value_len;
+    u_int32_t value_len; // FIXME: remove this
     struct jsonValue *next;
 } JSONValue;
 

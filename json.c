@@ -31,7 +31,7 @@ extern JSON *StringToJSON(char *input_str)
         return NULL;
     }
 
-    // LexerDebugTest(input_str, true);
+    //LexerDebugTest(input_str, true);
     Lexer *lexer = LexerInit(input_str);
     if (lexer == NULL)
     {

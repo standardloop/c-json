@@ -21,6 +21,9 @@
 
 #define DOUBLE_QUOTES_CHAR '\"'
 
+#define BACKSLASH_CHAR '\\'
+#define FORWARDLASH_CHAR '/'
+
 #define BRACKET_OPEN_CHAR '['
 #define BRACKET_CLOSE_CHAR ']'
 
