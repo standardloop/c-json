@@ -6,7 +6,7 @@
 
 int main(void)
 {
-    JSON *json = JSONFromFile("lab/invalid/string2.json");
+    JSON *json = JSONFromFile("lab/invalid/obj.json");
     // JSON *json = StringToJSON("[]");
     if (json == NULL)
     {

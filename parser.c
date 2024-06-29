@@ -44,6 +44,7 @@ extern Parser *ParserInit(Lexer *lexer)
 
 extern void FreeParser(Parser *parser)
 {
+
     if (parser != NULL)
     {
         if (parser->lexer != NULL)
@@ -112,7 +113,7 @@ static bool parseListErrorHelper(Parser *parser)
     if (parser->current_token->type == TokenComma && !IsTokenValueType(parser->peek_token, true))
     {
         parser->error = true;
-        parser->error_message = "Invalid token";
+        parser->error_message = "Invalid token after comma";
         return true;
     }
     if (parser->current_token->type == TokenCloseBracket && parser->peek_token->type == TokenEOF && parser->list_nested > 1)
@@ -130,6 +131,8 @@ static bool parseListErrorHelper(Parser *parser)
             return true;
         }
     }
+    parser->error = false;
+    parser->error_message = NULL;
     return false;
 }
 
@@ -168,8 +171,8 @@ static JSONValue *parseList(Parser *parser)
         {
             FreeDynamicArray(list);
             FreeJSONValue(json_value, false);
-            // parser->error = "[ERROR]: Invalid token";
-            parser->error = true;
+            // parser->error; // parseListErrorHelper writes this value
+            // parser->error; // parseListErrorHelper writes this value
             return NULL;
         }
         if (list_value == NULL)
@@ -244,10 +247,15 @@ static JSONValue *parseObj(Parser *parser)
         }
         // nextToken(parser);
         JSONValue *obj_key = parse(parser);
-        // if (obj_key != NULL && obj_key->value_type != STRING_t)
-        // {
-        //     printf("FIXME\n");
-        // }
+        if (obj_key != NULL && obj_key->value_type != STRING_t)
+        {
+            FreeHashMap(map);
+            FreeJSONValue(obj_key, true);
+            FreeJSONValue(json_value, false);
+            parser->error = true;
+            parser->error_message = "Object key must be a string";
+            return NULL;
+        }
         if (obj_key != NULL)
         {
             if (parser->peek_token->type == TokenColon)
@@ -265,12 +273,15 @@ static JSONValue *parseObj(Parser *parser)
             }
             else
             {
-                pass;
+                FreeHashMap(map);
+                FreeJSONValue(obj_key, true);
+                FreeJSONValue(json_value, false);
+                parser->error = true;
+                parser->error_message = "Colon not found after key";
+                return NULL;
             }
             FreeJSONValue(obj_key, false);
         }
-
-        // FreeJSONValue();
     }
     json_value->value_type = OBJ_t;
     json_value->value = map;
