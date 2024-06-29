@@ -90,6 +90,7 @@ static void nextToken(Parser *parser)
 
 static bool parseListErrorHelper(Parser *parser)
 {
+
     if (parser->current_token->type == TokenIllegal)
     {
         parser->error = true;
@@ -139,8 +140,10 @@ static JSONValue *parseList(Parser *parser)
     {
         return NULL;
     }
-    if (parser->current_token->type == TokenOpenBracket)
+    if (parser->current_token->type != TokenOpenBracket)
     {
+        FreeJSONValue(json_value, false);
+        return NULL;
     }
     DynamicArray *list = DefaultDynamicArrayInit();
 
@@ -151,7 +154,7 @@ static JSONValue *parseList(Parser *parser)
             nextToken(parser);
             break;
         }
-        if (parser->current_token->type == TokenCloseBracket && parser->peek_token->type == TokenEOF)
+        if (parser->current_token->type == TokenCloseBracket && parser->peek_token->type == TokenEOF && parser->list_nested == 0)
         {
             break;
         }
@@ -358,7 +361,7 @@ static JSONValue *parse(Parser *parser)
     {
         return NULL;
     }
-
+    // printf("[JOSH]: %u\n", (unsigned int)parser->list_nested);
     nextToken(parser);
     // PrintToken(parser->current_token);
     JSONValue *return_value = NULL;
@@ -434,56 +437,20 @@ static JSONValue *parse(Parser *parser)
     return return_value;
 }
 
+#define PRINT_ERROR_LINE_PREFIX_OFFSET 3
+#define PRINT_ERROR_LINE_SUFFIX_OFFSET 0
+
 extern void PrintErrorLine(Parser *parser)
 {
     if (parser == NULL || parser->lexer == NULL || parser->lexer->input == NULL)
     {
         return;
     }
-    u_int8_t line_count = 1;
-    // printf("%u\n", parser->current_token->line);
-    char *json_str_iterator = parser->lexer->input;
-    bool in_string = false;
-    bool double_quotes_count = 0;
-    while (json_str_iterator != NULL && *json_str_iterator != NULL_CHAR && line_count < parser->current_token->line)
-    {
-        if (*json_str_iterator == DOUBLE_QUOTES_CHAR)
-        {
-            double_quotes_count++;
-            if (!(double_quotes_count % 2))
-            {
-                in_string = true;
-            }
-            else
-            {
-                in_string = false;
-            }
-        }
 
-        if (!in_string && *json_str_iterator == NEWLINE_CHAR)
-        {
-            line_count++;
-        }
-        json_str_iterator++;
-    }
-    in_string = false;
-    double_quotes_count = 0;
-    while (json_str_iterator != NULL && *json_str_iterator != NULL_CHAR)
+    char *json_str_iterator = parser->lexer->input + parser->current_token->start - PRINT_ERROR_LINE_PREFIX_OFFSET;
+    for (u_int32_t i = parser->current_token->start - PRINT_ERROR_LINE_PREFIX_OFFSET; i < parser->current_token->end + PRINT_ERROR_LINE_SUFFIX_OFFSET; i++)
     {
-        if (*json_str_iterator == DOUBLE_QUOTES_CHAR)
-        {
-            double_quotes_count++;
-            if (!(double_quotes_count % 2))
-            {
-                in_string = true;
-            }
-            else
-            {
-                in_string = false;
-            }
-        }
-
-        if (!in_string && *json_str_iterator == NEWLINE_CHAR)
+        if (json_str_iterator == NULL || *json_str_iterator == NULL_CHAR)
         {
             break;
         }
@@ -492,7 +459,7 @@ extern void PrintErrorLine(Parser *parser)
     }
     printf("\n");
 
-    for (u_int32_t i = 0; i < parser->current_token->end; i++)
+    for (u_int32_t i = parser->current_token->start - PRINT_ERROR_LINE_PREFIX_OFFSET; i < parser->current_token->end + PRINT_ERROR_LINE_SUFFIX_OFFSET; i++)
     {
         if (i >= parser->current_token->start)
         {

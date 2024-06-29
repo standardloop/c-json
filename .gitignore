@@ -57,3 +57,6 @@ main-optimize
 lab
 lab.c
 .vscode
+test
+notes.txt
+test.c

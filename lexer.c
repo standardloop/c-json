@@ -488,10 +488,10 @@ extern void PrintToken(Token *token, bool print_literal)
         break;
     case TokenIllegal:
     default:
-        printf("Kind: TokenIllegal\n");
+        printf("Kind: TokenIllegal");
         break;
     }
-    if (print_literal && token->type != TokenIllegal)
+    if (print_literal && token->type != TokenIllegal && token->type != TokenEOF)
     {
         if (token->type == TokenString)
         {

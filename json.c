@@ -27,7 +27,7 @@ extern JSON *StringToJSON(char *input_str)
         (input_str[0] == CURLY_OPEN_CHAR && input_str[input_str_len - 1] != CURLY_CLOSE_CHAR) ||
         (input_str[0] == BRACKET_OPEN_CHAR && input_str[input_str_len - 1] != BRACKET_CLOSE_CHAR))
     {
-        printf("[ERROR]: input StringToJSON is not valid JSON\n");
+        printf("[ERROR]: Cannot find starting and closing Bracket or Brace\n");
         return NULL;
     }
 

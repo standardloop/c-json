@@ -6,8 +6,8 @@
 
 int main(void)
 {
-    // JSON *json = JSONFromFile("lab/api.json");
-    JSON *json = StringToJSON("[1,\"\n\",]");
+    JSON *json = JSONFromFile("lab/1mil.json");
+    //JSON *json = StringToJSON("[]");
     if (json == NULL)
     {
         return EXIT_FAILURE;
