@@ -275,6 +275,10 @@ static char *makeNumberLiteral(Lexer *lexer)
     {
         advanceChar(lexer);
         minus_count++;
+        if (!isdigit(lexer->current_char))
+        {
+            return NULL;
+        }
     }
 
     u_int8_t decimal_count = 0;
