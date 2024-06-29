@@ -12,6 +12,7 @@ static JSONValue *parse(Parser *);
 static JSONValue *parseList(Parser *);
 static bool parseListErrorHelper(Parser *);
 static JSONValue *parseObj(Parser *);
+static bool parseObjErrorHelper(Parser *);
 static JSONValue *parseNumber(Parser *);
 
 static JSONValue *initQuickJSONValue(enum JSONValueType, void *);
@@ -107,7 +108,7 @@ static bool parseListErrorHelper(Parser *parser)
     if (IsTokenValueType(parser->current_token, false) && (parser->peek_token->type != TokenComma && parser->peek_token->type != TokenCloseBracket))
     {
         parser->error = true;
-        parser->error_message = "Invalid token";
+        parser->error_message = "Invalid token DEBUG";
         return true;
     }
     if (parser->current_token->type == TokenComma && !IsTokenValueType(parser->peek_token, true))
@@ -211,6 +212,30 @@ extern void FreeJSONValue(JSONValue *json_value, bool deep)
     }
 }
 
+static bool parseObjErrorHelper(Parser *parser)
+{
+    if (parser->current_token->type == TokenIllegal)
+    {
+        parser->error = true;
+        parser->error_message = "Illegal token found";
+        return true;
+    }
+    if (parser->peek_token->type == TokenEOF && parser->current_token->type != TokenCloseCurlyBrace)
+    {
+        parser->error = true;
+        parser->error_message = "Closing Brace not found";
+        return true;
+    }
+    if (parser->current_token->type == TokenComma && parser->peek_token->type != TokenString)
+    {
+        parser->error = true;
+        parser->error_message = "Invalid token after comma, expected key string";
+        return true;
+    }
+
+    return false;
+}
+
 static JSONValue *parseObj(Parser *parser)
 {
     if (parser == NULL)
@@ -240,12 +265,15 @@ static JSONValue *parseObj(Parser *parser)
         {
             break;
         }
-        if (parser->current_token->type == TokenIllegal)
+
+        if (parseObjErrorHelper(parser))
         {
             FreeHashMap(map);
+            FreeJSONValue(json_value, true);
+            // parser->error; // parseObjErrorHelper writes this value
+            // parser->error_message; // parseObjErrorHelper writes this value
             return NULL;
         }
-        // nextToken(parser);
         JSONValue *obj_key = parse(parser);
         if (obj_key != NULL && obj_key->value_type != STRING_t)
         {
@@ -258,12 +286,33 @@ static JSONValue *parseObj(Parser *parser)
         }
         if (obj_key != NULL)
         {
+            // FIXME: maybe add a flag to enforce object key uniqueness?
+            // According to spec is not forbidden to have a duplicate key, but it is discouraged.
+            // if (HashMapGet(map, obj_key->value) != NULL)
+            // {
+            //     FreeHashMap(map);
+            //     FreeJSONValue(obj_key, true);
+            //     FreeJSONValue(json_value, false);
+            //     parser->error = true;
+            //     parser->error_message = "Duplicate object key found";
+            //     return NULL;
+            // }
+
             if (parser->peek_token->type == TokenColon)
             {
                 nextToken(parser); // skip over colon
-                if (parser->current_token->type == TokenColon)
+                JSONValue *obj_value = parse(parser);
+                if (!IsTokenValueType(parser->current_token, true))
                 {
-                    JSONValue *obj_value = parse(parser);
+                    FreeHashMap(map);
+                    FreeJSONValue(obj_key, true);
+                    FreeJSONValue(json_value, false);
+                    parser->error = true;
+                    parser->error_message = "Invalid Token after colon, expecting value";
+                    return NULL;
+                }
+                else
+                {
                     obj_value->key = obj_key->value;
                     if (obj_value != NULL)
                     {
@@ -271,6 +320,7 @@ static JSONValue *parseObj(Parser *parser)
                     }
                 }
             }
+
             else
             {
                 FreeHashMap(map);
