@@ -286,7 +286,7 @@ static char *makeNumberLiteral(Lexer *lexer)
         if (lexer->current_char == DOT_CHAR)
         {
             decimal_count++;
-            if (decimal_count > 1)
+            if (decimal_count > 1 || (decimal_count == 1 && science_count >= 1))
             {
                 error = true;
             }
@@ -355,7 +355,7 @@ static char *makeNumberLiteral(Lexer *lexer)
     }
     CopyString(lexer->input, number_literal, number_literal_size, start_position);
     number_literal[number_literal_size - 1] = NULL_CHAR;
-    // printf("number_literal\n", number_literal);
+    // printf("number_literal: %s\n", number_literal);
     return number_literal;
 }
 
@@ -404,7 +404,7 @@ static char *makeStringLiteral(Lexer *lexer)
             {
                 prev_char = lexer->current_char;
                 advanceChar(lexer);
-                for (u_int8_t i = 0; i < 3; i++)
+                for (u_int8_t i = 0; i < 4; i++)
                 {
                     if (!isxdigit(lexer->current_char))
                     {

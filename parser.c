@@ -345,7 +345,10 @@ static JSONValue *parseNumber(Parser *parser)
     {
         return NULL;
     }
-    if (IsCharInString(parser->current_token->literal, DOT_CHAR))
+    // FIXME:
+    // there is an issue here where number such as 1e-2 are actually decimals
+    // For now all scientific notation with be made into a floating point
+    if (IsCharInString(parser->current_token->literal, DOT_CHAR) || IsCharInString(parser->current_token->literal, 'e') || IsCharInString(parser->current_token->literal, 'E'))
     {
         return initQuickJSONValue(NUMBER_DOUBLE_t, parser->current_token->literal);
     }
