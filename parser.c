@@ -466,7 +466,32 @@ extern void PrintErrorLine(Parser *parser)
         }
         json_str_iterator++;
     }
-    printf("%s\n", json_str_iterator);
+    in_string = false;
+    double_quotes_count = 0;
+    while (json_str_iterator != NULL && *json_str_iterator != NULL_CHAR)
+    {
+        if (*json_str_iterator == DOUBLE_QUOTES_CHAR)
+        {
+            double_quotes_count++;
+            if (!(double_quotes_count % 2))
+            {
+                in_string = true;
+            }
+            else
+            {
+                in_string = false;
+            }
+        }
+
+        if (!in_string && *json_str_iterator == NEWLINE_CHAR)
+        {
+            break;
+        }
+        printf("%c", *json_str_iterator);
+        json_str_iterator++;
+    }
+    printf("\n");
+
     for (u_int32_t i = 0; i < parser->current_token->end; i++)
     {
         if (i >= parser->current_token->start)

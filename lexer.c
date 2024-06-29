@@ -450,7 +450,7 @@ extern void PrintToken(Token *token, bool print_literal)
     {
         return;
     }
-    printf("Line: %u Place: %u ↔ %u ", token->line, token->start, token->end);
+    printf("Line: %u Place: %u - %u ", token->line, token->start, token->end);
     switch (token->type)
     {
     case TokenEOF:
