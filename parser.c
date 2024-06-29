@@ -29,7 +29,8 @@ extern Parser *ParserInit(Lexer *lexer)
         FreeLexer(lexer);
         return NULL;
     }
-    parser->error = NULL;
+    parser->error = false;
+    parser->error_message = NULL;
     parser->lexer = lexer;
     parser->list_nested = 0;
     parser->obj_nested = 0;
@@ -63,9 +64,16 @@ extern void FreeParser(Parser *parser)
 
 extern void PrintParserError(Parser *parser)
 {
+    if (parser->current_token != NULL)
+    {
+        PrintToken(parser->current_token, false);
+    }
     if (parser->error == true)
     {
-        // printf("%s\n", parser->error_message);
+        if (parser->error_message != NULL)
+        {
+            printf("[ERROR]: %s\n", parser->error_message);
+        }
     }
 }
 
@@ -84,31 +92,48 @@ static bool parseListErrorHelper(Parser *parser)
 {
     if (parser->current_token->type == TokenIllegal)
     {
+        parser->error = true;
+        parser->error_message = "Illegal token found";
         return true;
     }
     if (parser->peek_token->type == TokenEOF && parser->current_token->type != TokenCloseBracket)
     {
+        parser->error = true;
+        parser->error_message = "Closing Bracket not found";
         return true;
     }
     if (IsTokenValueType(parser->current_token, false) && (parser->peek_token->type != TokenComma && parser->peek_token->type != TokenCloseBracket))
     {
+        parser->error = true;
+        parser->error_message = "Invalid token";
         return true;
     }
     if (parser->current_token->type == TokenComma && !IsTokenValueType(parser->peek_token, true))
     {
+        parser->error = true;
+        parser->error_message = "Invalid token";
         return true;
     }
     if (parser->current_token->type == TokenCloseBracket && parser->peek_token->type == TokenEOF && parser->list_nested > 1)
     {
+        parser->error = true;
+        parser->error_message = "Invalid token, Expected EOF";
         return true;
+    }
+    if (parser->current_token->type == TokenCloseBracket && (parser->peek_token->type != TokenEOF && parser->peek_token->type != TokenComma && parser->peek_token->type != TokenCloseCurlyBrace))
+    {
+        if (parser->list_nested >= 2)
+        {
+            parser->error = true;
+            parser->error_message = "Invalid Token after Closing Bracket";
+            return true;
+        }
     }
     return false;
 }
 
 static JSONValue *parseList(Parser *parser)
 {
-    // printf("parseList\n");
-    // PrintToken(parser->current_token);
     JSONValue *json_value = malloc(sizeof(JSONValue));
     if (json_value == NULL)
     {
@@ -118,7 +143,6 @@ static JSONValue *parseList(Parser *parser)
     {
     }
     DynamicArray *list = DefaultDynamicArrayInit();
-    // bool nested = false;
 
     while (ALWAYS)
     {
@@ -140,7 +164,6 @@ static JSONValue *parseList(Parser *parser)
         if (parseListErrorHelper(parser))
         {
             FreeDynamicArray(list);
-            PrintToken(parser->current_token);
             FreeJSONValue(json_value, false);
             // parser->error = "[ERROR]: Invalid token";
             parser->error = true;
@@ -411,6 +434,53 @@ static JSONValue *parse(Parser *parser)
     return return_value;
 }
 
+extern void PrintErrorLine(Parser *parser)
+{
+    if (parser == NULL || parser->lexer == NULL || parser->lexer->input == NULL)
+    {
+        return;
+    }
+    u_int8_t line_count = 1;
+    // printf("%u\n", parser->current_token->line);
+    char *json_str_iterator = parser->lexer->input;
+    bool in_string = false;
+    bool double_quotes_count = 0;
+    while (json_str_iterator != NULL && *json_str_iterator != NULL_CHAR && line_count < parser->current_token->line)
+    {
+        if (*json_str_iterator == DOUBLE_QUOTES_CHAR)
+        {
+            double_quotes_count++;
+            if (!(double_quotes_count % 2))
+            {
+                in_string = true;
+            }
+            else
+            {
+                in_string = false;
+            }
+        }
+
+        if (!in_string && *json_str_iterator == NEWLINE_CHAR)
+        {
+            line_count++;
+        }
+        json_str_iterator++;
+    }
+    printf("%s\n", json_str_iterator);
+    for (u_int32_t i = 0; i < parser->current_token->end; i++)
+    {
+        if (i >= parser->current_token->start)
+        {
+            printf("^");
+        }
+        else
+        {
+            printf(" ");
+        }
+    }
+    printf("\n");
+}
+
 extern JSON *ParseJSON(Parser *parser)
 {
     if (parser == NULL)
@@ -426,6 +496,7 @@ extern JSON *ParseJSON(Parser *parser)
     json->root = parse(parser);
     if (json->root == NULL)
     {
+        PrintErrorLine(parser);
         PrintParserError(parser);
         FreeParser(parser);
         FreeJSON(json);

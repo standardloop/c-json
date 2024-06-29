@@ -7,7 +7,7 @@
 int main(void)
 {
     //JSON *json = JSONFromFile("lab/api.json");
-    JSON *json = StringToJSON("[1,23,[]]");
+    JSON *json = StringToJSON("[1,23]]");
     if (json == NULL)
     {
         return EXIT_FAILURE;

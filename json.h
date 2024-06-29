@@ -147,7 +147,7 @@ typedef struct
 extern Lexer *LexerInit(char *);
 extern void FreeLexer(Lexer *);
 extern Token *Lex(Lexer *);
-extern void PrintToken(Token *);
+extern void PrintToken(Token *, bool);
 extern void FreeToken(Token *);
 extern bool IsTokenValueType(Token *, bool);
 

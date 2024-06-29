@@ -355,7 +355,7 @@ static char *makeNumberLiteral(Lexer *lexer)
     }
     CopyString(lexer->input, number_literal, number_literal_size, start_position);
     number_literal[number_literal_size - 1] = NULL_CHAR;
-    // printf("number_literal: %s\n", number_literal);
+    // printf("number_literal\n", number_literal);
     return number_literal;
 }
 
@@ -440,55 +440,71 @@ static char *makeStringLiteral(Lexer *lexer)
     }
     CopyString(lexer->input, string_literal, string_literal_size, start_position);
     string_literal[string_literal_size - 1] = NULL_CHAR;
-    // printf("[JOSH]: %s\n", string_literal);
+    // printf("[JOSH]\n", string_literal);
     return string_literal;
 }
 
-extern void PrintToken(Token *token)
+extern void PrintToken(Token *token, bool print_literal)
 {
     if (token == NULL)
     {
         return;
     }
+    printf("Line: %u Place: %u ↔ %u ", token->line, token->start, token->end);
     switch (token->type)
     {
     case TokenEOF:
-        printf("[Token]: Line: %u Place: %u %u Kind: TokenEOF\n", token->line, token->start, token->end);
+        printf("Kind: TokenEOF");
         break;
     case TokenColon:
-        printf("[Token]: Line: %u Place: %u %u Kind: TokenColon, Literal: %s\n", token->line, token->start, token->end, token->literal);
+        printf("Kind: TokenColon");
         break;
     case TokenOpenCurlyBrace:
-        printf("[Token]: Line: %u Place: %u %u Kind: TokenOpenCurlyBrace, Literal: %s\n", token->line, token->start, token->end, token->literal);
+        printf("Kind: TokenOpenCurlyBrace");
         break;
     case TokenCloseCurlyBrace:
-        printf("[Token]: Line: %u Place: %u %u Kind: TokenCloseCurlyBrace, Literal: %s\n", token->line, token->start, token->end, token->literal);
+        printf("Kind: TokenCloseCurlyBrace");
         break;
     case TokenOpenBracket:
-        printf("[Token]: Line: %u Place: %u %u Kind: TokenOpenBracket, Literal: %s\n", token->line, token->start, token->end, token->literal);
+        printf("Kind: TokenOpenBracket");
         break;
     case TokenCloseBracket:
-        printf("[Token]: Line: %u Place: %u %u Kind: TokenCloseBracket, Literal: %s\n", token->line, token->start, token->end, token->literal);
+        printf("Kind: TokenCloseBracket");
         break;
     case TokenComma:
-        printf("[Token]: Line: %u Place: %u %u Kind: TokenComma, Literal: %s\n", token->line, token->start, token->end, token->literal);
+        printf("Kind: TokenComma");
         break;
     case TokenString:
-        printf("[Token]: Line: %u Place: %u %u Kind: TokenString, Literal: \"%s\"\n", token->line, token->start, token->end, token->literal);
+        printf("Kind: TokenString");
         break;
     case TokenNumber:
-        printf("[Token]: Line: %u Place: %u %u Kind: TokenNumber, Literal: %s\n", token->line, token->start, token->end, token->literal);
+        printf("Kind: TokenNumber");
         break;
     case TokenBool:
-        printf("[Token]: Line: %u Place: %u %u Kind: TokenBool, Literal: %s\n", token->line, token->start, token->end, token->literal);
+        printf("Kind: TokenBool");
         break;
     case TokenNULL:
-        printf("[Token]: Line: %u Place: %u %u Kind: TokenNULL, Literal: %s\n", token->line, token->start, token->end, token->literal);
+        printf("Kind: TokenNULL");
         break;
     case TokenIllegal:
     default:
-        printf("[Token]: Line: %u Place: %u %u Kind: TokenIllegal\n", token->line, token->start, token->end);
+        printf("Kind: TokenIllegal\n");
         break;
+    }
+    if (print_literal && token->type != TokenIllegal)
+    {
+        if (token->type == TokenString)
+        {
+            printf("Literal: \"%s\"\n", token->literal);
+        }
+        else
+        {
+            printf("Literal: %s\n", token->literal);
+        }
+    }
+    else
+    {
+        printf("\n");
     }
 }
 
@@ -523,7 +539,7 @@ extern void LexerDebugTest(char *input_str, bool exit_after)
     while (ALWAYS)
     {
         Token *token = Lex(lexer);
-        PrintToken(token);
+        PrintToken(token, true);
         if (token->type == TokenEOF)
         {
             FreeToken(token);

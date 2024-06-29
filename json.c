@@ -31,7 +31,7 @@ extern JSON *StringToJSON(char *input_str)
         return NULL;
     }
 
-    //LexerDebugTest(input_str, true);
+    // LexerDebugTest(input_str, true);
     Lexer *lexer = LexerInit(input_str);
     if (lexer == NULL)
     {
@@ -57,6 +57,7 @@ extern JSON *JSONFromFile(char *filename)
 
     if (file_ptr == NULL)
     {
+        printf("[ERROR]: unable to open file \"%s\"\n", filename);
         return NULL;
     }
     char *buffer = NULL;
