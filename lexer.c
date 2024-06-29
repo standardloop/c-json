@@ -27,6 +27,7 @@ extern bool IsTokenValueType(Token *token, bool check_starters)
     }
     return false;
 }
+
 extern Lexer *LexerInit(char *input)
 {
     Lexer *lexer = malloc(sizeof(Lexer));

@@ -163,7 +163,10 @@ typedef struct
     Lexer *lexer;
     Token *current_token;
     Token *peek_token;
-    char *error;
+    bool error;
+    char *error_message;
+    u_int64_t list_nested;
+    u_int64_t obj_nested;
 } Parser;
 
 extern Parser *ParserInit(Lexer *);
