@@ -6,13 +6,25 @@
 
 int main(void)
 {
-    JSON *json = JSONFromFile("lab/1mil.json");
-    // JSON *json = StringToJSON("[]");
+
+    // JSON *json = JSONFromFile("lab/full.json");
+    JSON *json = StringToJSON("[0, 1234, 124]");
     if (json == NULL)
     {
         return EXIT_FAILURE;
     }
-    PrintJSON(json);
-    FreeJSON(json);
+    // PrintJSON(json);
+    // printf("\n");
+
+    // printf("%s\n", JSONValueToString(DynamicArrayGetAtIndex(json->root->value, 0)));
+
+    char *json_string = JSONToString(json);
+    if (json_string == NULL)
+    {
+        return EXIT_FAILURE;
+    }
+    printf("%s", json_string);
+    free(json_string);
+
     return EXIT_SUCCESS;
 }

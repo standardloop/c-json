@@ -40,4 +40,9 @@ extern size_t NumCharInString(const char *, char);
 extern char *QuickAllocatedString(char *);
 extern inline void PrintSpaces(int);
 extern bool IsDigitOrMinusSign(char);
+
+extern int32_t NumberOfDigitsInInt64(int64_t);
+extern char *Int64ToString(int64_t);
+extern char *DoubleToString(double);
+
 #endif
