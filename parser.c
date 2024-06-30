@@ -108,7 +108,7 @@ static bool parseListErrorHelper(Parser *parser)
     if (IsTokenValueType(parser->current_token, false) && (parser->peek_token->type != TokenComma && parser->peek_token->type != TokenCloseBracket))
     {
         parser->error = true;
-        parser->error_message = "Invalid token DEBUG";
+        parser->error_message = "Invalid token";
         return true;
     }
     if (parser->current_token->type == TokenComma && !IsTokenValueType(parser->peek_token, true))
