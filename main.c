@@ -8,16 +8,12 @@ int main(void)
 {
 
     // JSON *json = JSONFromFile("lab/full.json");
-    JSON *json = StringToJSON("[0, 1234, 124]");
+    JSON *json = StringToJSON("{\"test\": 1}");
     if (json == NULL)
     {
         return EXIT_FAILURE;
     }
     // PrintJSON(json);
-    // printf("\n");
-
-    // printf("%s\n", JSONValueToString(DynamicArrayGetAtIndex(json->root->value, 0)));
-
     char *json_string = JSONToString(json);
     if (json_string == NULL)
     {

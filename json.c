@@ -16,6 +16,7 @@ static void printJSONListValue(DynamicArray *);
 static void printJSONObjValue(HashMap *);
 
 static char *listToString(DynamicArray *);
+static char *objToString(HashMap *);
 
 extern JSON *StringToJSON(char *input_str)
 {
@@ -96,6 +97,10 @@ extern char *JSONToString(JSON *json)
 
 static char *listToString(DynamicArray *dynamic_array)
 {
+    if (dynamic_array == NULL)
+    {
+        return NULL;
+    }
     size_t list_as_string_size = 3; // "[]\0"
     char *list_as_string = malloc(sizeof(char) * list_as_string_size);
     list_as_string[0] = BRACKET_OPEN_CHAR;
@@ -119,6 +124,51 @@ static char *listToString(DynamicArray *dynamic_array)
     return list_as_string;
 }
 
+static char *objToString(HashMap *map)
+{
+    if (map == NULL)
+    {
+        return NULL;
+    }
+    size_t obj_as_string_size = 3; // "[]\0"
+    char *obj_as_string = malloc(sizeof(char) * obj_as_string_size);
+    obj_as_string[0] = CURLY_OPEN_CHAR;
+
+    for (u_int64_t i = 0; i < map->capacity; i++)
+    {
+        JSONValue *map_entry = map->entries[i];
+
+        while (map_entry != NULL)
+        {
+            char *entry_key = map_entry->key;
+            size_t entry_key_size = strlen(entry_key) + 1;
+            char *duplicated_key = malloc(sizeof(char) * entry_key_size);
+            strcpy(duplicated_key, entry_key);
+
+            char *entry_value = JSONValueToString(map_entry);
+            size_t entry_value_len = strlen(entry_value);
+            duplicated_key[entry_key_size - 1] = COLON_CHAR;
+
+            obj_as_string_size += entry_key_size;
+            obj_as_string_size += entry_value_len;
+
+            obj_as_string = realloc(obj_as_string, obj_as_string_size);
+
+            (void)strcat(obj_as_string, duplicated_key);
+            (void)strcat(obj_as_string, entry_value);
+
+            free(duplicated_key);
+            free(entry_value);
+
+            map_entry = map_entry->next;
+        }
+    }
+
+    obj_as_string[obj_as_string_size - 2] = CURLY_CLOSE_CHAR;
+    obj_as_string[obj_as_string_size - 1] = NULL_CHAR;
+    return obj_as_string;
+}
+
 extern char *JSONValueToString(JSONValue *json_value)
 {
     char *json_value_string = NULL;
@@ -128,6 +178,7 @@ extern char *JSONValueToString(JSONValue *json_value)
         json_value_string = listToString((DynamicArray *)json_value->value);
         break;
     case OBJ_t:
+        json_value_string = objToString((HashMap *)json_value->value);
         break;
     case NUMBER_INT_t:
         json_value_string = Int64ToString(*(int64_t *)json_value->value);
