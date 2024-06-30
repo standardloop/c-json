@@ -300,9 +300,9 @@ static JSONValue *parseObj(Parser *parser)
 
             if (parser->peek_token->type == TokenColon)
             {
+                // printf("[JOSH]: %s\n", (char *)obj_key->value);
                 nextToken(parser); // skip over colon
-                JSONValue *obj_value = parse(parser);
-                if (!IsTokenValueType(parser->current_token, true))
+                if (!IsTokenValueType(parser->peek_token, true))
                 {
                     FreeHashMap(map);
                     FreeJSONValue(obj_key, true);
@@ -310,6 +310,11 @@ static JSONValue *parseObj(Parser *parser)
                     parser->error = true;
                     parser->error_message = "Invalid Token after colon, expecting value";
                     return NULL;
+                }
+                JSONValue *obj_value = parse(parser);
+                if (obj_value == NULL)
+                {
+                    printf("POOP\n");
                 }
                 else
                 {
@@ -427,7 +432,7 @@ static JSONValue *parse(Parser *parser)
     }
     // printf("[JOSH]: %u\n", (unsigned int)parser->list_nested);
     nextToken(parser);
-    // PrintToken(parser->current_token);
+    // PrintToken(parser->current_token, true);
     JSONValue *return_value = NULL;
 
     if (parser->current_token->type == TokenOpenCurlyBrace)

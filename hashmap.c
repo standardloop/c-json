@@ -115,10 +115,28 @@ static bool hashMapEntriesInsert(JSONValue **entries, u_int32_t index, JSONValue
         entries[index] = entry;
         return false;
     }
+    // If duplicate key, update
+    if (strcmp(collision->key, entry->key) == 0)
+    {
+        entry->next = collision->next;
+        collision->next = NULL;
+        freeHashMapEntrySingle(collision, true);
+        entries[index] = entry;
+        return true;
+    }
+
     JSONValue *iterator_prev = collision;
     JSONValue *iterator = collision->next;
     while (iterator != NULL)
     {
+        if (strcmp(iterator->key, entry->key) == 0)
+        {
+            iterator_prev->next = entry;
+            entry->next = iterator->next;
+            iterator->next = NULL;
+            freeHashMapEntrySingle(iterator, true);
+            return true;
+        }
         iterator = iterator->next;
         iterator_prev = iterator_prev->next;
     }
