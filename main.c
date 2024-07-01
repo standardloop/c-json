@@ -8,7 +8,7 @@ int main(void)
 {
 
     // JSON *json = JSONFromFile("lab/full.json");
-    JSON *json = StringToJSON("{\"test\": 1}");
+    JSON *json = StringToJSON("[\"1\"]");
     if (json == NULL)
     {
         return EXIT_FAILURE;

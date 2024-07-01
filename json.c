@@ -130,7 +130,7 @@ static char *objToString(HashMap *map)
     {
         return NULL;
     }
-    size_t obj_as_string_size = 3; // "[]\0"
+    size_t obj_as_string_size = 3; // "{}\0"
     char *obj_as_string = malloc(sizeof(char) * obj_as_string_size);
     obj_as_string[0] = CURLY_OPEN_CHAR;
 
@@ -144,10 +144,15 @@ static char *objToString(HashMap *map)
             size_t entry_key_size = strlen(entry_key) + 1;
             char *duplicated_key = malloc(sizeof(char) * entry_key_size);
             strcpy(duplicated_key, entry_key);
+            duplicated_key[entry_key_size - 1] = COLON_CHAR; // Don't need '\0'
 
             char *entry_value = JSONValueToString(map_entry);
             size_t entry_value_len = strlen(entry_value);
-            duplicated_key[entry_key_size - 1] = COLON_CHAR;
+            if (map_entry->next != NULL || i < map->capacity - 1)
+            {
+                entry_value[entry_value_len] = COMMA_CHAR;
+                entry_value_len++;
+            }
 
             obj_as_string_size += entry_key_size;
             obj_as_string_size += entry_value_len;
@@ -187,8 +192,7 @@ extern char *JSONValueToString(JSONValue *json_value)
         json_value_string = DoubleToString(*(double *)json_value->value);
         break;
     case STRING_t:
-        json_value_string = malloc(sizeof(char) * json_value->value_len);
-        strcpy(json_value_string, json_value->value);
+        json_value_string = PutQuotesAroundString(json_value->value, false);
         break;
     case BOOL_t:
         if (*(bool *)json_value->value == true)

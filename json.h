@@ -58,6 +58,7 @@ typedef struct
 {
     u_int32_t size;
     u_int32_t capacity;
+    u_int32_t collision_count;
     JSONValue **entries;
     HashFunction *hashFunction;
 } HashMap;

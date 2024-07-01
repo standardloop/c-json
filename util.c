@@ -139,7 +139,27 @@ extern char *DoubleToString(double num)
     return double_as_string;
 }
 
-// int main(void)
-// {
-//     return 0;
-// }
+extern char *PutQuotesAroundString(char *input_str, bool free_input)
+{
+    if (input_str == NULL)
+    {
+        return NULL;
+    }
+    size_t input_str_real_len = strlen(input_str) + 1;
+    size_t new_str_len = input_str_real_len + 2;
+    char *new_string = malloc(sizeof(char) * new_str_len);
+    new_string[0] = DOUBLE_QUOTES_CHAR;
+
+    for (size_t i = 0; i < input_str_real_len - 1; i++)
+    {
+        new_string[i + 1] = input_str[i];
+    }
+    new_string[new_str_len - 2] = DOUBLE_QUOTES_CHAR;
+    new_string[new_str_len - 1] = NULL_CHAR;
+    if (free_input)
+    {
+        free(input_str);
+    }
+
+    return new_string;
+}
