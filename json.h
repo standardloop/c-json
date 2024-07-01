@@ -31,6 +31,8 @@ typedef struct jsonValue
     struct jsonValue *next;
 } JSONValue;
 
+extern char *JSONValueToString(JSONValue *);
+
 typedef struct
 {
     JSONValue *root;
@@ -56,6 +58,7 @@ typedef struct
 {
     u_int32_t size;
     u_int32_t capacity;
+    u_int32_t collision_count;
     JSONValue **entries;
     HashFunction *hashFunction;
 } HashMap;
@@ -71,7 +74,7 @@ extern void PrintHashMap(HashMap *);
 // ————————— HASHMAP END —————————
 
 // ————————— DYN ARRAY START —————————
-#define DEFAULT_DYN_ARR_SIZE 10
+#define DEFAULT_DYN_ARR_SIZE 16
 #define DEFAULT_DYN_ARR_RESIZE_MULTIPLE 2
 
 typedef struct

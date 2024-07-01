@@ -35,9 +35,17 @@
 #define pass (void)0
 
 extern void CopyString(char *, char *, size_t, size_t);
+extern char *PutQuotesAroundString(char *, bool);
 extern bool IsCharInString(const char *, char);
 extern size_t NumCharInString(const char *, char);
 extern char *QuickAllocatedString(char *);
 extern inline void PrintSpaces(int);
 extern bool IsDigitOrMinusSign(char);
+
+extern int32_t NumberOfDigitsInInt64(int64_t);
+extern char *Int64ToString(int64_t);
+extern char *DoubleToString(double);
+
+extern void PrintStringDebug(char *, size_t);
+
 #endif

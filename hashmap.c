@@ -68,6 +68,7 @@ extern HashMap *HashMapInit(u_int32_t initial_capacity, HashFunction *hashFuncti
         return NULL;
     }
     map->size = 0;
+    map->collision_count = 0;
     map->capacity = initial_capacity;
     map->entries = hashMapEntriesInit(initial_capacity);
 
@@ -101,7 +102,11 @@ extern void HashMapInsert(HashMap *map, JSONValue *entry)
     }
     u_int32_t index = map->hashFunction(entry->key, map->capacity);
     bool collision = hashMapEntriesInsert(map->entries, index, entry);
-    if (!collision)
+    if (collision)
+    {
+        map->collision_count++;
+    }
+    else
     {
         map->size++;
     }
@@ -276,7 +281,11 @@ extern void HashMapRemove(HashMap *map, char *key)
 
     if (strcmp(key, entry->key) == 0)
     {
+        JSONValue *temp = entry;
         map->entries[index] = entry->next;
+        entry->next = NULL;
+        freeHashMapEntrySingle(temp, true);
+        map->collision_count--;
         return;
     }
 
@@ -289,6 +298,7 @@ extern void HashMapRemove(HashMap *map, char *key)
             iterator_prev->next = iterator->next;
             map->entries[index] = iterator_prev;
             freeHashMapEntrySingle(iterator, true);
+            map->collision_count--;
             break;
         }
         iterator_prev = iterator_prev->next;
@@ -354,6 +364,7 @@ static void hashMapResize(HashMap *map)
 
     u_int32_t new_capacity = map->capacity * DEFAULT_MAP_RESIZE_MULTIPLE;
     u_int32_t new_size = 0;
+    u_int32_t new_collision_count = 0;
 
     JSONValue **new_entries = hashMapEntriesInit(new_capacity);
 
@@ -376,6 +387,10 @@ static void hashMapResize(HashMap *map)
             {
                 new_size++;
             }
+            else
+            {
+                new_collision_count++;
+            }
             JSONValue *temp = iterator;
             iterator = iterator->next;
             FreeJSONValue(temp, false);
@@ -384,6 +399,7 @@ static void hashMapResize(HashMap *map)
     freeHashMapEntries(map->entries, map->capacity, false, false);
 
     map->size = new_size;
+    map->collision_count = new_collision_count;
     map->capacity = new_capacity;
     map->entries = new_entries;
 }
