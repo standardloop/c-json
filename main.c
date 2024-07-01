@@ -7,8 +7,9 @@
 int main(void)
 {
 
-    // JSON *json = JSONFromFile("lab/full.json");
-    JSON *json = StringToJSON("[\"1\"]");
+    //JSON *json = JSONFromFile("lab/api.json");
+    // JSON *json = StringToJSON("[\"1\"]");
+    JSON *json = StringToJSON("{\"key\": \"value\", \"foo\": \"bar\"}");
     if (json == NULL)
     {
         return EXIT_FAILURE;
@@ -19,6 +20,7 @@ int main(void)
     {
         return EXIT_FAILURE;
     }
+
     printf("%s", json_string);
     free(json_string);
 

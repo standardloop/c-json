@@ -134,6 +134,7 @@ static char *objToString(HashMap *map)
     char *obj_as_string = malloc(sizeof(char) * obj_as_string_size);
     obj_as_string[0] = CURLY_OPEN_CHAR;
 
+    u_int64_t entry_count = 0;
     for (u_int64_t i = 0; i < map->capacity; i++)
     {
         JSONValue *map_entry = map->entries[i];
@@ -141,20 +142,21 @@ static char *objToString(HashMap *map)
         while (map_entry != NULL)
         {
             char *entry_key = map_entry->key;
-            size_t entry_key_size = strlen(entry_key) + 1;
-            char *duplicated_key = malloc(sizeof(char) * entry_key_size);
-            strcpy(duplicated_key, entry_key);
-            duplicated_key[entry_key_size - 1] = COLON_CHAR; // Don't need '\0'
+            size_t duplicated_entry_key_size = strlen(entry_key);
+            char *duplicated_key = PutQuotesAroundString(entry_key, false);
+            duplicated_entry_key_size += 2;
+            duplicated_key[duplicated_entry_key_size] = COLON_CHAR; // Don't need '\0'
+            duplicated_entry_key_size++;
 
             char *entry_value = JSONValueToString(map_entry);
             size_t entry_value_len = strlen(entry_value);
-            if (map_entry->next != NULL || i < map->capacity - 1)
+            if ((map_entry->next == NULL && entry_count < map->size - 1) || map_entry->next != NULL)
             {
                 entry_value[entry_value_len] = COMMA_CHAR;
                 entry_value_len++;
             }
 
-            obj_as_string_size += entry_key_size;
+            obj_as_string_size += duplicated_entry_key_size;
             obj_as_string_size += entry_value_len;
 
             obj_as_string = realloc(obj_as_string, obj_as_string_size);
@@ -166,6 +168,7 @@ static char *objToString(HashMap *map)
             free(entry_value);
 
             map_entry = map_entry->next;
+            entry_count++;
         }
     }
 

@@ -163,3 +163,14 @@ extern char *PutQuotesAroundString(char *input_str, bool free_input)
 
     return new_string;
 }
+
+extern void PrintStringDebug(char *input_str, size_t input_str_len)
+{
+    if (input_str == NULL || input_str_len == 0)
+    {
+    }
+    for (size_t i = 0; i < input_str_len; i++)
+    {
+        printf("%d\n", input_str[i]);
+    }
+}

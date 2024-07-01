@@ -46,4 +46,6 @@ extern int32_t NumberOfDigitsInInt64(int64_t);
 extern char *Int64ToString(int64_t);
 extern char *DoubleToString(double);
 
+extern void PrintStringDebug(char *, size_t);
+
 #endif
