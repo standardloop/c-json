@@ -155,14 +155,14 @@ static JSONValue *parseList(Parser *parser)
     {
         if (parser->current_token->type == TokenCloseBracket && parser->peek_token->type == TokenComma)
         {
-            nextToken(parser);
+            nextToken(parser); // skip comma
             break;
         }
         if (parser->current_token->type == TokenCloseBracket && parser->peek_token->type == TokenEOF && parser->list_nested == 0)
         {
             break;
         }
-        if (parser->peek_token->type == TokenCloseCurlyBrace)
+        if (parser->current_token->type == TokenCloseBracket && parser->peek_token->type == TokenCloseCurlyBrace)
         {
             break;
         }
@@ -257,11 +257,15 @@ static JSONValue *parseObj(Parser *parser)
             nextToken(parser);
             break;
         }
-        if (parser->current_token->type == TokenCloseCurlyBrace && parser->peek_token->type == TokenEOF)
+        if (parser->current_token->type == TokenCloseCurlyBrace && parser->peek_token->type == TokenCloseCurlyBrace && parser->obj_nested >= 1)
         {
             break;
         }
-        if (parser->peek_token->type == TokenCloseBracket)
+        if (parser->current_token->type == TokenCloseCurlyBrace && parser->obj_nested == 0 && parser->peek_token->type == TokenEOF)
+        {
+            break;
+        }
+        if (parser->current_token->type == TokenCloseCurlyBrace && parser->peek_token->type == TokenCloseBracket)
         {
             break;
         }
@@ -275,7 +279,7 @@ static JSONValue *parseObj(Parser *parser)
             return NULL;
         }
         JSONValue *obj_key = parse(parser);
-        if (obj_key != NULL && obj_key->value_type != STRING_t)
+        if (obj_key != NULL && (obj_key->value_type != STRING_t || obj_key->value == NULL))
         {
             FreeHashMap(map);
             FreeJSONValue(obj_key, true);
@@ -284,8 +288,10 @@ static JSONValue *parseObj(Parser *parser)
             parser->error_message = "Object key must be a string";
             return NULL;
         }
-        if (obj_key != NULL)
+        if (obj_key != NULL && obj_key->value != NULL)
         {
+            // printf("key: %s\n", (char *)obj_key->value);
+
             // FIXME: maybe add a flag to enforce object key uniqueness?
             // According to spec is not forbidden to have a duplicate key, but it is discouraged.
             // if (HashMapGet(map, obj_key->value) != NULL)
@@ -314,7 +320,7 @@ static JSONValue *parseObj(Parser *parser)
                 JSONValue *obj_value = parse(parser);
                 if (obj_value == NULL)
                 {
-                    printf("POOP\n");
+                    printf("FIXME\n");
                 }
                 else
                 {
@@ -437,6 +443,7 @@ static JSONValue *parse(Parser *parser)
 
     if (parser->current_token->type == TokenOpenCurlyBrace)
     {
+        // printf("Parsing Object!\n");
         parser->obj_nested++;
         return_value = parseObj(parser);
     }
