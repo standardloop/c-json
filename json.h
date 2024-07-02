@@ -168,8 +168,8 @@ typedef struct
     Token *peek_token;
     bool error;
     char *error_message;
-    u_int64_t list_nested;
-    u_int64_t obj_nested;
+    int64_t list_nested;
+    int64_t obj_nested;
 } Parser;
 
 extern Parser *ParserInit(Lexer *);

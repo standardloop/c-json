@@ -16,6 +16,19 @@ build:
 	util.c \
 	-o $(EXECUTABLE_NAME)
 
+build_debug:
+	@$(CC) $(CC_FLAGS) \
+	main.c \
+	json.c \
+	lexer.c \
+	parser.c \
+	hashmap.c \
+	dynamicarray.c \
+	util.c \
+	-O0 \
+	-g \
+	-o $(EXECUTABLE_NAME)-debug
+
 
 run:
 	@./$(EXECUTABLE_NAME)

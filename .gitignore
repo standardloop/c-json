@@ -54,6 +54,7 @@ dkms.conf
 # Custom
 main
 main-optimize
+main-debug
 lab
 lab.c
 .vscode
