@@ -7,7 +7,7 @@
 int main(void)
 {
 
-    JSON *json = JSONFromFile("lab/broken/api3.json");
+    JSON *json = JSONFromFile("lab/api.json");
     // JSON *json = StringToJSON("[\"1\"]");
     // JSON *json = StringToJSON("{\"key\": \"value\", \"foo\": \"bar\"}");
     if (json == NULL)
@@ -15,6 +15,7 @@ int main(void)
         return EXIT_FAILURE;
     }
     PrintJSON(json);
+    FreeJSON(json);
 
     // char *json_string = JSONToString(json);
     // if (json_string == NULL)

@@ -54,3 +54,15 @@ build_optimize:
 
 run_optimize:
 	@./$(EXECUTABLE_NAME)-optimize
+
+
+build_test:
+	@$(CC) $(CC_FLAGS) \
+	test.c \
+	json.c \
+	lexer.c \
+	parser.c \
+	hashmap.c \
+	dynamicarray.c \
+	util.c \
+	-o $(TEST_EXECUTABLE_NAME)

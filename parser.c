@@ -11,8 +11,12 @@ static void nextToken(Parser *);
 static JSONValue *parse(Parser *);
 static JSONValue *parseList(Parser *);
 static bool parseListErrorHelper(Parser *);
+static bool parseListLoopChecker(Parser *);
+
 static JSONValue *parseObj(Parser *);
 static bool parseObjErrorHelper(Parser *);
+static bool parseObjLoopChecker(Parser *);
+
 static JSONValue *parseNumber(Parser *);
 
 static JSONValue *initQuickJSONValue(enum JSONValueType, void *);
@@ -135,6 +139,13 @@ static bool parseListErrorHelper(Parser *parser)
         parser->error_message = "Invalid Token after Closing Bracket";
         return true;
     }
+    if (parser->current_token->type == TokenCloseBracket && parser->peek_token->type != TokenEOF && parser->peek_token->type != TokenCloseBracket && parser->peek_token->type != TokenCloseCurlyBrace && parser->peek_token->type != TokenComma)
+    {
+        parser->error = true;
+        parser->error_message = "Unexpected token after Closing Bracket";
+        return true;
+    }
+
     if (IsTokenValueType(parser->current_token, false) && (parser->peek_token->type != TokenComma && parser->peek_token->type != TokenCloseBracket))
     {
         parser->error = true;
@@ -156,6 +167,24 @@ static bool parseListErrorHelper(Parser *parser)
 
     parser->error = false;
     parser->error_message = NULL;
+    return false;
+}
+
+static inline bool parseListLoopChecker(Parser *parser)
+{
+    if (parser->current_token->type == TokenCloseBracket && parser->peek_token->type == TokenComma)
+    {
+        nextToken(parser); // skip comma
+        return true;
+    }
+    if (parser->current_token->type == TokenCloseBracket && parser->peek_token->type == TokenEOF && parser->list_nested == 0)
+    {
+        return true;
+    }
+    if (parser->current_token->type == TokenCloseBracket && parser->peek_token->type == TokenCloseCurlyBrace)
+    {
+        return true;
+    }
     return false;
 }
 
@@ -192,16 +221,7 @@ static JSONValue *parseList(Parser *parser)
         {
             DynamicArrayAddLast(list, list_value);
         }
-        if (parser->current_token->type == TokenCloseBracket && parser->peek_token->type == TokenComma)
-        {
-            nextToken(parser); // skip comma
-            break;
-        }
-        if (parser->current_token->type == TokenCloseBracket && parser->peek_token->type == TokenEOF && parser->list_nested == 0)
-        {
-            break;
-        }
-        if (parser->current_token->type == TokenCloseBracket && parser->peek_token->type == TokenCloseCurlyBrace)
+        if (parseListLoopChecker(parser))
         {
             break;
         }
@@ -237,25 +257,62 @@ extern void FreeJSONValue(JSONValue *json_value, bool deep)
 
 static bool parseObjErrorHelper(Parser *parser)
 {
+    if (parser->error)
+    {
+        return true;
+    }
+
     if (parser->current_token->type == TokenIllegal)
     {
         parser->error = true;
         parser->error_message = "Illegal token found";
         return true;
     }
-    if (parser->peek_token->type == TokenEOF && parser->current_token->type != TokenCloseCurlyBrace)
+    if (parser->peek_token->type == TokenEOF && parser->current_token->type != TokenCloseCurlyBrace && parser->obj_nested != 0)
     {
         parser->error = true;
         parser->error_message = "Closing Brace not found";
         return true;
     }
-    if (parser->current_token->type == TokenComma && parser->peek_token->type != TokenString)
+    if (parser->current_token->type == TokenCloseCurlyBrace && parser->peek_token->type != TokenEOF && parser->peek_token->type != TokenCloseBracket && parser->peek_token->type != TokenCloseCurlyBrace && parser->peek_token->type != TokenComma)
     {
         parser->error = true;
-        parser->error_message = "Invalid token after comma, expected key string";
+        parser->error_message = "Unexpected token after Closing Brace";
         return true;
     }
+    // if (parser->current_token->type == TokenComma && parser->peek_token->type != TokenString)
+    // {
+    //     parser->error = true;
+    //     parser->error_message = "Invalid token after comma, expected key string";
+    //     return true;
+    // }
 
+    return false;
+}
+
+static bool parseObjLoopChecker(Parser *parser)
+{ // PrintToken(parser->current_token);
+    if (parser->current_token->type == TokenCloseCurlyBrace && parser->peek_token->type == TokenComma)
+    {
+        nextToken(parser);
+        return true;
+    }
+    if (parser->current_token->type == TokenCloseCurlyBrace && parser->peek_token->type == TokenCloseCurlyBrace && parser->obj_nested >= 1)
+    {
+        return true;
+    }
+    if (parser->current_token->type == TokenCloseCurlyBrace && parser->obj_nested == 0 && parser->peek_token->type == TokenEOF)
+    {
+        return true;
+    }
+    if (parser->current_token->type == TokenCloseBracket && parser->peek_token->type == TokenCloseCurlyBrace)
+    {
+        return true;
+    }
+    if (parser->current_token->type == TokenCloseCurlyBrace && parser->peek_token->type == TokenCloseBracket)
+    {
+        return true;
+    }
     return false;
 }
 
@@ -274,29 +331,6 @@ static JSONValue *parseObj(Parser *parser)
     HashMap *map = DefaultHashMapInit();
     while (ALWAYS)
     {
-        // PrintToken(parser->current_token);
-        if (parser->current_token->type == TokenCloseCurlyBrace && parser->peek_token->type == TokenComma)
-        {
-            nextToken(parser);
-            break;
-        }
-        if (parser->current_token->type == TokenCloseCurlyBrace && parser->peek_token->type == TokenCloseCurlyBrace && parser->obj_nested >= 1)
-        {
-            break;
-        }
-        if (parser->current_token->type == TokenCloseCurlyBrace && parser->obj_nested == 0 && parser->peek_token->type == TokenEOF)
-        {
-            break;
-        }
-        if (parser->current_token->type == TokenCloseBracket && parser->peek_token->type == TokenCloseCurlyBrace)
-        {
-            break;
-        }
-        if (parser->current_token->type == TokenCloseCurlyBrace && parser->peek_token->type == TokenCloseBracket)
-        {
-            break;
-        }
-
         if (parseObjErrorHelper(parser))
         {
             FreeHashMap(map);
@@ -305,6 +339,12 @@ static JSONValue *parseObj(Parser *parser)
             // parser->error_message; // parseObjErrorHelper writes this value
             return NULL;
         }
+
+        if (parseObjLoopChecker(parser))
+        {
+            break;
+        }
+
         JSONValue *obj_key = parse(parser);
         if (obj_key != NULL && (obj_key->value_type != STRING_t || obj_key->value == NULL))
         {
@@ -317,20 +357,6 @@ static JSONValue *parseObj(Parser *parser)
         }
         if (obj_key != NULL && obj_key->value != NULL)
         {
-            // printf("key: %s\n", (char *)obj_key->value);
-
-            // FIXME: maybe add a flag to enforce object key uniqueness?
-            // According to spec is not forbidden to have a duplicate key, but it is discouraged.
-            // if (HashMapGet(map, obj_key->value) != NULL)
-            // {
-            //     FreeHashMap(map);
-            //     FreeJSONValue(obj_key, true);
-            //     FreeJSONValue(json_value, false);
-            //     parser->error = true;
-            //     parser->error_message = "Duplicate object key found";
-            //     return NULL;
-            // }
-
             if (parser->peek_token->type == TokenColon)
             {
                 // printf("[JOSH]: %s\n", (char *)obj_key->value);
@@ -360,7 +386,6 @@ static JSONValue *parseObj(Parser *parser)
                     }
                 }
             }
-
             else
             {
                 FreeHashMap(map);

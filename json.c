@@ -166,9 +166,11 @@ static char *objToString(HashMap *map)
 
             free(duplicated_key);
             free(entry_value);
-
+            if (map_entry->next == NULL)
+            {
+                entry_count++;
+            }
             map_entry = map_entry->next;
-            entry_count++;
         }
     }
 
