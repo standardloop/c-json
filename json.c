@@ -65,7 +65,7 @@ extern JSON *JSONFromFile(char *filename)
     }
     char *buffer = NULL;
     fseek(file_ptr, 0, SEEK_END);
-    long length = ftell(file_ptr);
+    u_int64_t length = ftell(file_ptr);
     fseek(file_ptr, 0, SEEK_SET);
     buffer = malloc(length);
     if (buffer)
@@ -91,6 +91,11 @@ extern char *JSONToString(JSON *json)
         return NULL;
     }
     char *json_as_string = JSONValueToString(json->root);
+    if (json_as_string == NULL)
+    {
+        FreeJSON(json);
+        return NULL;
+    }
     FreeJSON(json); // Do we want to handle free here?
     return json_as_string;
 }

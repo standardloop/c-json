@@ -18,7 +18,6 @@ static JSONValue *parseObj(Parser *);
 static bool parseObjLoopChecker(Parser *);
 
 static JSONValue *parseNumber(Parser *);
-
 static JSONValue *initQuickJSONValue(enum JSONValueType, void *);
 
 extern Parser *ParserInit(Lexer *lexer)
@@ -282,6 +281,7 @@ static bool parseObjLoopChecker(Parser *parser)
     }
     if (parser->current_token->type == TokenCloseCurlyBrace && parser->peek_token->type == TokenCloseCurlyBrace)
     {
+        nextToken(parser);
         return true;
     }
     if (parser->current_token->type == TokenCloseCurlyBrace && parser->peek_token->type == TokenEOF)
@@ -355,6 +355,7 @@ static JSONValue *parseObj(Parser *parser)
                     // PrintToken(parser->current_token, false);
                     // PrintToken(parser->peek_token, false);
                     printf("FIXME\n");
+                    printf("this should never be NULL\n");
                 }
                 else
                 {
