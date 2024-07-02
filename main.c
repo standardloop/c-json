@@ -14,17 +14,17 @@ int main(void)
     {
         return EXIT_FAILURE;
     }
-    PrintJSON(json);
-    FreeJSON(json);
+    // PrintJSON(json);
+    // FreeJSON(json);
 
-    // char *json_string = JSONToString(json);
-    // if (json_string == NULL)
-    // {
-    //     return EXIT_FAILURE;
-    // }
+    char *json_string = JSONToString(json);
+    if (json_string == NULL)
+    {
+        return EXIT_FAILURE;
+    }
 
     // printf("%s", json_string);
-    // free(json_string);
+    free(json_string);
 
     return EXIT_SUCCESS;
 }
