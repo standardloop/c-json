@@ -27,7 +27,6 @@ typedef struct jsonValue
     char *key;
     enum JSONValueType value_type;
     void *value;
-    u_int32_t value_len; // FIXME: remove this
     struct jsonValue *next;
 } JSONValue;
 
@@ -179,7 +178,7 @@ extern void PrintErrorLine(Parser *);
 extern void FreeJSONValue(JSONValue *, bool);
 extern JSON *ParseJSON(Parser *);
 extern JSONValue *JSONValueReplicate(JSONValue *);
-extern JSONValue *JSONValueInit(enum JSONValueType, void *, char *, u_int32_t);
+extern JSONValue *JSONValueInit(enum JSONValueType, void *, char *);
 
 // ————————— PARSER END —————————
 

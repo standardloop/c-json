@@ -380,7 +380,7 @@ static void hashMapResize(HashMap *map)
 
         while (iterator != NULL)
         {
-            JSONValue *new_entry = JSONValueInit(iterator->value_type, iterator->value, iterator->key, 0);
+            JSONValue *new_entry = JSONValueInit(iterator->value_type, iterator->value, iterator->key);
             u_int32_t new_index = map->hashFunction(iterator->key, new_capacity);
             bool collision = hashMapEntriesInsert(new_entries, new_index, new_entry);
             if (!collision)

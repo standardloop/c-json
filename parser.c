@@ -391,15 +391,12 @@ static JSONValue *initQuickJSONValue(enum JSONValueType value_type, void *value)
     {
         return NULL;
     }
-    u_int32_t value_len;
     if (value_type == STRING_t)
     {
-        value_len = strlen((char *)value) + 1;
         json_value->value = value;
     }
     else if (value_type == NULL_t)
     {
-        value_len = 0;
         json_value->value = NULL;
         free(value);
     }
@@ -414,7 +411,6 @@ static JSONValue *initQuickJSONValue(enum JSONValueType value_type, void *value)
         {
             *new_bool = false;
         }
-        value_len = 1;
         json_value->value = new_bool;
         free(value);
     }
@@ -422,7 +418,6 @@ static JSONValue *initQuickJSONValue(enum JSONValueType value_type, void *value)
     {
         double *new_double = malloc(sizeof(double));
         *new_double = atof((char *)value);
-        value_len = 1;
         json_value->value = new_double;
         free(value);
     }
@@ -430,18 +425,15 @@ static JSONValue *initQuickJSONValue(enum JSONValueType value_type, void *value)
     {
         int64_t *new_int = malloc(sizeof(int64_t));
         *new_int = (int64_t)atof((char *)value);
-        value_len = 1;
         json_value->value = new_int;
         free(value);
     }
     else
     {
         json_value->value = NULL;
-        value_len = 0;
         // free(value); // FIXME
     }
     json_value->value_type = value_type;
-    json_value->value_len = value_len;
     return json_value;
 }
 
@@ -586,7 +578,7 @@ extern JSON *ParseJSON(Parser *parser)
     return json;
 }
 
-extern JSONValue *JSONValueInit(enum JSONValueType type, void *value, char *key, u_int32_t len)
+extern JSONValue *JSONValueInit(enum JSONValueType type, void *value, char *key)
 {
     JSONValue *json_value = malloc(sizeof(JSONValue));
     if (json_value == NULL)
@@ -596,7 +588,6 @@ extern JSONValue *JSONValueInit(enum JSONValueType type, void *value, char *key,
     json_value->key = key;
     json_value->value_type = type;
     json_value->value = value;
-    json_value->value_len = len;
     json_value->next = NULL;
     return json_value;
 }
@@ -609,24 +600,25 @@ extern JSONValue *JSONValueReplicate(JSONValue *json_value)
         return NULL;
     }
     void *value = NULL;
-    switch (json_value->value_type)
+    if (json_value->value_type == NUMBER_DOUBLE_t)
     {
-    case NUMBER_DOUBLE_t:
-        value = (double *)malloc(sizeof(double) * json_value->value_len);
-        memcpy(value, json_value->value, sizeof(double) * json_value->value_len);
-        break;
-    case NUMBER_INT_t:
-        value = (int *)malloc(sizeof(int) * json_value->value_len);
-        memcpy(value, json_value->value, sizeof(int) * json_value->value_len);
-        break;
-    case STRING_t:
-        value = (char *)malloc(sizeof(char) * json_value->value_len);
-        memcpy(value, json_value->value, sizeof(char) * json_value->value_len);
-        break;
-    case LIST_t:
-        value = (DynamicArray *)DynamicArrayReplicate(json_value->value);
-    default:
-        break;
+        value = (double *)malloc(sizeof(double) * 1);
+        memcpy(value, json_value->value, sizeof(double) * 1);
     }
-    return JSONValueInit(json_value->value_type, value, NULL, json_value->value_len);
+    else if (json_value->value_type == NUMBER_INT_t)
+    {
+        value = (int *)malloc(sizeof(int) * 1);
+        memcpy(value, json_value->value, sizeof(int) * 1);
+    }
+    else if (json_value->value_type == STRING_t)
+    {
+        size_t value_len = strlen((char *)json_value->value) + 1;
+        value = (char *)malloc(sizeof(char) * value_len);
+        memcpy(value, json_value->value, sizeof(char) * value_len);
+    }
+    else if (json_value->value_type == LIST_t)
+    {
+        value = (DynamicArray *)DynamicArrayReplicate(json_value->value);
+    }
+    return JSONValueInit(json_value->value_type, value, NULL);
 }
