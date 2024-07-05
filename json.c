@@ -109,6 +109,9 @@ static char *listToString(DynamicArray *dynamic_array)
     size_t list_as_string_size = 3; // "[]\0"
     char *list_as_string = malloc(sizeof(char) * list_as_string_size);
     list_as_string[0] = BRACKET_OPEN_CHAR;
+    list_as_string[1] = NULL_CHAR;
+
+    size_t chars_written = 2 - 1;
 
     bool needs_comma = false;
     for (u_int64_t i = 0; i < dynamic_array->size; i++)
@@ -117,15 +120,20 @@ static char *listToString(DynamicArray *dynamic_array)
         size_t list_element_len = strlen(list_element);
         if (i < dynamic_array->size - 1)
         {
-            list_element_len++; // ','
+            // list_element_len++; // ','
             needs_comma = true;
         }
         list_as_string_size += list_element_len;
+        list_as_string_size += needs_comma;
         list_as_string = realloc(list_as_string, list_as_string_size);
-        (void)strcat(list_as_string, list_element);
+        // (void)strcat(list_as_string, list_element);
+        CopyStringCanary(list_as_string, list_element, chars_written);
+        chars_written += list_element_len;
         if (needs_comma)
         {
-            (void)strcat(list_as_string, ",");
+            // (void)strcat(list_as_string, ",");
+            CopyStringCanary(list_as_string, ",", chars_written);
+            chars_written++;
         }
         needs_comma = false;
         free(list_element);
@@ -145,6 +153,9 @@ static char *objToString(HashMap *map)
     size_t obj_as_string_size = 3; // "{}\0"
     char *obj_as_string = malloc(sizeof(char) * obj_as_string_size);
     obj_as_string[0] = CURLY_OPEN_CHAR;
+    obj_as_string[1] = NULL_CHAR;
+
+    size_t chars_written = 2 - 1;
 
     u_int64_t entry_count = 0;
     for (u_int64_t i = 0; i < map->capacity; i++)
@@ -155,30 +166,34 @@ static char *objToString(HashMap *map)
         while (map_entry != NULL)
         {
             char *entry_key = map_entry->key;
-            size_t duplicated_entry_key_size = strlen(entry_key);
+            size_t duplicated_key_size = strlen(entry_key);
             char *duplicated_key = PutQuotesAroundString(entry_key, false);
-            duplicated_entry_key_size += 2;
-            duplicated_entry_key_size++; // ':'
+            duplicated_key_size += 2;
 
             char *entry_value = JSONValueToString(map_entry);
             size_t entry_value_len = strlen(entry_value);
             if ((map_entry->next == NULL && entry_count < map->size - 1) || map_entry->next != NULL)
             {
-                entry_value_len++;
                 needs_comma = true;
             }
 
-            obj_as_string_size += duplicated_entry_key_size;
+            obj_as_string_size += duplicated_key_size;
+            obj_as_string_size++; // ':'
             obj_as_string_size += entry_value_len;
+            obj_as_string_size += needs_comma;
 
             obj_as_string = realloc(obj_as_string, obj_as_string_size);
 
-            (void)strcat(obj_as_string, duplicated_key);
-            (void)strcat(obj_as_string, ":");
-            (void)strcat(obj_as_string, entry_value);
+            CopyStringCanary(obj_as_string, duplicated_key, chars_written);
+            chars_written += duplicated_key_size;
+            CopyStringCanary(obj_as_string, ":", chars_written);
+            chars_written++;
+            CopyStringCanary(obj_as_string, entry_value, chars_written);
+            chars_written += entry_value_len;
             if (needs_comma)
             {
-                (void)strcat(obj_as_string, ",");
+                CopyStringCanary(obj_as_string, ",", chars_written);
+                chars_written++;
             }
             free(duplicated_key);
             free(entry_value);

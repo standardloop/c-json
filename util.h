@@ -35,6 +35,8 @@
 #define pass (void)0
 
 extern void CopyString(char *, char *, size_t, size_t);
+extern void CopyStringCanary(char *, char *, u_int64_t);
+
 extern char *PutQuotesAroundString(char *, bool);
 extern bool IsCharInString(const char *, char);
 extern size_t NumCharInString(const char *, char);

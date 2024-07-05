@@ -82,7 +82,9 @@ extern int32_t NumberOfDigitsInInt64(int64_t num)
 {
     int32_t r = 1;
     if (num < 0)
+    {
         num = (num == LLONG_MIN) ? LLONG_MAX : -num;
+    }
     while (num > 9)
     {
         num /= 10;
@@ -113,7 +115,9 @@ extern char *Int64ToString(int64_t num)
     } while (num);
 
     if (tmp_value < 0)
+    {
         *ptr++ = '-';
+    }
     *ptr-- = '\0';
 
     while (ptr1 < ptr)
@@ -172,5 +176,15 @@ extern void PrintStringDebug(char *input_str, size_t input_str_len)
     for (size_t i = 0; i < input_str_len; i++)
     {
         printf("%d\n", input_str[i]);
+    }
+}
+
+extern void CopyStringCanary(char *des, char *src, u_int64_t des_offset)
+{
+    char *des_iterator = des + des_offset;
+
+    while (src != NULL && *src != NULL_CHAR)
+    {
+        *des_iterator++ = *src++;
     }
 }
