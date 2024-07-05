@@ -24,9 +24,9 @@ static void hashMapResize(HashMap *map);
 static u_int32_t defaultHashFunction(char *key, u_int32_t capacity)
 {
     u_int32_t len = strlen(key);
-    uint32_t hash = 0;
+    u_int32_t hash = 0;
 
-    for (uint32_t i = 0; i < len; ++i)
+    for (u_int32_t i = 0; i < len; ++i)
     {
         hash += key[i];
         hash += (hash << 10);
