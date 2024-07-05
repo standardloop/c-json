@@ -120,18 +120,16 @@ static char *listToString(DynamicArray *dynamic_array)
         size_t list_element_len = strlen(list_element);
         if (i < dynamic_array->size - 1)
         {
-            // list_element_len++; // ','
             needs_comma = true;
         }
         list_as_string_size += list_element_len;
         list_as_string_size += needs_comma;
         list_as_string = realloc(list_as_string, list_as_string_size);
-        // (void)strcat(list_as_string, list_element);
+
         CopyStringCanary(list_as_string, list_element, chars_written);
         chars_written += list_element_len;
         if (needs_comma)
         {
-            // (void)strcat(list_as_string, ",");
             CopyStringCanary(list_as_string, ",", chars_written);
             chars_written++;
         }
