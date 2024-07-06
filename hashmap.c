@@ -375,3 +375,19 @@ static void hashMapResize(HashMap *map)
     map->capacity = new_capacity;
     map->entries = new_entries;
 }
+
+extern HashMap *HashMapReplicate(HashMap *map)
+{
+    if (map == NULL)
+    {
+        return NULL;
+    }
+    HashMap *deep_clone = HashMapInit(map->capacity, map->hashFunction);
+    deep_clone->collision_count = map->collision_count;
+    deep_clone->size = map->collision_count;
+    for (u_int32_t i = 0; i < map->capacity; i++)
+    {
+        deep_clone->entries[i] = JSONValueReplicate(map->entries[i]);
+    }
+    return deep_clone;
+}

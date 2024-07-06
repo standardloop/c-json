@@ -66,6 +66,7 @@ extern JSONValue *HashMapGet(HashMap *, char *);
 
 extern HashMap *HashMapInit(u_int32_t, HashFunction *);
 extern HashMap *DefaultHashMapInit(void);
+extern HashMap *HashMapReplicate(HashMap *);
 extern void FreeHashMap(HashMap *);
 extern void HashMapInsert(HashMap *, JSONValue *);
 extern void HashMapRemove(HashMap *, char *);
