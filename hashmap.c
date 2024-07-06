@@ -6,7 +6,6 @@
 #include "./json.h"
 #include "./util.h"
 
-static void freeHashMapEntryValue(void *, enum JSONValueType);
 static void freeHashMapEntrySingle(JSONValue *, bool);
 static void freeHashMapEntryList(JSONValue *, bool);
 static void freeHashMapEntries(JSONValue **, u_int32_t, bool, bool);
@@ -174,25 +173,6 @@ extern JSONValue *HashMapGet(HashMap *map, char *key)
     return NULL;
 }
 
-static void freeHashMapEntryValue(void *value, enum JSONValueType value_type)
-{
-    if (value != NULL)
-    {
-        if (value_type == LIST_t)
-        {
-            FreeDynamicArray(value);
-        }
-        else if (value_type == OBJ_t)
-        {
-            FreeHashMap(value);
-        }
-        else
-        {
-            free(value);
-        }
-    }
-}
-
 static void freeHashMapEntryList(JSONValue *entry, bool deep)
 {
     JSONValue *temp = NULL;
@@ -200,16 +180,12 @@ static void freeHashMapEntryList(JSONValue *entry, bool deep)
     {
         temp = entry;
         entry = entry->next;
-        if (deep)
-        {
-            freeHashMapEntryValue(temp->value, temp->value_type);
-        }
         if (temp->key != NULL)
         {
             free(temp->key);
             temp->key = NULL;
         }
-        free(temp);
+        FreeJSONValue(temp, deep);
     }
 }
 
@@ -217,16 +193,12 @@ static void freeHashMapEntrySingle(JSONValue *entry, bool deep)
 {
     if (entry != NULL)
     {
-        if (deep)
-        {
-            freeHashMapEntryValue(entry->value, entry->value_type);
-        }
         if (entry->key != NULL)
         {
             free(entry->key);
             entry->key = NULL;
         }
-        free(entry);
+        FreeJSONValue(entry, deep);
     }
 }
 
