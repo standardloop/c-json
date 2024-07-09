@@ -5,7 +5,6 @@
 #include <ctype.h>
 
 #include "./json.h"
-#
 
 static void nextToken(Parser *);
 static JSONValue *parse(Parser *);

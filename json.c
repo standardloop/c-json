@@ -7,7 +7,6 @@
 #include <math.h>
 
 #include "./json.h"
-#
 
 static void printJSONStringValue(char *);
 static void printJSONNumberIntValue(int64_t *value);

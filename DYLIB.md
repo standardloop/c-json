@@ -4,7 +4,7 @@
 
 Header file name and subject to change
 
-## setup
+## Setup
 ```sh
 $ make release
 ```
@@ -13,8 +13,8 @@ $ make release
 
 ### Source
 
-```c
-#include <json.h>
+```C
+#include <standardloop/json.h>
 int main(void)
 {
     JSON *test = StringToJSON("[]");
@@ -27,7 +27,11 @@ int main(void)
 ### Setup and Run
 
 ```sh
-$ export DYLD_LIBRARY_PATH="/usr/local/lib"
-$ gcc main.c -lstandardloop-json
+$ export DYLD_LIBRARY_PATH="/usr/local/lib/standardloop"
+$ gcc main.c -L/usr/local/lib/standardloop -lstandardloop-json
 $ ./a.out
+[]%
 ```
+
+## Note:
+If using just `/usr/local/lib` instead of `/usr/local/lib/standardloop` then the addition arg, `-L`, is not needed.

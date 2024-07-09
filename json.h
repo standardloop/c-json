@@ -1,5 +1,5 @@
-#ifndef STANDARDLOOP_C_JSON_H
-#define STANDARDLOOP_C_JSON_H
+#ifndef STANDARDLOOP_JSON_H
+#define STANDARDLOOP_JSON_H
 
 #include <stdio.h>
 #include <stdlib.h>
