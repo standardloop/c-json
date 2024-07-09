@@ -10,7 +10,7 @@ Planning to use this as a library in https://github.com/standardloop/cerver
 ```C
 #include <stdio.h>
 #include <stdlib.h>
-#include "./json.h" // or <standardloop/json/h> if using dynamic library
+#include "./json.h" // or <standardloop/json.h> if using dynamic library
 
 int main(void)
 {
