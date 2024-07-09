@@ -34,14 +34,6 @@ extern JSON *StringToJSON(char *input_str)
         printf("[ERROR]: input StringToJSON is NULL\n");
         return NULL;
     }
-    size_t input_str_len = strlen(input_str);
-    if ((input_str[0] != CURLY_OPEN_CHAR && input_str[0] != BRACKET_OPEN_CHAR) ||
-        (input_str[0] == CURLY_OPEN_CHAR && input_str[input_str_len - 1] != CURLY_CLOSE_CHAR) ||
-        (input_str[0] == BRACKET_OPEN_CHAR && input_str[input_str_len - 1] != BRACKET_CLOSE_CHAR))
-    {
-        printf("[ERROR]: Cannot find starting and closing Bracket or Brace\n");
-        return NULL;
-    }
 
     // LexerDebugTest(input_str, true);
     Lexer *lexer = LexerInit(input_str);
@@ -58,7 +50,6 @@ extern JSON *StringToJSON(char *input_str)
     JSON *json = ParseJSON(parser);
     if (json == NULL)
     {
-        FreeParser(parser);
         return NULL;
     }
     return json;
