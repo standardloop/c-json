@@ -52,11 +52,13 @@ extern JSON *StringToJSON(char *input_str)
     Parser *parser = ParserInit(lexer);
     if (parser == NULL)
     {
+        FreeLexer(lexer);
         return NULL;
     }
     JSON *json = ParseJSON(parser);
     if (json == NULL)
     {
+        FreeParser(parser);
         return NULL;
     }
     return json;

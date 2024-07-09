@@ -49,6 +49,7 @@ build_release:
 	@$(CC) \
 	$(SOURCE_FILES) \
 	-O3 \
+	-dynamiclib \
 	-current_version 1.0.0 \
 	-o $(DYLIB_NAME)
 
