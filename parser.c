@@ -5,7 +5,7 @@
 #include <ctype.h>
 
 #include "./json.h"
-#include "./util.h"
+#
 
 static void nextToken(Parser *);
 static JSONValue *parse(Parser *);
@@ -19,6 +19,8 @@ static bool parseObjLoopChecker(Parser *);
 
 static JSONValue *parseNumber(Parser *);
 static JSONValue *initQuickJSONValue(enum JSONValueType, void *);
+
+static bool isCharInString(const char *, char);
 
 extern Parser *ParserInit(Lexer *lexer)
 {
@@ -444,6 +446,19 @@ static JSONValue *initQuickJSONValue(enum JSONValueType value_type, void *value)
     return json_value;
 }
 
+static bool isCharInString(const char *input_str, char checker)
+{
+    while (*input_str != NULL_CHAR)
+    {
+        if (*input_str == checker)
+        {
+            return true;
+        }
+        input_str++;
+    }
+    return false;
+}
+
 static JSONValue *parseNumber(Parser *parser)
 {
     if (parser == NULL)
@@ -453,7 +468,7 @@ static JSONValue *parseNumber(Parser *parser)
     // FIXME:
     // there is an issue here where number such as 1e-2 are actually decimals
     // For now all scientific notation with be made into a floating point
-    if (IsCharInString(parser->current_token->literal, DOT_CHAR) || IsCharInString(parser->current_token->literal, 'e') || IsCharInString(parser->current_token->literal, 'E'))
+    if (isCharInString(parser->current_token->literal, DOT_CHAR) || isCharInString(parser->current_token->literal, 'e') || isCharInString(parser->current_token->literal, 'E'))
     {
         return initQuickJSONValue(NUMBER_DOUBLE_t, parser->current_token->literal);
     }

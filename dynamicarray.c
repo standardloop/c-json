@@ -4,7 +4,7 @@
 #include <string.h>
 
 #include "./json.h"
-#include "./util.h"
+#
 
 static inline bool isDynamicArrayFull(DynamicArray *);
 static inline bool isDynamicArrayEmpty(DynamicArray *);

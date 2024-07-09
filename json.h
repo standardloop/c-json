@@ -183,4 +183,34 @@ extern JSONValue *JSONValueInit(enum JSONValueType, void *, char *);
 
 // ————————— PARSER END —————————
 
+// ————————— UTIL BEGIN —————————
+#define ALWAYS 1
+#define pass (void)0
+
+#define SPACE_CHAR ' '
+#define TAB_CHAR '\t'
+#define NEWLINE_CHAR '\n'
+#define CARRIAGE_CHAR '\r'
+
+#define DASH_MINUS_CHAR '-'
+#define PLUS_CHAR '+'
+
+#define DOT_CHAR '.'
+#define COMMA_CHAR ','
+#define COLON_CHAR ':'
+
+#define DOUBLE_QUOTES_CHAR '\"'
+#define BACKSLASH_CHAR '\\'
+#define FORWARDLASH_CHAR '/'
+
+#define BRACKET_OPEN_CHAR '['
+#define BRACKET_CLOSE_CHAR ']'
+
+#define CURLY_OPEN_CHAR '{'
+#define CURLY_CLOSE_CHAR '}'
+
+#define NULL_CHAR '\0'
+
+// ————————— UTIL END —————————
+
 #endif

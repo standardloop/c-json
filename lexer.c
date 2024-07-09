@@ -5,7 +5,6 @@
 #include <ctype.h>
 
 #include "./json.h"
-#include "./util.h"
 
 static void advanceChar(Lexer *);
 static void backtrackChar(Lexer *);
@@ -14,6 +13,28 @@ static char *makeStringLiteral(Lexer *);
 static char *makeNumberLiteral(Lexer *);
 static char *makeNULLLiteral(Lexer *);
 static char *makeBoolLiteral(Lexer *);
+
+static bool isDigitOrMinusSign(char);
+
+static void copyString(char *, char *, size_t, size_t);
+
+static void copyString(char *src, char *des, size_t len, size_t src_offset)
+{
+    if (src == NULL || des == NULL || len <= 0)
+    {
+        return;
+    }
+
+    char *src_it = src + src_offset;
+    size_t size = 0;
+    while (size < len)
+    {
+        *des = *src_it;
+        des++;
+        src_it++;
+        size++;
+    }
+}
 
 extern bool IsTokenValueType(Token *token, bool check_starters)
 {
@@ -95,7 +116,15 @@ extern Token *NewToken(enum TokenType type, u_int32_t start, u_int32_t end, u_in
     return token;
 }
 
-// FIXME position needs changing!!!!
+static bool isDigitOrMinusSign(char test)
+{
+    if (isdigit(test) || test == DASH_MINUS_CHAR)
+    {
+        return true;
+    }
+    return false;
+}
+
 extern Token *Lex(Lexer *lexer)
 {
     Token *token = NULL;
@@ -143,7 +172,7 @@ extern Token *Lex(Lexer *lexer)
             token = NewToken(TokenString, curr_pos, lexer->position + 1, lexer->line, string_literal);
         }
     }
-    else if (IsDigitOrMinusSign(lexer->current_char))
+    else if (isDigitOrMinusSign(lexer->current_char))
     {
         char *number_literal = makeNumberLiteral(lexer);
         if (number_literal == NULL)
@@ -216,7 +245,7 @@ static char *makeBoolLiteral(Lexer *lexer)
     {
         return NULL;
     }
-    CopyString(lexer->input, bool_literal, bool_literal_size, start_position);
+    copyString(lexer->input, bool_literal, bool_literal_size, start_position);
     bool_literal[bool_literal_size - 1] = NULL_CHAR;
 
     if (strcmp(bool_literal, JSON_BOOL_TRUE) != 0 && strcmp(bool_literal, JSON_BOOL_FALSE) != 0)
@@ -257,7 +286,7 @@ static char *makeNULLLiteral(Lexer *lexer)
     {
         return NULL;
     }
-    CopyString(lexer->input, null_literal, null_literal_size, start_position);
+    copyString(lexer->input, null_literal, null_literal_size, start_position);
     null_literal[null_literal_size - 1] = NULL_CHAR;
 
     if (strcmp(null_literal, JSON_NULL) != 0)
@@ -308,7 +337,7 @@ static char *makeNumberLiteral(Lexer *lexer)
                 error = true;
             }
             advanceChar(lexer);
-            if (!IsDigitOrMinusSign(lexer->current_char) && lexer->current_char != PLUS_CHAR)
+            if (!isDigitOrMinusSign(lexer->current_char) && lexer->current_char != PLUS_CHAR)
             {
                 error = true;
             }
@@ -357,7 +386,7 @@ static char *makeNumberLiteral(Lexer *lexer)
     {
         return NULL;
     }
-    CopyString(lexer->input, number_literal, number_literal_size, start_position);
+    copyString(lexer->input, number_literal, number_literal_size, start_position);
     number_literal[number_literal_size - 1] = NULL_CHAR;
     // printf("number_literal: %s\n", number_literal);
     return number_literal;
@@ -442,7 +471,7 @@ static char *makeStringLiteral(Lexer *lexer)
     {
         return NULL;
     }
-    CopyString(lexer->input, string_literal, string_literal_size, start_position);
+    copyString(lexer->input, string_literal, string_literal_size, start_position);
     string_literal[string_literal_size - 1] = NULL_CHAR;
     // printf("[JOSH]\n", string_literal);
     return string_literal;

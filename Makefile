@@ -3,7 +3,11 @@ include Makefile.properties
 all: build run
 
 clean:
-	rm $(EXECUTABLE_NAME)
+	@rm -f $(EXECUTABLE_NAME)
+	@rm -f $(EXECUTABLE_NAME)-debug
+	@rm -f $(EXECUTABLE_NAME)-test
+	@rm -f $(EXECUTABLE_NAME)-optimize
+	@rm -f a.out
 
 build:
 	@$(CC) $(CC_FLAGS) \
@@ -13,7 +17,6 @@ build:
 	parser.c \
 	hashmap.c \
 	dynamicarray.c \
-	util.c \
 	-o $(EXECUTABLE_NAME)
 
 build_debug:
@@ -24,7 +27,6 @@ build_debug:
 	parser.c \
 	hashmap.c \
 	dynamicarray.c \
-	util.c \
 	-O0 \
 	-g \
 	-o $(EXECUTABLE_NAME)-debug
@@ -48,7 +50,6 @@ build_optimize:
 	parser.c \
 	hashmap.c \
 	dynamicarray.c \
-	util.c \
 	-O3 \
 	-o $(EXECUTABLE_NAME)-optimize
 
@@ -64,5 +65,4 @@ build_test:
 	parser.c \
 	hashmap.c \
 	dynamicarray.c \
-	util.c \
 	-o $(TEST_EXECUTABLE_NAME)
