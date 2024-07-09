@@ -1,5 +1,5 @@
-#ifndef JSON_H
-#define JSON_H
+#ifndef STANDARDLOOP_C_JSON_H
+#define STANDARDLOOP_C_JSON_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -210,7 +210,6 @@ extern JSONValue *JSONValueInit(enum JSONValueType, void *, char *);
 #define CURLY_CLOSE_CHAR '}'
 
 #define NULL_CHAR '\0'
-
 // ————————— UTIL END —————————
 
 #endif

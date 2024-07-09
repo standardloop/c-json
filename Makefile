@@ -8,6 +8,7 @@ clean:
 	@rm -f $(EXECUTABLE_NAME)-test
 	@rm -f $(EXECUTABLE_NAME)-optimize
 	@rm -f a.out
+	@rm -f $(DYLIB_NAME)
 
 build:
 	@$(CC) $(CC_FLAGS) \
@@ -66,3 +67,22 @@ build_test:
 	hashmap.c \
 	dynamicarray.c \
 	-o $(TEST_EXECUTABLE_NAME)
+
+release: build_release move_files
+
+build_release:
+	@$(CC) \
+	json.c \
+	lexer.c \
+	parser.c \
+	hashmap.c \
+	dynamicarray.c \
+	-dynamiclib \
+	-O3 \
+	-current_version 1.0.0 \
+	-o $(DYLIB_NAME)
+
+move_files:
+	@sudo cp $(DYLIB_NAME) /usr/local/lib/
+	@rm -f $(DYLIB_NAME)
+	@sudo cp json.h /usr/local/include/
