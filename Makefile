@@ -54,5 +54,5 @@ build_release:
 	-o $(DYLIB_NAME)
 
 move_files:
-	@sudo mv $(DYLIB_NAME) /usr/local/lib/standardloop/
-	@sudo cp json.h /usr/local/include/standardloop/
+	@sudo mv $(DYLIB_NAME) $(DYLIB_PATH)
+	@sudo cp json.h $(DYLIB_INCLUDE_PATH)
