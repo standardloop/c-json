@@ -32,9 +32,12 @@ extern Parser *ParserInit(Lexer *lexer)
     if (parser == NULL)
     {
         FreeLexer(lexer);
+        printf("[ERROR]: couldn't allocate memory for Parser\n");
         return NULL;
     }
-    parser->error = false;
+
+    parser->input_error = false;
+    parser->memory_error = false;
     parser->error_message = NULL;
     parser->lexer = lexer;
     parser->list_nested = 0;
@@ -74,7 +77,7 @@ extern void PrintParserError(Parser *parser)
     {
         PrintToken(parser->current_token, false);
     }
-    if (parser->error == true)
+    if (parser->input_error == true)
     {
         if (parser->error_message != NULL)
         {
@@ -116,42 +119,42 @@ static void nextToken(Parser *parser)
 static bool parseListErrorHelper(Parser *parser)
 {
     // printf("%lld\n", parser->list_nested);
-    if (parser->error == true)
+    if (parser->input_error == true)
     {
         return true;
     }
     if (parser->current_token->type == TokenIllegal)
     {
-        parser->error = true;
+        parser->input_error = true;
         parser->error_message = "Illegal token found";
         return true;
     }
     if (parser->peek_token->type == TokenEOF && parser->current_token->type != TokenCloseBracket)
     {
-        parser->error = true;
+        parser->input_error = true;
         parser->error_message = "Closing Bracket not found";
         return true;
     }
     if (parser->current_token->type == TokenCloseBracket && parser->peek_token->type != TokenEOF && parser->peek_token->type != TokenCloseBracket && parser->peek_token->type != TokenCloseCurlyBrace && parser->peek_token->type != TokenComma)
     {
-        parser->error = true;
+        parser->input_error = true;
         parser->error_message = "Unexpected token after Closing Bracket";
         return true;
     }
     if (parser->current_token->type == TokenCloseBracket && parser->peek_token->type == TokenEOF && (parser->list_nested != 0 || parser->obj_nested != 0))
     {
-        parser->error = true;
+        parser->input_error = true;
         parser->error_message = "Invalid Token after Closing Bracket";
         return true;
     }
     if (parser->current_token->type == TokenComma && !IsTokenValueType(parser->peek_token, true))
     {
-        parser->error = true;
+        parser->input_error = true;
         parser->error_message = "Value expected after comma";
         return true;
     }
 
-    parser->error = false;
+    parser->input_error = false;
     parser->error_message = NULL;
     return false;
 }
@@ -183,6 +186,8 @@ static JSONValue *parseList(Parser *parser)
     JSONValue *json_value = malloc(sizeof(JSONValue));
     if (json_value == NULL)
     {
+        parser->memory_error = true;
+        parser->error_message = "[ERROR]: not enough memory for creating JSONValue inside parseList";
         return NULL;
     }
     if (parser->current_token->type != TokenOpenBracket)
@@ -191,7 +196,12 @@ static JSONValue *parseList(Parser *parser)
         return NULL;
     }
     DynamicArray *list = DefaultDynamicArrayInit();
-
+    if (list == NULL)
+    {
+        parser->memory_error = true;
+        parser->error_message = "[ERROR]: not enough memory for creating DynamicArray inside parseList";
+        return NULL;
+    }
     while (ALWAYS)
     {
         JSONValue *list_value = parse(parser);
@@ -199,8 +209,8 @@ static JSONValue *parseList(Parser *parser)
         {
             FreeDynamicArray(list);
             FreeJSONValue(json_value, false);
-            // parser->error; // parseListErrorHelper writes this value
-            // parser->error; // parseListErrorHelper writes this value
+            // parser->input_error; // parseListErrorHelper writes this value
+            // parser->input_error; // parseListErrorHelper writes this value
             return NULL;
         }
         if (list_value == NULL)
@@ -247,32 +257,32 @@ extern void FreeJSONValue(JSONValue *json_value, bool deep)
 
 static bool parseObjErrorHelper(Parser *parser)
 {
-    if (parser->error)
+    if (parser->input_error)
     {
         return true;
     }
 
     if (parser->current_token->type == TokenIllegal)
     {
-        parser->error = true;
+        parser->input_error = true;
         parser->error_message = "Illegal token found";
         return true;
     }
     if (parser->peek_token->type == TokenEOF && parser->current_token->type != TokenCloseCurlyBrace)
     {
-        parser->error = true;
+        parser->input_error = true;
         parser->error_message = "Closing Brace not found";
         return true;
     }
     if (parser->peek_token->type == TokenEOF && parser->current_token->type == TokenCloseCurlyBrace && (parser->obj_nested != 0 || parser->list_nested != 0))
     {
-        parser->error = true;
+        parser->input_error = true;
         parser->error_message = "Unmatch brackets or braces";
         return true;
     }
     if (parser->current_token->type == TokenCloseCurlyBrace && parser->peek_token->type != TokenEOF && parser->peek_token->type != TokenCloseBracket && parser->peek_token->type != TokenCloseCurlyBrace && parser->peek_token->type != TokenComma)
     {
-        parser->error = true;
+        parser->input_error = true;
         parser->error_message = "Unexpected token after Closing Brace";
         return true;
     }
@@ -312,17 +322,25 @@ static JSONValue *parseObj(Parser *parser)
     JSONValue *json_value = malloc(sizeof(JSONValue));
     if (json_value == NULL)
     {
+        parser->memory_error = true;
+        parser->error_message = "[ERROR]: not enough memory for creating JSONValue inside parseObj";
         return NULL;
     }
 
     HashMap *map = DefaultHashMapInit();
+    if (map == NULL)
+    {
+        parser->memory_error = true;
+        parser->error_message = "[ERROR]: not enough memory for creating HashMap inside parseObj";
+        return NULL;
+    }
     while (ALWAYS)
     {
         if (parseObjErrorHelper(parser))
         {
             FreeHashMap(map);
             FreeJSONValue(json_value, true);
-            // parser->error; // parseObjErrorHelper writes this value
+            // parser->input_error; // parseObjErrorHelper writes this value
             // parser->error_message; // parseObjErrorHelper writes this value
             return NULL;
         }
@@ -338,7 +356,7 @@ static JSONValue *parseObj(Parser *parser)
             FreeHashMap(map);
             FreeJSONValue(obj_key, true);
             FreeJSONValue(json_value, false);
-            parser->error = true;
+            parser->input_error = true;
             parser->error_message = "Object key must be a string";
             return NULL;
         }
@@ -353,7 +371,7 @@ static JSONValue *parseObj(Parser *parser)
                     FreeHashMap(map);
                     FreeJSONValue(obj_key, true);
                     FreeJSONValue(json_value, false);
-                    parser->error = true;
+                    parser->input_error = true;
                     parser->error_message = "Invalid Token after colon, expecting value";
                     return NULL;
                 }
@@ -379,7 +397,7 @@ static JSONValue *parseObj(Parser *parser)
                 FreeHashMap(map);
                 FreeJSONValue(obj_key, true);
                 FreeJSONValue(json_value, false);
-                parser->error = true;
+                parser->input_error = true;
                 parser->error_message = "Colon not found after key";
                 return NULL;
             }
@@ -583,10 +601,13 @@ extern JSON *ParseJSON(Parser *parser)
     JSON *json = malloc(sizeof(JSON));
     if (json == NULL)
     {
+        printf("[ERROR]: Not enough memory for JSON\n");
         FreeParser(parser);
         return NULL;
     }
     json->root = parse(parser);
+    // probably want the error to be on JSON obj so it can be read before being freed
+    // right now it just prints to stdout, but for cerver, we would want access to that error message
     if (json->root == NULL)
     {
         PrintErrorLine(parser);

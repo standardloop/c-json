@@ -375,6 +375,7 @@ static void hashMapResize(HashMap *map)
     map->entries = new_entries;
 }
 
+// FIXME: not complete
 extern HashMap *HashMapReplicate(HashMap *map)
 {
     if (map == NULL)

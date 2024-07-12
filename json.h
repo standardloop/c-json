@@ -166,7 +166,8 @@ typedef struct
     Lexer *lexer;
     Token *current_token;
     Token *peek_token;
-    bool error;
+    bool input_error;
+    bool memory_error;
     char *error_message;
     int64_t list_nested;
     int64_t obj_nested;

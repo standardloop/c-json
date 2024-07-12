@@ -26,6 +26,12 @@ extern DynamicArray *DynamicArrayInit(u_int32_t initial_capacity)
     dynamic_array->size = 0;
     dynamic_array->capacity = initial_capacity;
     dynamic_array->list = malloc(sizeof(JSONValue *) * dynamic_array->capacity);
+    if (dynamic_array->list == NULL)
+    {
+        FreeDynamicArray(dynamic_array);
+        printf("[ERROR]: could not allocate memory for DynamicArray list\n");
+        return NULL;
+    }
     return dynamic_array;
 }
 
@@ -64,7 +70,6 @@ extern void DynamicArrayAdd(DynamicArray *dynamic_array, JSONValue *element, u_i
 
 static void dynamicArrayResize(DynamicArray *dynamic_array)
 {
-    // printf("resizing array!\n");
     if (dynamic_array == NULL)
     {
         return;
@@ -73,8 +78,8 @@ static void dynamicArrayResize(DynamicArray *dynamic_array)
     JSONValue **newList = malloc(sizeof(JSONValue *) * dynamic_array->capacity * DEFAULT_DYN_ARR_RESIZE_MULTIPLE);
     if (newList == NULL)
     {
-        printf("not enough memory for newList\n");
-        return; // FIXME
+        printf("Couldn't resize list, not enough memory!\n");
+        return;
     }
 
     for (u_int32_t i = 0; i < dynamic_array->size; i++)

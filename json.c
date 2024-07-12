@@ -50,6 +50,9 @@ extern JSON *StringToJSON(char *input_str)
     JSON *json = ParseJSON(parser);
     if (json == NULL)
     {
+        // need to differentitate between parsing error because JSON is invalid or
+        // if we ran out of memory trying to parse it.
+        printf("[ERROR]: couldn't parse JSON");
         return NULL;
     }
     return json;
@@ -98,7 +101,7 @@ extern char *JSONToString(JSON *json)
         FreeJSON(json);
         return NULL;
     }
-    FreeJSON(json); // Do we want to handle free here?
+    FreeJSON(json);
     return json_as_string;
 }
 
