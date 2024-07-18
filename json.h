@@ -63,6 +63,7 @@ typedef struct
 } HashMap;
 
 extern JSONValue *HashMapGet(HashMap *, char *);
+extern void *HashMapGetValueDirect(HashMap *, char *);
 
 extern HashMap *HashMapInit(u_int32_t, HashFunction *);
 extern HashMap *DefaultHashMapInit(void);

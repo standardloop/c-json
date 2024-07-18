@@ -172,6 +172,16 @@ extern JSONValue *HashMapGet(HashMap *map, char *key)
     return NULL;
 }
 
+extern void *HashMapGetValueDirect(HashMap *map, char *key)
+{
+    JSONValue *value_obj = HashMapGet(map, key);
+    if (value_obj == NULL || value_obj->value == NULL)
+    {
+        return NULL;
+    }
+    return value_obj->value;
+}
+
 static void freeHashMapEntryList(JSONValue *entry, bool deep)
 {
     JSONValue *temp = NULL;
