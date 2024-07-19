@@ -1,6 +1,6 @@
 include Makefile.properties
 
-all: build
+all: build run
 
 clean:
 	@rm -f $(EXECUTABLE_NAME)
@@ -16,6 +16,9 @@ build:
 	$(DYN_LIBS_USED_PATH) \
 	$(DYN_LIBS_USED) \
 	-o $(EXECUTABLE_NAME)
+
+run:
+	@DYLD_LIBRARY_PATH=$(DYLIB_PATH) ./$(EXECUTABLE_NAME)
 
 build_debug:
 	@$(CC) $(CC_FLAGS) \
