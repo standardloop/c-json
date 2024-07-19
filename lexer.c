@@ -57,7 +57,7 @@ extern Lexer *LexerInit(char *input)
         return NULL;
     }
     lexer->input = input;
-    lexer->input_len = strlen(input) + 1;
+    lexer->input_len = strlen(input);
     lexer->current_char = NULL_CHAR;
     lexer->position = -2;
     lexer->read_position = -1;

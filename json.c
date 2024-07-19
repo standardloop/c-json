@@ -6,6 +6,8 @@
 #include <limits.h>
 #include <math.h>
 
+#include <standardloop/util.h>
+
 #include "./json.h"
 
 static void printJSONStringValue(char *);
@@ -20,7 +22,6 @@ static void printJSONObjValue(HashMap *);
 static char *listToString(DynamicArray *);
 static char *objToString(HashMap *);
 
-static char *putQuotesAroundString(char *, bool);
 static char *int64ToString(int64_t);
 static char *doubleToString(double);
 static int32_t numberOfDigitsInInt64(int64_t);
@@ -68,16 +69,16 @@ extern JSON *JSONFromFile(char *filename)
         printf("[ERROR]: unable to open file \"%s\"\n", filename);
         return NULL;
     }
-    char *buffer = NULL;
     fseek(file_ptr, 0, SEEK_END);
     u_int64_t length = ftell(file_ptr);
     fseek(file_ptr, 0, SEEK_SET);
-    buffer = malloc(length);
-    if (buffer)
+    char *buffer = malloc(length + 1);
+    if (buffer != NULL)
     {
         fread(buffer, 1, length, file_ptr);
     }
     fclose(file_ptr);
+    buffer[length] = NULL_CHAR;
 
     if (buffer == NULL)
     {
@@ -157,31 +158,6 @@ static char *listToString(DynamicArray *dynamic_array)
     return list_as_string;
 }
 
-static char *putQuotesAroundString(char *input_str, bool free_input)
-{
-    if (input_str == NULL)
-    {
-        return NULL;
-    }
-    size_t input_str_real_len = strlen(input_str) + 1;
-    size_t new_str_len = input_str_real_len + 2;
-    char *new_string = malloc(sizeof(char) * new_str_len);
-    new_string[0] = DOUBLE_QUOTES_CHAR;
-
-    for (size_t i = 0; i < input_str_real_len - 1; i++)
-    {
-        new_string[i + 1] = input_str[i];
-    }
-    new_string[new_str_len - 2] = DOUBLE_QUOTES_CHAR;
-    new_string[new_str_len - 1] = NULL_CHAR;
-    if (free_input)
-    {
-        free(input_str);
-    }
-
-    return new_string;
-}
-
 static char *objToString(HashMap *map)
 {
     if (map == NULL)
@@ -205,7 +181,7 @@ static char *objToString(HashMap *map)
         {
             char *entry_key = map_entry->key;
             size_t duplicated_key_size = strlen(entry_key);
-            char *duplicated_key = putQuotesAroundString(entry_key, false);
+            char *duplicated_key = PutQuotesAroundString(entry_key, false);
             duplicated_key_size += 2;
 
             char *entry_value = JSONValueToString(map_entry);
@@ -331,7 +307,7 @@ extern char *JSONValueToString(JSONValue *json_value)
         json_value_string = doubleToString(*(double *)json_value->value);
         break;
     case STRING_t:
-        json_value_string = putQuotesAroundString(json_value->value, false);
+        json_value_string = PutQuotesAroundString(json_value->value, false);
         break;
     case BOOL_t:
         if (*(bool *)json_value->value == true)
@@ -379,7 +355,7 @@ extern void FreeJSON(JSON *json)
 // Pretty Print can be handled by piping into jq
 extern void PrintJSON(JSON *json)
 {
-    if (json == NULL)
+    if (json == NULL || json->root == NULL || json->root->value == NULL)
     {
         return;
     }
@@ -395,7 +371,7 @@ extern void PrintJSON(JSON *json)
 
 extern void PrintJSONValue(JSONValue *json_value)
 {
-    if (json_value == NULL)
+    if (json_value == NULL || json_value->value == NULL)
     {
         return;
     }

@@ -351,7 +351,7 @@ static JSONValue *parseObj(Parser *parser)
         }
 
         JSONValue *obj_key = parse(parser);
-        if (obj_key != NULL && (obj_key->value_type != STRING_t || obj_key->value == NULL))
+        if (obj_key != NULL && (obj_key->value == NULL || obj_key->value_type != STRING_t))
         {
             FreeHashMap(map);
             FreeJSONValue(obj_key, true);
@@ -360,6 +360,7 @@ static JSONValue *parseObj(Parser *parser)
             parser->error_message = "Object key must be a string";
             return NULL;
         }
+        // FIXME, maybe just else?
         if (obj_key != NULL && obj_key->value != NULL)
         {
             if (parser->peek_token->type == TokenColon)
@@ -386,10 +387,7 @@ static JSONValue *parseObj(Parser *parser)
                 else
                 {
                     obj_value->key = obj_key->value;
-                    if (obj_value != NULL)
-                    {
-                        HashMapInsert(map, obj_value);
-                    }
+                    HashMapInsert(map, obj_value);
                 }
             }
             else

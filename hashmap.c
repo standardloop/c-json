@@ -112,14 +112,21 @@ extern void HashMapInsert(HashMap *map, JSONValue *entry)
 
 static bool hashMapEntriesInsert(JSONValue **entries, u_int32_t index, JSONValue *entry)
 {
+    // FIXME: may have to use enum for return values
+    // collion, no collision, or error
+    if (entries == NULL || entry == NULL)
+    {
+        return false;
+    }
     JSONValue *collision = entries[index];
     if (collision == NULL)
     {
+        entry->next = NULL;
         entries[index] = entry;
         return false;
     }
     // If duplicate key, update
-    if (strcmp(collision->key, entry->key) == 0)
+    if (collision->key != NULL && strcmp(collision->key, entry->key) == 0)
     {
         entry->next = collision->next;
         collision->next = NULL;
@@ -132,7 +139,7 @@ static bool hashMapEntriesInsert(JSONValue **entries, u_int32_t index, JSONValue
     JSONValue *iterator = collision->next;
     while (iterator != NULL)
     {
-        if (strcmp(iterator->key, entry->key) == 0)
+        if (iterator->key != NULL && entry->key != NULL && strcmp(iterator->key, entry->key) == 0)
         {
             iterator_prev->next = entry;
             entry->next = iterator->next;
@@ -184,15 +191,14 @@ extern void *HashMapGetValueDirect(HashMap *map, char *key)
 
 static void freeHashMapEntryList(JSONValue *entry, bool deep)
 {
-    JSONValue *temp = NULL;
+    JSONValue *temp;
     while (entry != NULL)
     {
         temp = entry;
         entry = entry->next;
-        if (temp->key != NULL)
+        if (temp != NULL && temp->key != NULL)
         {
             free(temp->key);
-            temp->key = NULL;
         }
         FreeJSONValue(temp, deep);
     }
@@ -222,6 +228,7 @@ static void freeHashMapEntries(JSONValue **entries, u_int32_t size, bool deep, b
         for (u_int32_t i = 0; i < size; i++)
         {
             freeHashMapEntryList(entries[i], entry_values);
+            entries[i] = NULL;
         }
     }
     free(entries);
@@ -236,6 +243,7 @@ extern void FreeHashMap(HashMap *map)
     if (map->entries != NULL)
     {
         freeHashMapEntries(map->entries, map->capacity, true, true);
+        map->entries = NULL;
     }
     free(map);
 }

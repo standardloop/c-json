@@ -4,6 +4,7 @@ all: build run
 
 clean:
 	@rm -f $(EXECUTABLE_NAME)
+	@rm -f $(EXECUTABLE_NAME)-sanitize
 	@rm -f $(EXECUTABLE_NAME)-debug
 	@rm -f $(EXECUTABLE_NAME)-optimize
 	@rm -f a.out
@@ -30,10 +31,26 @@ build_debug:
 	-g \
 	-o $(EXECUTABLE_NAME)-debug
 
+sanitize: build_sanitize run_sanitize
+
+build_sanitize:
+	@$(CC) $(CC_FLAGS) \
+	main.c \
+	-fsanitize=address \
+	-fno-omit-frame-pointer \
+	$(SOURCE_FILES) \
+	$(DYN_LIBS_USED_PATH) \
+	$(DYN_LIBS_USED) \
+	-o $(EXECUTABLE_NAME)-sanitize
+
+run_sanitize:
+	@DYLD_LIBRARY_PATH=$(DYLIB_PATH) ./$(EXECUTABLE_NAME)-sanitize
+
 check_leaks: build run_leaks
 
+# FIXME DYLIB issues
 run_leaks:
-	@leaks --atExit -- ./$(EXECUTABLE_NAME)
+	@export DYLD_LIBRARY_PATH=$(DYLIB_PATH) && leaks --atExit -- ./$(EXECUTABLE_NAME)
 
 optimize: build_optimize
 
