@@ -236,7 +236,7 @@ extern void FreeJSONValue(JSONValue *json_value, bool deep)
 {
     if (json_value != NULL)
     {
-        if (deep)
+        if (deep && json_value->value != NULL)
         {
             if (json_value->value_type == LIST_t)
             {
@@ -250,6 +250,7 @@ extern void FreeJSONValue(JSONValue *json_value, bool deep)
             {
                 free(json_value->value);
             }
+            json_value->value = NULL;
         }
         free(json_value);
     }

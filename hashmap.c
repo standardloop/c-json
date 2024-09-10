@@ -3,12 +3,14 @@
 #include <string.h>
 #include <stdbool.h>
 
+#include <standardloop/util.h>
+
 #include "./json.h"
 
 static void freeHashMapEntrySingle(JSONValue *, bool);
 static void freeHashMapEntryList(JSONValue *, bool);
 static void freeHashMapEntries(JSONValue **, u_int32_t, bool, bool);
-static void printHashMapEntry(JSONValue *, u_int32_t);
+static void printHashMapEntry(JSONValue *);
 static u_int32_t defaultHashFunction(char *, u_int32_t);
 
 static bool hashMapEntriesInsert(JSONValue **, u_int32_t, JSONValue *);
@@ -38,7 +40,7 @@ static u_int32_t defaultHashFunction(char *key, u_int32_t capacity)
 
 extern HashMap *DefaultHashMapInit(void)
 {
-    return HashMapInit(DEFAULT_MAP_SIZE, NULL);
+    return HashMapInit(DEFAULT_MAP_SIZE, NULL, false);
 }
 
 static JSONValue **hashMapEntriesInit(u_int32_t capacity)
@@ -57,7 +59,7 @@ static JSONValue **hashMapEntriesInit(u_int32_t capacity)
     return entries;
 }
 
-extern HashMap *HashMapInit(u_int32_t initial_capacity, HashFunction *hashFunction)
+extern HashMap *HashMapInit(u_int32_t initial_capacity, HashFunction *hashFunction, bool force_lowercase)
 {
     HashMap *map = malloc(sizeof(HashMap));
     if (map == NULL)
@@ -68,6 +70,7 @@ extern HashMap *HashMapInit(u_int32_t initial_capacity, HashFunction *hashFuncti
     map->size = 0;
     map->collision_count = 0;
     map->capacity = initial_capacity;
+    map->force_lowercase = force_lowercase;
     map->entries = hashMapEntriesInit(initial_capacity);
 
     if (map->entries == NULL)
@@ -97,6 +100,10 @@ extern void HashMapInsert(HashMap *map, JSONValue *entry)
     if (isMapFull(map))
     {
         hashMapResize(map);
+    }
+    if (map->force_lowercase)
+    {
+        StringToLower(entry->key);
     }
     u_int32_t index = map->hashFunction(entry->key, map->capacity);
     bool collision = hashMapEntriesInsert(map->entries, index, entry);
@@ -199,8 +206,12 @@ static void freeHashMapEntryList(JSONValue *entry, bool deep)
         if (temp != NULL && temp->key != NULL)
         {
             free(temp->key);
+            temp->key = NULL;
         }
-        FreeJSONValue(temp, deep);
+        if (temp != NULL)
+        {
+            FreeJSONValue(temp, deep);
+        }
     }
 }
 
@@ -227,8 +238,11 @@ static void freeHashMapEntries(JSONValue **entries, u_int32_t size, bool deep, b
     {
         for (u_int32_t i = 0; i < size; i++)
         {
-            freeHashMapEntryList(entries[i], entry_values);
-            entries[i] = NULL;
+            if (entries[i] != NULL)
+            {
+                freeHashMapEntryList(entries[i], entry_values);
+                entries[i] = NULL;
+            }
         }
     }
     free(entries);
@@ -308,7 +322,7 @@ extern void PrintHashMap(HashMap *map)
         JSONValue *entry = map->entries[i];
         if (entry != NULL)
         {
-            printHashMapEntry(entry, i);
+            printHashMapEntry(entry);
             if (entry_count < map->size - 1)
             {
                 printf(", ");
@@ -319,21 +333,20 @@ extern void PrintHashMap(HashMap *map)
     printf("}");
 }
 
-static void printHashMapEntry(JSONValue *entry, u_int32_t index)
+static void printHashMapEntry(JSONValue *entry)
 {
-    if (entry == NULL)
+    if (entry == NULL || entry->value == NULL || entry->key == NULL)
     {
         return;
-    }
-    if (index)
-    {
-        pass;
     }
     JSONValue *iterator = entry;
     while (iterator != NULL)
     {
-        printf("\"%s\": ", iterator->key);
-        PrintJSONValue(iterator);
+        if (iterator->key != NULL && iterator->value != NULL)
+        {
+            printf("\"%s\": ", iterator->key);
+            PrintJSONValue(iterator);
+        }
 
         iterator = iterator->next;
         if (iterator != NULL)
@@ -400,7 +413,7 @@ extern HashMap *HashMapReplicate(HashMap *map)
     {
         return NULL;
     }
-    HashMap *deep_clone = HashMapInit(map->capacity, map->hashFunction);
+    HashMap *deep_clone = HashMapInit(map->capacity, map->hashFunction, map->force_lowercase);
     deep_clone->collision_count = map->collision_count;
     deep_clone->size = map->collision_count;
     for (u_int32_t i = 0; i < map->capacity; i++)

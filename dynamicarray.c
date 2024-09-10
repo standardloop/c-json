@@ -25,7 +25,7 @@ extern DynamicArray *DynamicArrayInit(u_int32_t initial_capacity)
     }
     dynamic_array->size = 0;
     dynamic_array->capacity = initial_capacity;
-    dynamic_array->list = malloc(sizeof(JSONValue *) * dynamic_array->capacity);
+    dynamic_array->list = malloc(sizeof(JSONValue *) * initial_capacity);
     if (dynamic_array->list == NULL)
     {
         FreeDynamicArray(dynamic_array);

@@ -378,25 +378,25 @@ extern void PrintJSONValue(JSONValue *json_value)
     switch (json_value->value_type)
     {
     case OBJ_t:
-        printJSONObjValue(json_value->value);
+        printJSONObjValue((HashMap *)json_value->value);
         break;
     case NUMBER_INT_t:
-        printJSONNumberIntValue(json_value->value);
+        printJSONNumberIntValue((int64_t *)json_value->value);
         break;
     case NUMBER_DOUBLE_t:
-        printJSONNumberDoubleValue(json_value->value);
+        printJSONNumberDoubleValue((double *)json_value->value);
         break;
     case STRING_t:
-        printJSONStringValue(json_value->value);
+        printJSONStringValue((char *)json_value->value);
         break;
     case BOOL_t:
-        printJSONBoolValue(json_value->value);
+        printJSONBoolValue((bool *)json_value->value);
         break;
     case NULL_t:
         printJSONNULLValue();
         break;
     case LIST_t:
-        printJSONListValue(json_value->value);
+        printJSONListValue((DynamicArray *)json_value->value);
         break;
     default:
         break;

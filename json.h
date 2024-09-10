@@ -60,12 +60,13 @@ typedef struct
     u_int32_t collision_count;
     JSONValue **entries;
     HashFunction *hashFunction;
+    bool force_lowercase;
 } HashMap;
 
 extern JSONValue *HashMapGet(HashMap *, char *);
 extern void *HashMapGetValueDirect(HashMap *, char *);
 
-extern HashMap *HashMapInit(u_int32_t, HashFunction *);
+extern HashMap *HashMapInit(u_int32_t, HashFunction *, bool);
 extern HashMap *DefaultHashMapInit(void);
 extern HashMap *HashMapReplicate(HashMap *);
 extern void FreeHashMap(HashMap *);
