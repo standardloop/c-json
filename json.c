@@ -19,14 +19,9 @@ static void printJSONNULLValue(void);
 static void printJSONListValue(DynamicArray *);
 static void printJSONObjValue(HashMap *);
 
-static char *listToString(DynamicArray *);
-static char *objToString(HashMap *);
-
 static char *int64ToString(int64_t);
 static char *doubleToString(double);
 static int32_t numberOfDigitsInInt64(int64_t);
-
-static void copyStringCanary(char *, char *, u_int64_t);
 
 extern JSON *StringToJSON(char *input_str)
 {
@@ -106,125 +101,6 @@ extern char *JSONToString(JSON *json)
     return json_as_string;
 }
 
-static void copyStringCanary(char *des, char *src, u_int64_t des_offset)
-{
-    char *des_iterator = des + des_offset;
-
-    while (src != NULL && *src != NULL_CHAR)
-    {
-        *des_iterator++ = *src++;
-    }
-}
-
-static char *listToString(DynamicArray *dynamic_array)
-{
-    if (dynamic_array == NULL)
-    {
-        return NULL;
-    }
-    size_t list_as_string_size = 3; // "[]\0"
-    char *list_as_string = malloc(sizeof(char) * list_as_string_size);
-    list_as_string[0] = BRACKET_OPEN_CHAR;
-    list_as_string[1] = NULL_CHAR;
-
-    size_t chars_written = 2 - 1;
-
-    bool needs_comma = false;
-    for (u_int64_t i = 0; i < dynamic_array->size; i++)
-    {
-        char *list_element = JSONValueToString(dynamic_array->list[i]);
-        size_t list_element_len = strlen(list_element);
-        if (i < dynamic_array->size - 1)
-        {
-            needs_comma = true;
-        }
-        list_as_string_size += list_element_len;
-        list_as_string_size += needs_comma;
-        list_as_string = realloc(list_as_string, list_as_string_size);
-
-        copyStringCanary(list_as_string, list_element, chars_written);
-        chars_written += list_element_len;
-        if (needs_comma)
-        {
-            copyStringCanary(list_as_string, ",", chars_written);
-            chars_written++;
-        }
-        needs_comma = false;
-        free(list_element);
-    }
-
-    list_as_string[list_as_string_size - 2] = BRACKET_CLOSE_CHAR;
-    list_as_string[list_as_string_size - 1] = NULL_CHAR;
-    return list_as_string;
-}
-
-static char *objToString(HashMap *map)
-{
-    if (map == NULL)
-    {
-        return NULL;
-    }
-    size_t obj_as_string_size = 3; // "{}\0"
-    char *obj_as_string = malloc(sizeof(char) * obj_as_string_size);
-    obj_as_string[0] = CURLY_OPEN_CHAR;
-    obj_as_string[1] = NULL_CHAR;
-
-    size_t chars_written = 2 - 1;
-
-    u_int64_t entry_count = 0;
-    for (u_int64_t i = 0; i < map->capacity; i++)
-    {
-        JSONValue *map_entry = map->entries[i];
-        bool needs_comma = false;
-
-        while (map_entry != NULL)
-        {
-            char *entry_key = map_entry->key;
-            size_t duplicated_key_size = strlen(entry_key);
-            char *duplicated_key = PutQuotesAroundString(entry_key, false);
-            duplicated_key_size += 2;
-
-            char *entry_value = JSONValueToString(map_entry);
-            size_t entry_value_len = strlen(entry_value);
-            if ((map_entry->next == NULL && entry_count < map->size - 1) || map_entry->next != NULL)
-            {
-                needs_comma = true;
-            }
-
-            obj_as_string_size += duplicated_key_size;
-            obj_as_string_size++; // ':'
-            obj_as_string_size += entry_value_len;
-            obj_as_string_size += needs_comma;
-
-            obj_as_string = realloc(obj_as_string, obj_as_string_size);
-
-            copyStringCanary(obj_as_string, duplicated_key, chars_written);
-            chars_written += duplicated_key_size;
-            copyStringCanary(obj_as_string, ":", chars_written);
-            chars_written++;
-            copyStringCanary(obj_as_string, entry_value, chars_written);
-            chars_written += entry_value_len;
-            if (needs_comma)
-            {
-                copyStringCanary(obj_as_string, ",", chars_written);
-                chars_written++;
-            }
-            free(duplicated_key);
-            free(entry_value);
-            if (map_entry->next == NULL)
-            {
-                entry_count++;
-            }
-            needs_comma = false;
-            map_entry = map_entry->next;
-        }
-    }
-
-    obj_as_string[obj_as_string_size - 2] = CURLY_CLOSE_CHAR;
-    obj_as_string[obj_as_string_size - 1] = NULL_CHAR;
-    return obj_as_string;
-}
-
 static int32_t numberOfDigitsInInt64(int64_t num)
 {
     int32_t r = 1;
@@ -295,10 +171,10 @@ extern char *JSONValueToString(JSONValue *json_value)
     switch (json_value->value_type)
     {
     case LIST_t:
-        json_value_string = listToString((DynamicArray *)json_value->value);
+        json_value_string = ListToString((DynamicArray *)json_value->value);
         break;
     case OBJ_t:
-        json_value_string = objToString((HashMap *)json_value->value);
+        json_value_string = ObjToString((HashMap *)json_value->value);
         break;
     case NUMBER_INT_t:
         json_value_string = int64ToString(*(int64_t *)json_value->value);

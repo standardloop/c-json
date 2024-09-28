@@ -422,3 +422,70 @@ extern HashMap *HashMapReplicate(HashMap *map)
     }
     return deep_clone;
 }
+
+extern char *ObjToString(HashMap *map)
+{
+    if (map == NULL)
+    {
+        return NULL;
+    }
+    size_t obj_as_string_size = 3; // "{}\0"
+    char *obj_as_string = malloc(sizeof(char) * obj_as_string_size);
+    obj_as_string[0] = CURLY_OPEN_CHAR;
+    obj_as_string[1] = NULL_CHAR;
+
+    size_t chars_written = 2 - 1;
+
+    u_int64_t entry_count = 0;
+    for (u_int64_t i = 0; i < map->capacity; i++)
+    {
+        JSONValue *map_entry = map->entries[i];
+        bool needs_comma = false;
+
+        while (map_entry != NULL)
+        {
+            char *entry_key = map_entry->key;
+            size_t duplicated_key_size = strlen(entry_key);
+            char *duplicated_key = PutQuotesAroundString(entry_key, false);
+            duplicated_key_size += 2;
+
+            char *entry_value = JSONValueToString(map_entry);
+            size_t entry_value_len = strlen(entry_value);
+            if ((map_entry->next == NULL && entry_count < map->size - 1) || map_entry->next != NULL)
+            {
+                needs_comma = true;
+            }
+
+            obj_as_string_size += duplicated_key_size;
+            obj_as_string_size++; // ':'
+            obj_as_string_size += entry_value_len;
+            obj_as_string_size += needs_comma;
+
+            obj_as_string = realloc(obj_as_string, obj_as_string_size);
+
+            CopyStringCanary(obj_as_string, duplicated_key, chars_written);
+            chars_written += duplicated_key_size;
+            CopyStringCanary(obj_as_string, ":", chars_written);
+            chars_written++;
+            CopyStringCanary(obj_as_string, entry_value, chars_written);
+            chars_written += entry_value_len;
+            if (needs_comma)
+            {
+                CopyStringCanary(obj_as_string, ",", chars_written);
+                chars_written++;
+            }
+            free(duplicated_key);
+            free(entry_value);
+            if (map_entry->next == NULL)
+            {
+                entry_count++;
+            }
+            needs_comma = false;
+            map_entry = map_entry->next;
+        }
+    }
+
+    obj_as_string[obj_as_string_size - 2] = CURLY_CLOSE_CHAR;
+    obj_as_string[obj_as_string_size - 1] = NULL_CHAR;
+    return obj_as_string;
+}

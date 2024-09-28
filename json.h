@@ -73,6 +73,8 @@ extern void FreeHashMap(HashMap *);
 extern void HashMapInsert(HashMap *, JSONValue *);
 extern void HashMapRemove(HashMap *, char *);
 extern void PrintHashMap(HashMap *);
+extern char *ObjToString(HashMap *);
+
 // ————————— HASHMAP END —————————
 
 // ————————— DYN ARRAY START —————————
@@ -91,6 +93,7 @@ extern DynamicArray *DefaultDynamicArrayInit(void);
 extern DynamicArray *DynamicArrayInitFromStr(char *);
 extern DynamicArray *DynamicArrayReplicate(DynamicArray *);
 
+extern char *ListToString(DynamicArray *);
 extern void DynamicArrayAddFirst(DynamicArray *, JSONValue *);
 extern void DynamicArrayAddLast(DynamicArray *, JSONValue *);
 extern void DynamicArrayAdd(DynamicArray *, JSONValue *, u_int32_t);
