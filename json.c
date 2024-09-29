@@ -19,9 +19,7 @@ static void printJSONNULLValue(void);
 static void printJSONListValue(DynamicArray *);
 static void printJSONObjValue(HashMap *);
 
-static char *int64ToString(int64_t);
 static char *doubleToString(double);
-static int32_t numberOfDigitsInInt64(int64_t);
 
 extern JSON *StringToJSON(char *input_str)
 {
@@ -101,57 +99,6 @@ extern char *JSONToString(JSON *json)
     return json_as_string;
 }
 
-static int32_t numberOfDigitsInInt64(int64_t num)
-{
-    int32_t r = 1;
-    if (num < 0)
-    {
-        num = (num == LLONG_MIN) ? LLONG_MAX : -num;
-    }
-    while (num > 9)
-    {
-        num /= 10;
-        r++;
-    }
-    return r;
-}
-
-static char *int64ToString(int64_t num)
-{
-    int32_t num_digits = numberOfDigitsInInt64(num);
-    if (num < 0)
-    {
-        num_digits++;
-    }
-    char *int64_as_string = malloc(sizeof(char) * (num_digits + 1));
-
-    char *ptr = int64_as_string;
-    char *ptr1 = int64_as_string;
-    char tmp_char = NULL_CHAR;
-
-    int64_t tmp_value = 0;
-    do
-    {
-        tmp_value = num;
-        num /= 10;
-        *ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz"[35 + (tmp_value - num * 10)];
-    } while (num);
-
-    if (tmp_value < 0)
-    {
-        *ptr++ = '-';
-    }
-    *ptr-- = '\0';
-
-    while (ptr1 < ptr)
-    {
-        tmp_char = *ptr;
-        *ptr-- = *ptr1;
-        *ptr1++ = tmp_char;
-    }
-    return int64_as_string;
-}
-
 #define FLOAT_CHAR_MAX 10
 static char *doubleToString(double num)
 {
@@ -177,7 +124,7 @@ extern char *JSONValueToString(JSONValue *json_value)
         json_value_string = ObjToString((HashMap *)json_value->value);
         break;
     case NUMBER_INT_t:
-        json_value_string = int64ToString(*(int64_t *)json_value->value);
+        json_value_string = Int64ToString(*(int64_t *)json_value->value);
         break;
     case NUMBER_DOUBLE_t:
         json_value_string = doubleToString(*(double *)json_value->value);
