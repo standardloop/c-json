@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #include <standardloop/util.h>
 
@@ -106,6 +107,7 @@ extern void HashMapInsert(HashMap *map, JSONValue *entry)
         StringToLower(entry->key);
     }
     u_int32_t index = map->hashFunction(entry->key, map->capacity);
+    assert(index < map->capacity);
     bool collision = hashMapEntriesInsert(map->entries, index, entry);
     if (collision)
     {
@@ -120,11 +122,13 @@ extern void HashMapInsert(HashMap *map, JSONValue *entry)
 static bool hashMapEntriesInsert(JSONValue **entries, u_int32_t index, JSONValue *entry)
 {
     // FIXME: may have to use enum for return values
-    // collion, no collision, or error
-    if (entries == NULL || entry == NULL)
+    // collision, no collision, or error
+    if (entries == NULL || entry == NULL || entry->key == NULL)
     {
         return false;
     }
+    printf("[JOSH]: %s\n", entry->key);
+    fflush(stdout);
     JSONValue *collision = entries[index];
     if (collision == NULL)
     {
@@ -141,7 +145,6 @@ static bool hashMapEntriesInsert(JSONValue **entries, u_int32_t index, JSONValue
         entries[index] = entry;
         return true;
     }
-
     JSONValue *iterator_prev = collision;
     JSONValue *iterator = collision->next;
     while (iterator != NULL)
@@ -154,8 +157,8 @@ static bool hashMapEntriesInsert(JSONValue **entries, u_int32_t index, JSONValue
             freeHashMapEntrySingle(iterator, true);
             return true;
         }
+        iterator_prev = iterator;
         iterator = iterator->next;
-        iterator_prev = iterator_prev->next;
     }
     iterator_prev->next = entry;
     return true;
@@ -198,7 +201,7 @@ extern void *HashMapGetValueDirect(HashMap *map, char *key)
 
 static void freeHashMapEntryList(JSONValue *entry, bool deep)
 {
-    JSONValue *temp;
+    JSONValue *temp = NULL;
     while (entry != NULL)
     {
         temp = entry;
@@ -425,12 +428,18 @@ extern HashMap *HashMapReplicate(HashMap *map)
 
 extern char *ObjToString(HashMap *map)
 {
+    // FIXME map->entriess == NULL ?
     if (map == NULL)
     {
         return NULL;
     }
     size_t obj_as_string_size = 3; // "{}\0"
     char *obj_as_string = malloc(sizeof(char) * obj_as_string_size);
+    if (obj_as_string == NULL)
+    {
+        printf("[FATAL]: cannot allocate memory for obj as string\n");
+        return NULL;
+    }
     obj_as_string[0] = CURLY_OPEN_CHAR;
     obj_as_string[1] = NULL_CHAR;
 
