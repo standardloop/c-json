@@ -38,6 +38,8 @@ build_sanitize:
 	main.c \
 	-fsanitize=address \
 	-fno-omit-frame-pointer \
+	-g \
+	-O0 \
 	$(SOURCE_FILES) \
 	$(DYN_LIBS_USED_PATH) \
 	$(DYN_LIBS_USED) \

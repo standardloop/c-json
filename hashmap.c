@@ -127,8 +127,8 @@ static bool hashMapEntriesInsert(JSONValue **entries, u_int32_t index, JSONValue
     {
         return false;
     }
-    printf("[JOSH]: %s\n", entry->key);
-    fflush(stdout);
+    // printf("[JOSH]: %s\n", entry->key);
+    // fflush(stdout);
     JSONValue *collision = entries[index];
     if (collision == NULL)
     {

@@ -6,13 +6,13 @@
 
 int main(void)
 {
-
-    JSON *json = JSONFromFile("lab/test.json");
+    // JSON *json = JSONFromFile("lab/test.json");
+    JSON *json = StringToJSON("[{\"guid\": \"\", \"about\": \"\"}]");
     if (json == NULL)
     {
         return EXIT_FAILURE;
     }
-    // PrintJSON(json);
+    PrintJSON(json);
     FreeJSON(json);
 
     // char *json_string = JSONToString(json);
@@ -22,6 +22,5 @@ int main(void)
     // }
     // // printf("%s", json_string);
     // free(json_string);
-
     return EXIT_SUCCESS;
 }

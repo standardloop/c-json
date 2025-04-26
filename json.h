@@ -37,6 +37,7 @@ typedef struct
     JSONValue *root;
 } JSON;
 
+extern JSON *JSONInit();
 extern JSON *StringToJSON(char *);
 extern JSON *JSONFromFile(char *);
 extern char *JSONToString(JSON *);

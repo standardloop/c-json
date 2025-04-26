@@ -21,6 +21,18 @@ static void printJSONObjValue(HashMap *);
 
 static char *doubleToString(double);
 
+extern JSON *JSONInit()
+{
+    JSON *json = malloc(sizeof(JSON));
+    if (json == NULL)
+    {
+        // print error
+        return NULL;
+    }
+    json->root = NULL;
+    return json;
+}
+
 extern JSON *StringToJSON(char *input_str)
 {
     if (input_str == NULL)
@@ -35,6 +47,7 @@ extern JSON *StringToJSON(char *input_str)
     {
         return NULL;
     }
+
     Parser *parser = ParserInit(lexer);
     if (parser == NULL)
     {
@@ -49,6 +62,7 @@ extern JSON *StringToJSON(char *input_str)
         printf("[ERROR]: couldn't parse JSON");
         return NULL;
     }
+    
     return json;
 }
 
