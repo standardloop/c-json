@@ -56,7 +56,6 @@ main
 main-optimize
 main-debug
 lab
-lab.c
 .vscode
 test
 notes.txt
