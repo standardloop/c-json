@@ -1,6 +1,6 @@
 include Makefile.properties
 
-all: build run
+all: download_dependencies build run
 
 clean:
 	@rm -f $(EXECUTABLE_NAME)
@@ -9,8 +9,17 @@ clean:
 	@rm -f $(EXECUTABLE_NAME)-optimize
 	@rm -f a.out
 	@rm -f $(DYLIB_NAME)
+	@rm -f $(DYLIB_NAME).zip
 
-build:
+download_dependencies:
+	mkdir -p tmp && \
+	cd tmp && \
+	curl -O -J -L https://github.com/standardloop/c-util/releases/download/v0.0.1/libstandardloop-util.zip && \
+	unzip libstandardloop-util.zip && \
+	sudo mv libstandardloop-util.dylib /usr/local/lib/standardloop/ && \
+	sudo mv util.h /usr/local/include/standardloop/ && rm libstandardloop-util.zip
+
+build: download_dependencies
 	@$(CC) $(CC_FLAGS) \
 	main.c \
 	$(SOURCE_FILES) \
@@ -21,7 +30,7 @@ build:
 run:
 	@DYLD_LIBRARY_PATH=$(DYLIB_PATH) ./$(EXECUTABLE_NAME)
 
-build_debug:
+build_debug: download_dependencies
 	@$(CC) $(CC_FLAGS) \
 	main.c \
 	$(SOURCE_FILES) \
@@ -33,7 +42,7 @@ build_debug:
 
 sanitize: build_sanitize run_sanitize
 
-build_sanitize:
+build_sanitize: download_dependencies
 	@$(CC) $(CC_FLAGS) \
 	main.c \
 	-fsanitize=address \
@@ -56,7 +65,7 @@ run_leaks:
 
 optimize: build_optimize
 
-build_optimize:
+build_optimize: download_dependencies
 	@$(CC) $(CC_FLAGS) \
 	main.c \
 	$(SOURCE_FILES) \
@@ -67,16 +76,41 @@ build_optimize:
 
 release: build_release move_files
 
-build_release:
-	@$(CC) \
+build_release: download_dependencies
+	@$(CC) $(CC_FLAGS) \
 	$(SOURCE_FILES) \
 	$(DYN_LIBS_USED_PATH) \
 	$(DYN_LIBS_USED) \
 	-O3 \
 	-dynamiclib \
-	-current_version 1.0.0 \
+	-current_version $(RELEASE_VERSION) \
 	-o $(DYLIB_NAME)
 
 move_files:
 	@sudo mv $(DYLIB_NAME) $(DYLIB_PATH)
 	@sudo cp $(EXECUTABLE_NAME).h $(DYLIB_INCLUDE_PATH)
+
+# local testing
+download_release:
+	mkdir -p tmp && \
+	cd tmp && \
+	curl -O -J -L https://github.com/standardloop/c-json/releases/download/v0.0.1/libstandardloop-json.zip && \
+	unzip libstandardloop-json.zip && \
+	sudo mv libstandardloop-json.dylib /usr/local/lib/standardloop/ && \
+	sudo mv json.h /usr/local/include/standardloop/ && rm libstandardloop-json.zip
+
+.PHONY: lab FORCE
+
+lab: FORCE
+	@$(CC) $(CC_FLAGS) \
+	lab.c \
+	-L/usr/local/lib/standardloop \
+	-lstandardloop-util \
+	-lstandardloop-json \
+	-o lab
+
+FORCE:
+
+clean_release:
+	sudo rm /usr/local/lib/standardloop/libstandardloop-json.dylib
+	sudo rm /usr/local/include/standardloop/json.h

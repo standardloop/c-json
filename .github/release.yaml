@@ -1,0 +1,44 @@
+name: Release dylib
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release-dylib:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    env:
+      DYLIB_NAME: "libstandardloop-json.dylib"
+      HEADER_NAME: "json.h"
+      ZIP_NAME: "libstandardloop-json.zip"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: echo vars
+        run: |
+          echo ${{ env.DYLIB_NAME }}
+          echo ${{ env.HEADER_NAME }}
+          echo ${{ env.ZIP_NAME }}
+
+      - name: Build the dylib
+        run: |
+          make build_release
+
+      - name: Archive dylib
+        run: |
+          zip ${{ env.ZIP_NAME }} ${{ env.DYLIB_NAME }} ${{ env.HEADER_NAME }}
+
+      - name: Create dylib Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ${{ env.ZIP_NAME }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

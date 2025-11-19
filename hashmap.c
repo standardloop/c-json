@@ -107,6 +107,7 @@ extern void HashMapInsert(HashMap *map, JSONValue *entry)
         StringToLower(entry->key);
     }
     u_int32_t index = map->hashFunction(entry->key, map->capacity);
+    // printf("[JOSH]: %d\n", (int)index);
     assert(index < map->capacity);
     bool collision = hashMapEntriesInsert(map->entries, index, entry);
     if (collision)
@@ -136,7 +137,7 @@ static bool hashMapEntriesInsert(JSONValue **entries, u_int32_t index, JSONValue
         entries[index] = entry;
         return false;
     }
-    // If duplicate key, update
+    // If duplicate key, update (in future could maybe make this a feature flag for the init function)
     if (collision->key != NULL && strcmp(collision->key, entry->key) == 0)
     {
         entry->next = collision->next;
@@ -154,7 +155,7 @@ static bool hashMapEntriesInsert(JSONValue **entries, u_int32_t index, JSONValue
             iterator_prev->next = entry;
             entry->next = iterator->next;
             iterator->next = NULL;
-            freeHashMapEntrySingle(iterator, true);
+            freeHashMapEntrySingle(iterator, true); // FIXME
             return true;
         }
         iterator_prev = iterator;
