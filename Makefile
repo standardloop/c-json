@@ -16,6 +16,8 @@ download_dependencies:
 	cd tmp && \
 	curl -O -J -L https://github.com/standardloop/c-util/releases/download/v0.0.1/libstandardloop-util.zip && \
 	unzip libstandardloop-util.zip && \
+	sudo mkdir -p /usr/local/lib/standardloop/ && \
+	sudo mkdir -p /usr/local/include/standardloop/ && \
 	sudo mv libstandardloop-util.dylib /usr/local/lib/standardloop/ && \
 	sudo mv util.h /usr/local/include/standardloop/ && rm libstandardloop-util.zip
 
