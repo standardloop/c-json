@@ -1,0 +1,164 @@
+---
+version: '3'
+
+vars:
+  CC: gcc
+  CC_FLAGS: "-Werror -Wextra -Wall -Wfree-nonheap-object -std=c17"
+  LAB_EXECUTABLE_NAME: lab
+  SOURCE_FILES:
+    - json.c
+    - lexer.c
+    - parser.c
+    - hashmap.c
+    - dynamicarray.c
+  DYN_LIBS_USED_PATH: -L/usr/local/lib/standardloop
+  DYN_LIBS_USED: -lstandardloop-util
+  DYLIB_NAME: libstandardloop-json.dylib
+  DYLIB_PATH: /usr/local/lib/standardloop/
+  DYLIB_INCLUDE_PATH: /usr/local/include/standardloop/
+  RELEASE_VERSION: 0.0.1
+
+# Inputs
+# - REPO_NAME
+# - DYLIB_VERSION
+# - DYLIB_NAME
+download-dependency: &download-dependency |
+  mkdir -p dependencies/tmp-{{.DYLIB_NAME}}
+  cd dependencies/tmp-{{.DYLIB_NAME}}
+  curl -O -J -L https://github.com/standardloop/{{.REPO_NAME}}/releases/download/v{{.DYLIB_VERSION}}/libstandardloop-{{.DYLIB_NAME}}.zip
+  unzip libstandardloop-{{.DYLIB_NAME}}.zip
+  sudo mkdir -p /usr/local/lib/standardloop/
+  sudo mkdir -p /usr/local/include/standardloop/
+  sudo mv libstandardloop-{{.DYLIB_NAME}}.dylib /usr/local/lib/standardloop/
+  sudo mv {{.DYLIB_NAME}}.h /usr/local/include/standardloop/ && rm libstandardloop-{{.DYLIB_NAME}}.zip
+
+tasks:
+  default:
+    deps:
+      - lab
+
+  check-version:
+    silent: true
+    cmds:
+      - cat json.h | grep -q {{.RELEASE_VERSION}}
+      - cat json.h | grep -q "MAJOR_VERSION 0"
+      - cat json.h | grep -q "MINOR_VERSION 0"
+      - cat json.h | grep -q "PATCH_VERSION 1"
+
+  dependencies:
+    deps:
+      - dependencies:util
+
+  dependencies:util:
+    vars:
+      REPO_NAME: c-util
+      DYLIB_VERSION: 0.0.1
+      DYLIB_NAME: util
+    cmds:
+      - sudo -v
+      - *download-dependency
+    status:
+      - otool -L /usr/local/lib/standardloop/libstandardloop-{{.DYLIB_NAME}}.dylib | head -n 2 | tail -n 1 | grep "current version {{.DYLIB_VERSION}}"
+      - cat /usr/local/include/standardloop/{{.DYLIB_NAME}}.h | grep "STANDARDLOOP_{{.DYLIB_NAME | upper}}_H_VERSION \"{{.DYLIB_VERSION}}\""
+
+  release:
+    deps:
+      - check-version
+      - release:build
+      - release:move-files
+
+  release:build:
+    run: once
+    deps:
+      - check-version
+      - dependencies
+    cmds:
+      - |
+        {{.CC}} {{.CC_FLAGS}} \
+        {{range .SOURCE_FILES}} {{.}} {{end}} \
+        {{.DYN_LIBS_USED_PATH}} \
+        {{.DYN_LIBS_USED}} \
+        -O3 \
+        -dynamiclib \
+        -current_version {{.RELEASE_VERSION}} \
+        -compatibility_version {{.RELEASE_VERSION}} \
+        -o {{.DYLIB_NAME}}
+    sources:
+      - ./json.c
+    generates:
+      - "{{.DYLIB_NAME}}"
+  
+  release:move-files:
+    deps:
+      - release:build
+    cmds:
+      - sudo -v
+      - sudo cp {{.DYLIB_NAME}} {{.DYLIB_PATH}}
+      - sudo cp json.h {{.DYLIB_INCLUDE_PATH}}
+
+  release:clean:
+    allow_failure: true
+    cmds:
+      - sudo -v
+      - sudo rm -f {{.DYLIB_PATH}}/{{.DYLIB_NAME}}
+      - sudo rm -f {{.DYLIB_INCLUDE_PATH}}/json.h
+    
+  # local test
+  remote:download:
+    run: once
+    cmds:
+      - |
+        mkdir -p tmp
+        cd tmp
+        curl -O -J -L https://github.com/standardloop/c-json/releases/download/v{{.RELEASE_VERSION}}/libstandardloop-json.zip
+        unzip libstandardloop-json.zip
+        rm libstandardloop-json.zip
+
+  remote:move:
+    deps:
+      - remote:download
+    cmds:
+      - |
+        cd tmp/
+        sudo -v
+        sudo mv {{.DYLIB_NAME}} {{.DYLIB_PATH}}
+        sudo mv json.h {{.DYLIB_INCLUDE_PATH}}
+
+  lab:
+    deps:
+      - lab:run
+
+  lab:build:
+    run: once
+    cmds:
+      - |
+        {{.CC}} {{.CC_FLAGS}} \
+        lab.c \
+        {{range .SOURCE_FILES}} {{.}} {{end}} \
+        {{.DYN_LIBS_USED_PATH}} \
+        {{.DYN_LIBS_USED}} \
+        -L/usr/local/lib/standardloop \
+        -fno-omit-frame-pointer \
+        -o {{.LAB_EXECUTABLE_NAME}}
+    sources:
+      - "*.c"
+    generates:
+      - "{{.LAB_EXECUTABLE_NAME}}"
+
+  lab:run:
+    deps:
+      - lab:build
+    cmds:
+      - ./{{.LAB_EXECUTABLE_NAME}}
+
+  lab:leaks:
+    deps:
+      - lab:build
+    cmds:
+      - leaks --atExit -- ./{{.LAB_EXECUTABLE_NAME}}
+    env:
+      DYLD_FALLBACK_LIBRARY_PATH: /usr/local/lib/standardloop/
+      DYLD_LIBRARY_PATH: /usr/local/lib/standardloop/
+      # MallocStackLogging: YES
+      # -lstandardloop-json \
+      # -fsanitize=address \

@@ -24,9 +24,12 @@ jobs:
           echo ${{ env.HEADER_NAME }}
           echo ${{ env.ZIP_NAME }}
 
+      - name: Install Task
+        uses: go-task/setup-task@v1
+
       - name: Build the dylib
         run: |
-          make build_release
+          task release:build
 
       - name: Archive dylib
         run: |

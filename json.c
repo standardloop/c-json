@@ -62,7 +62,7 @@ extern JSON *StringToJSON(char *input_str)
         printf("[ERROR]: couldn't parse JSON");
         return NULL;
     }
-    
+
     return json;
 }
 
@@ -176,13 +176,16 @@ extern void FreeJSON(JSON *json)
     }
     if (json->root != NULL)
     {
-        if (json->root->value_type == LIST_t)
+        if (json->root->value != NULL)
         {
-            FreeDynamicArray(json->root->value);
-        }
-        else if (json->root->value_type == OBJ_t)
-        {
-            FreeHashMap(json->root->value);
+            if (json->root->value_type == LIST_t)
+            {
+                FreeDynamicArray(json->root->value);
+            }
+            else if (json->root->value_type == OBJ_t)
+            {
+                FreeHashMap(json->root->value);
+            }
         }
         FreeJSONValue(json->root, false);
     }
