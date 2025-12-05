@@ -112,6 +112,8 @@ extern void HashMapInsert(HashMap *map, JSONValue *entry)
     bool collision = hashMapEntriesInsert(map->entries, index, entry);
     if (collision)
     {
+        // printf("COLLISION!\n");
+        // fflush(stdout);
         map->collision_count++;
     }
     else
@@ -137,30 +139,49 @@ static bool hashMapEntriesInsert(JSONValue **entries, u_int32_t index, JSONValue
         entries[index] = entry;
         return false;
     }
+    // printf("%s -> %s\n", collision->key, entry->key);
     // If duplicate key, update (in future could maybe make this a feature flag for the init function)
-    if (collision->key != NULL && strcmp(collision->key, entry->key) == 0)
+    if (collision->key != NULL)
     {
-        entry->next = collision->next;
-        collision->next = NULL;
-        freeHashMapEntrySingle(collision, true);
-        entries[index] = entry;
-        return true;
+        size_t collision_key_len = strlen(collision->key);
+        size_t entry_key_len = strlen(entry->key);
+        if (collision_key_len == entry_key_len)
+        {
+            if (strncmp(collision->key, entry->key, entry_key_len) == 0)
+            {
+                entry->next = collision->next;
+                collision->next = NULL;
+                freeHashMapEntrySingle(collision, true);
+                entries[index] = entry;
+                return true;
+            }
+        }
     }
     JSONValue *iterator_prev = collision;
     JSONValue *iterator = collision->next;
     while (iterator != NULL)
     {
-        if (iterator->key != NULL && entry->key != NULL && strcmp(iterator->key, entry->key) == 0)
+        if (iterator->key != NULL && entry->key != NULL)
         {
-            iterator_prev->next = entry;
-            entry->next = iterator->next;
-            iterator->next = NULL;
-            freeHashMapEntrySingle(iterator, true); // FIXME
-            return true;
+            size_t collision_key_len = strlen(collision->key);
+            size_t entry_key_len = strlen(entry->key);
+            if (collision_key_len == entry_key_len)
+            {
+                if (strncmp(iterator->key, entry->key, collision_key_len) == 0)
+                {
+                    iterator_prev->next = entry;
+                    entry->next = iterator->next;
+                    iterator->next = NULL;
+                    freeHashMapEntrySingle(iterator, true);
+                    return true;
+                }
+            }
         }
+
         iterator_prev = iterator;
         iterator = iterator->next;
     }
+    entry->next = NULL;
     iterator_prev->next = entry;
     return true;
 }
@@ -351,7 +372,6 @@ static void printHashMapEntry(JSONValue *entry)
             printf("\"%s\": ", iterator->key);
             PrintJSONValue(iterator);
         }
-
         iterator = iterator->next;
         if (iterator != NULL)
         {
@@ -363,6 +383,8 @@ static void printHashMapEntry(JSONValue *entry)
 // JOSH
 static void hashMapResize(HashMap *map)
 {
+    // printf("hashMapResize\n");
+    // fflush(stdout);
     if (map == NULL)
     {
         return;

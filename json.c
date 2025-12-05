@@ -120,9 +120,9 @@ static char *doubleToString(double num)
     // double fractional = modf(num, &integral);
     // int64_t integral_as_int64 = (int64_t)integral;
     // printf("%lld %lf\n", integral_as_int64, fractional);
-    char *double_as_string = malloc(sizeof(char) * FLOAT_CHAR_MAX);
+    char *double_as_string = malloc((sizeof(char) * FLOAT_CHAR_MAX) + sizeof(char));
     (void)gcvt(num, FLOAT_CHAR_MAX, double_as_string);
-
+    double_as_string[FLOAT_CHAR_MAX] = NULL_CHAR;
     return double_as_string;
 }
 

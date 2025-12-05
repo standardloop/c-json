@@ -500,7 +500,8 @@ static JSONValue *parse(Parser *parser)
     {
         return NULL;
     }
-    // printf("[JOSH]: %u\n", (unsigned int)parser->list_nested);
+    // printf("[JOSH]: %d\n", parser->peek_token->type);
+    // printf("[JOSH]: %s\n", parser->peek_token->literal);
 
     nextToken(parser);
     // PrintToken(parser->current_token, false);

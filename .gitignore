@@ -55,7 +55,7 @@ dkms.conf
 main
 main-optimize
 main-debug
-lab-private
+private
 .vscode
 test
 notes.txt
@@ -65,3 +65,5 @@ json-sanitize
 test.c
 .task
 lab
+lab-sanitize
+hold.c

@@ -394,13 +394,13 @@ static char *makeNumberLiteral(Lexer *lexer)
 
 static char *makeStringLiteral(Lexer *lexer)
 {
-    u_int32_t start_position = lexer->position + 1;
+    u_int32_t start_position = lexer->position + 1; // move pass quotes
     char prev_char = lexer->current_char;
     advanceChar(lexer);
     bool is_error = false;
     while (ALWAYS)
     {
-        // printf("%d\n", lexer->current_char);
+        // printf("%c\n", lexer->current_char);
         if (lexer->current_char == BACKSLASH_CHAR)
         {
             prev_char = lexer->current_char;
@@ -473,7 +473,8 @@ static char *makeStringLiteral(Lexer *lexer)
     }
     copyString(lexer->input, string_literal, string_literal_size, start_position);
     string_literal[string_literal_size - 1] = NULL_CHAR;
-    // printf("[JOSH]\n", string_literal);
+    // printf("[JOSH]: %s\n", string_literal);
+    // printf("[JOSH]: %d\n", (int)strlen(string_literal));
     return string_literal;
 }
 

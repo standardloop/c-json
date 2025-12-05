@@ -12,11 +12,11 @@ vars:
     - hashmap.c
     - dynamicarray.c
   DYN_LIBS_USED_PATH: -L/usr/local/lib/standardloop
-  DYN_LIBS_USED: -lstandardloop-util
+  DYN_LIBS_USED: "-lstandardloop-util"
   DYLIB_NAME: libstandardloop-json.dylib
   DYLIB_PATH: /usr/local/lib/standardloop/
   DYLIB_INCLUDE_PATH: /usr/local/include/standardloop/
-  RELEASE_VERSION: 0.0.1
+  RELEASE_VERSION: 0.0.2
 
 # Inputs
 # - REPO_NAME
@@ -43,7 +43,7 @@ tasks:
       - cat json.h | grep -q {{.RELEASE_VERSION}}
       - cat json.h | grep -q "MAJOR_VERSION 0"
       - cat json.h | grep -q "MINOR_VERSION 0"
-      - cat json.h | grep -q "PATCH_VERSION 1"
+      - cat json.h | grep -q "PATCH_VERSION 2"
 
   dependencies:
     deps:
@@ -52,7 +52,7 @@ tasks:
   dependencies:util:
     vars:
       REPO_NAME: c-util
-      DYLIB_VERSION: 0.0.1
+      DYLIB_VERSION: 0.0.3
       DYLIB_NAME: util
     cmds:
       - sudo -v
@@ -84,7 +84,7 @@ tasks:
         -compatibility_version {{.RELEASE_VERSION}} \
         -o {{.DYLIB_NAME}}
     sources:
-      - ./json.c
+      - "*.c"
     generates:
       - "{{.DYLIB_NAME}}"
   
@@ -93,7 +93,7 @@ tasks:
       - release:build
     cmds:
       - sudo -v
-      - sudo cp {{.DYLIB_NAME}} {{.DYLIB_PATH}}
+      - sudo mv {{.DYLIB_NAME}} {{.DYLIB_PATH}}
       - sudo cp json.h {{.DYLIB_INCLUDE_PATH}}
 
   release:clean:
@@ -137,28 +137,57 @@ tasks:
         {{range .SOURCE_FILES}} {{.}} {{end}} \
         {{.DYN_LIBS_USED_PATH}} \
         {{.DYN_LIBS_USED}} \
-        -L/usr/local/lib/standardloop \
-        -fno-omit-frame-pointer \
+        -O0 \
+        -lstandardloop-json \
         -o {{.LAB_EXECUTABLE_NAME}}
     sources:
       - "*.c"
     generates:
       - "{{.LAB_EXECUTABLE_NAME}}"
+  
+  lab:sanitize:
+    deps:
+      - lab:run-sanitize
+
+  lab:build-sanitize:
+    run: once
+    cmds:
+      - |
+        {{.CC}} {{.CC_FLAGS}} \
+        lab.c \
+        {{range .SOURCE_FILES}} {{.}} {{end}} \
+        {{.DYN_LIBS_USED_PATH}} \
+        {{.DYN_LIBS_USED}} \
+        -O0 \
+        -lstandardloop-json \
+        -fno-omit-frame-pointer \
+        -fsanitize=address \
+        -o {{.LAB_EXECUTABLE_NAME}}-sanitize
+    sources:
+      - "*.c"
+    generates:
+      - "{{.LAB_EXECUTABLE_NAME}}-sanitize"
 
   lab:run:
     deps:
       - lab:build
     cmds:
       - ./{{.LAB_EXECUTABLE_NAME}}
+  
+  lab:run-sanitize:
+    deps:
+      - lab:build-sanitize
+    cmds:
+      - ./{{.LAB_EXECUTABLE_NAME}}-sanitize
 
   lab:leaks:
     deps:
       - lab:build
     cmds:
+      - cp /usr/local/lib/standardloop/libstandardloop-util.dylib ./ # to get around sips we need to move dylibs to local dir :(
+      - cp /usr/local/lib/standardloop/libstandardloop-json.dylib ./
       - leaks --atExit -- ./{{.LAB_EXECUTABLE_NAME}}
-    env:
-      DYLD_FALLBACK_LIBRARY_PATH: /usr/local/lib/standardloop/
-      DYLD_LIBRARY_PATH: /usr/local/lib/standardloop/
-      # MallocStackLogging: YES
-      # -lstandardloop-json \
-      # -fsanitize=address \
+      - rm libstandardloop-util.dylib
+      - rm libstandardloop-json.dylib
+    # env:
+    #   MallocStackLogging: YES
