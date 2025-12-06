@@ -6,13 +6,13 @@
 
 #include "./json.h"
 
-static void advanceChar(Lexer *);
-static void backtrackChar(Lexer *);
-static void skipWhitespace(Lexer *);
-static char *makeStringLiteral(Lexer *);
-static char *makeNumberLiteral(Lexer *);
-static char *makeNULLLiteral(Lexer *);
-static char *makeBoolLiteral(Lexer *);
+static void advanceChar(JSONLexer *);
+static void backtrackChar(JSONLexer *);
+static void skipWhitespace(JSONLexer *);
+static char *makeStringLiteral(JSONLexer *);
+static char *makeNumberLiteral(JSONLexer *);
+static char *makeNULLLiteral(JSONLexer *);
+static char *makeBoolLiteral(JSONLexer *);
 
 static bool isDigitOrMinusSign(char);
 
@@ -36,22 +36,22 @@ static void copyString(char *src, char *des, size_t len, size_t src_offset)
     }
 }
 
-extern bool IsTokenValueType(Token *token, bool check_starters)
+extern bool IsJSONTokenValueType(JSONToken *token, bool check_starters)
 {
-    if (token->type == TokenString || token->type == TokenNumber || token->type == TokenBool || token->type == TokenNULL)
+    if (token->type == JSONTokenString || token->type == JSONTokenNumber || token->type == JSONTokenBool || token->type == JSONTokenNULL)
     {
         return true;
     }
-    else if ((token->type == TokenOpenCurlyBrace || token->type == TokenOpenBracket) && check_starters)
+    else if ((token->type == JSONTokenOpenCurlyBrace || token->type == JSONTokenOpenBracket) && check_starters)
     {
         return true;
     }
     return false;
 }
 
-extern Lexer *LexerInit(char *input)
+extern JSONLexer *JSONLexerInit(char *input)
 {
-    Lexer *lexer = malloc(sizeof(Lexer));
+    JSONLexer *lexer = malloc(sizeof(JSONLexer));
     if (lexer == NULL)
     {
         return NULL;
@@ -68,7 +68,7 @@ extern Lexer *LexerInit(char *input)
     return lexer;
 }
 
-static void advanceChar(Lexer *lexer)
+static void advanceChar(JSONLexer *lexer)
 {
     if (lexer->read_position >= lexer->input_len)
     {
@@ -82,14 +82,14 @@ static void advanceChar(Lexer *lexer)
     lexer->read_position++;
 }
 
-static void backtrackChar(Lexer *lexer)
+static void backtrackChar(JSONLexer *lexer)
 {
     lexer->position -= 2;
     lexer->read_position--;
     lexer->current_char = lexer->input[lexer->read_position];
 }
 
-static void skipWhitespace(Lexer *lexer)
+static void skipWhitespace(JSONLexer *lexer)
 {
     while (lexer->current_char == SPACE_CHAR || lexer->current_char == TAB_CHAR || lexer->current_char == NEWLINE_CHAR || lexer->current_char == CARRIAGE_CHAR)
     {
@@ -101,9 +101,9 @@ static void skipWhitespace(Lexer *lexer)
     }
 }
 
-extern Token *NewToken(enum TokenType type, u_int32_t start, u_int32_t end, u_int32_t line_num, char *literal)
+extern JSONToken *NewJSONToken(enum JSONTokenType type, u_int32_t start, u_int32_t end, u_int32_t line_num, char *literal)
 {
-    Token *token = malloc(sizeof(Token));
+    JSONToken *token = malloc(sizeof(JSONToken));
     if (token == NULL)
     {
         return NULL;
@@ -125,51 +125,51 @@ static bool isDigitOrMinusSign(char test)
     return false;
 }
 
-extern Token *Lex(Lexer *lexer)
+extern JSONToken *Lex(JSONLexer *lexer)
 {
-    Token *token = NULL;
+    JSONToken *token = NULL;
     advanceChar(lexer);
     skipWhitespace(lexer);
 
     u_int32_t curr_pos = lexer->position;
     if (lexer->current_char == NULL_CHAR)
     {
-        token = NewToken(TokenEOF, curr_pos, lexer->position + 1, lexer->line, NULL_CHAR_STRING);
+        token = NewJSONToken(JSONTokenEOF, curr_pos, lexer->position + 1, lexer->line, NULL_CHAR_STRING);
     }
     else if (lexer->current_char == CURLY_OPEN_CHAR)
     {
-        token = NewToken(TokenOpenCurlyBrace, curr_pos, lexer->position + 1, lexer->line, TOKEN_OPEN_CURLY_BRACE_STRING);
+        token = NewJSONToken(JSONTokenOpenCurlyBrace, curr_pos, lexer->position + 1, lexer->line, JSON_TOKEN_OPEN_CURLY_BRACE_STRING);
     }
     else if (lexer->current_char == CURLY_CLOSE_CHAR)
     {
-        token = NewToken(TokenCloseCurlyBrace, curr_pos, lexer->position + 1, lexer->line, TOKEN_CLOSE_CURLY_BRACE_STRING);
+        token = NewJSONToken(JSONTokenCloseCurlyBrace, curr_pos, lexer->position + 1, lexer->line, JSON_TOKEN_CLOSE_CURLY_BRACE_STRING);
     }
     else if (lexer->current_char == BRACKET_OPEN_CHAR)
     {
-        token = NewToken(TokenOpenBracket, curr_pos, lexer->position + 1, lexer->line, TOKEN_OPEN_BRACKET_STRING);
+        token = NewJSONToken(JSONTokenOpenBracket, curr_pos, lexer->position + 1, lexer->line, JSON_TOKEN_OPEN_BRACKET_STRING);
     }
     else if (lexer->current_char == BRACKET_CLOSE_CHAR)
     {
-        token = NewToken(TokenCloseBracket, curr_pos, lexer->position + 1, lexer->line, TOKEN_CLOSE_BRACKET_STRING);
+        token = NewJSONToken(JSONTokenCloseBracket, curr_pos, lexer->position + 1, lexer->line, JSON_TOKEN_CLOSE_BRACKET_STRING);
     }
     else if (lexer->current_char == COMMA_CHAR)
     {
-        token = NewToken(TokenComma, curr_pos, lexer->position + 1, lexer->line, TOKEN_COMMA_STRING);
+        token = NewJSONToken(JSONTokenComma, curr_pos, lexer->position + 1, lexer->line, JSON_TOKEN_COMMA_STRING);
     }
     else if (lexer->current_char == COLON_CHAR)
     {
-        token = NewToken(TokenColon, curr_pos, lexer->position + 1, lexer->line, TOKEN_COLON_STRING);
+        token = NewJSONToken(JSONTokenColon, curr_pos, lexer->position + 1, lexer->line, JSON_TOKEN_COLON_STRING);
     }
     else if (lexer->current_char == DOUBLE_QUOTES_CHAR)
     {
         char *string_literal = makeStringLiteral(lexer);
         if (string_literal == NULL)
         {
-            token = NewToken(TokenIllegal, curr_pos, lexer->position + 1, lexer->line, NULL);
+            token = NewJSONToken(JSONTokenIllegal, curr_pos, lexer->position + 1, lexer->line, NULL);
         }
         else
         {
-            token = NewToken(TokenString, curr_pos, lexer->position + 1, lexer->line, string_literal);
+            token = NewJSONToken(JSONTokenString, curr_pos, lexer->position + 1, lexer->line, string_literal);
         }
     }
     else if (isDigitOrMinusSign(lexer->current_char))
@@ -177,11 +177,11 @@ extern Token *Lex(Lexer *lexer)
         char *number_literal = makeNumberLiteral(lexer);
         if (number_literal == NULL)
         {
-            token = NewToken(TokenIllegal, curr_pos, lexer->position + 1, lexer->line, NULL);
+            token = NewJSONToken(JSONTokenIllegal, curr_pos, lexer->position + 1, lexer->line, NULL);
         }
         else
         {
-            token = NewToken(TokenNumber, curr_pos, lexer->position + 1, lexer->line, number_literal);
+            token = NewJSONToken(JSONTokenNumber, curr_pos, lexer->position + 1, lexer->line, number_literal);
             backtrackChar(lexer);
         }
     }
@@ -190,11 +190,11 @@ extern Token *Lex(Lexer *lexer)
         char *bool_literal = makeBoolLiteral(lexer);
         if (bool_literal == NULL)
         {
-            token = NewToken(TokenIllegal, curr_pos, lexer->position + 1, lexer->line, NULL);
+            token = NewJSONToken(JSONTokenIllegal, curr_pos, lexer->position + 1, lexer->line, NULL);
         }
         else
         {
-            token = NewToken(TokenBool, curr_pos, lexer->position + 1, lexer->line, bool_literal);
+            token = NewJSONToken(JSONTokenBool, curr_pos, lexer->position + 1, lexer->line, bool_literal);
         }
     }
     else if (lexer->current_char == 'n')
@@ -202,22 +202,22 @@ extern Token *Lex(Lexer *lexer)
         char *null_literal = makeNULLLiteral(lexer);
         if (null_literal == NULL)
         {
-            token = NewToken(TokenIllegal, curr_pos, lexer->position + 1, lexer->line, NULL);
+            token = NewJSONToken(JSONTokenIllegal, curr_pos, lexer->position + 1, lexer->line, NULL);
         }
         else
         {
-            token = NewToken(TokenNULL, curr_pos, lexer->position + 1, lexer->line, null_literal);
+            token = NewJSONToken(JSONTokenNULL, curr_pos, lexer->position + 1, lexer->line, null_literal);
         }
     }
     else
     {
-        token = NewToken(TokenIllegal, curr_pos, lexer->position + 1, lexer->line, NULL);
+        token = NewJSONToken(JSONTokenIllegal, curr_pos, lexer->position + 1, lexer->line, NULL);
     }
 
     return token;
 }
 
-static char *makeBoolLiteral(Lexer *lexer)
+static char *makeBoolLiteral(JSONLexer *lexer)
 {
     char first_char = lexer->current_char;
     u_int32_t start_position = lexer->position;
@@ -256,7 +256,7 @@ static char *makeBoolLiteral(Lexer *lexer)
     return bool_literal;
 }
 
-static char *makeNULLLiteral(Lexer *lexer)
+static char *makeNULLLiteral(JSONLexer *lexer)
 {
     if (lexer == NULL)
     {
@@ -296,7 +296,7 @@ static char *makeNULLLiteral(Lexer *lexer)
     return null_literal;
 }
 
-static char *makeNumberLiteral(Lexer *lexer)
+static char *makeNumberLiteral(JSONLexer *lexer)
 {
     u_int32_t start_position = lexer->position;
     u_int8_t minus_count = 0;
@@ -392,7 +392,7 @@ static char *makeNumberLiteral(Lexer *lexer)
     return number_literal;
 }
 
-static char *makeStringLiteral(Lexer *lexer)
+static char *makeStringLiteral(JSONLexer *lexer)
 {
     u_int32_t start_position = lexer->position + 1; // move pass quotes
     char prev_char = lexer->current_char;
@@ -478,7 +478,7 @@ static char *makeStringLiteral(Lexer *lexer)
     return string_literal;
 }
 
-extern void PrintToken(Token *token, bool print_literal)
+extern void PrintJSONToken(JSONToken *token, bool print_literal)
 {
     if (token == NULL)
     {
@@ -487,47 +487,47 @@ extern void PrintToken(Token *token, bool print_literal)
     printf("Line: %u Place: %u - %u ", token->line, token->start, token->end);
     switch (token->type)
     {
-    case TokenEOF:
-        printf("Kind: TokenEOF");
+    case JSONTokenEOF:
+        printf("Kind: JSONTokenEOF");
         break;
-    case TokenColon:
-        printf("Kind: TokenColon");
+    case JSONTokenColon:
+        printf("Kind: JSONTokenColon");
         break;
-    case TokenOpenCurlyBrace:
-        printf("Kind: TokenOpenCurlyBrace");
+    case JSONTokenOpenCurlyBrace:
+        printf("Kind: JSONTokenOpenCurlyBrace");
         break;
-    case TokenCloseCurlyBrace:
-        printf("Kind: TokenCloseCurlyBrace");
+    case JSONTokenCloseCurlyBrace:
+        printf("Kind: JSONTokenCloseCurlyBrace");
         break;
-    case TokenOpenBracket:
-        printf("Kind: TokenOpenBracket");
+    case JSONTokenOpenBracket:
+        printf("Kind: JSONTokenOpenBracket");
         break;
-    case TokenCloseBracket:
-        printf("Kind: TokenCloseBracket");
+    case JSONTokenCloseBracket:
+        printf("Kind: JSONTokenCloseBracket");
         break;
-    case TokenComma:
-        printf("Kind: TokenComma");
+    case JSONTokenComma:
+        printf("Kind: JSONTokenComma");
         break;
-    case TokenString:
-        printf("Kind: TokenString");
+    case JSONTokenString:
+        printf("Kind: JSONTokenString");
         break;
-    case TokenNumber:
-        printf("Kind: TokenNumber");
+    case JSONTokenNumber:
+        printf("Kind: JSONTokenNumber");
         break;
-    case TokenBool:
-        printf("Kind: TokenBool");
+    case JSONTokenBool:
+        printf("Kind: JSONTokenBool");
         break;
-    case TokenNULL:
-        printf("Kind: TokenNULL");
+    case JSONTokenNULL:
+        printf("Kind: JSONTokenNULL");
         break;
-    case TokenIllegal:
+    case JSONTokenIllegal:
     default:
-        printf("Kind: TokenIllegal");
+        printf("Kind: JSONTokenIllegal");
         break;
     }
-    if (print_literal && token->type != TokenIllegal && token->type != TokenEOF)
+    if (print_literal && token->type != JSONTokenIllegal && token->type != JSONTokenEOF)
     {
-        if (token->type == TokenString)
+        if (token->type == JSONTokenString)
         {
             printf("Literal: \"%s\"\n", token->literal);
         }
@@ -542,12 +542,12 @@ extern void PrintToken(Token *token, bool print_literal)
     }
 }
 
-extern void FreeToken(Token *token)
+extern void FreeJSONToken(JSONToken *token)
 {
     if (token != NULL)
     {
-        // if (token->type == TokenString || token->type == TokenNumber ||
-        //     token->type == TokenBool || token->type == TokenNULL)
+        // if (token->type == JSONTokenString || token->type == JSONTokenNumber ||
+        //     token->type == JSONTokenBool || token->type == JSONTokenNULL)
         // {
         //     if (token->literal != NULL)
         //     {
@@ -558,7 +558,7 @@ extern void FreeToken(Token *token)
     }
 }
 
-extern void FreeLexer(Lexer *lexer)
+extern void FreeJSONLexer(JSONLexer *lexer)
 {
     if (lexer != NULL)
     {
@@ -566,30 +566,30 @@ extern void FreeLexer(Lexer *lexer)
     }
 }
 
-extern void LexerDebugTest(char *input_str, bool exit_after)
+extern void JSONLexerDebugTest(char *input_str, bool exit_after)
 {
-    Lexer *lexer = LexerInit(input_str);
+    JSONLexer *lexer = JSONLexerInit(input_str);
 
     while (ALWAYS)
     {
-        Token *token = Lex(lexer);
-        PrintToken(token, true);
-        if (token->type == TokenEOF)
+        JSONToken *token = Lex(lexer);
+        PrintJSONToken(token, true);
+        if (token->type == JSONTokenEOF)
         {
-            FreeToken(token);
+            FreeJSONToken(token);
             break;
         }
-        // else if (token->type == TokenIllegal)
+        // else if (token->type == JSONTokenIllegal)
         // {
-        //     FreeToken(token);
-        //     FreeLexer(lexer);
+        //     FreeJSONToken(token);
+        //     FreeJSONLexer(lexer);
         //     printf("JSON is invalid!\n");
         //     return NULL;
         // }
 
-        FreeToken(token);
+        FreeJSONToken(token);
     }
-    FreeLexer(lexer);
+    FreeJSONLexer(lexer);
     if (exit_after)
     {
         exit(1);

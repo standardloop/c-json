@@ -3,8 +3,8 @@
 
 #define STANDARDLOOP_JSON_H_MAJOR_VERSION 0
 #define STANDARDLOOP_JSON_H_MINOR_VERSION 0
-#define STANDARDLOOP_JSON_H_PATCH_VERSION 2
-#define STANDARDLOOP_JSON_H_VERSION "0.0.2"
+#define STANDARDLOOP_JSON_H_PATCH_VERSION 3
+#define STANDARDLOOP_JSON_H_VERSION "0.0.3"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -116,37 +116,37 @@ extern void FreeDynamicArray(DynamicArray *);
 
 // ————————— LEXER START —————————
 #define NULL_CHAR_STRING "\0"
-#define TOKEN_OPEN_CURLY_BRACE_STRING "{"
-#define TOKEN_CLOSE_CURLY_BRACE_STRING "}"
-#define TOKEN_OPEN_BRACKET_STRING "["
-#define TOKEN_CLOSE_BRACKET_STRING "]"
-#define TOKEN_COLON_STRING ":"
-#define TOKEN_COMMA_STRING ","
+#define JSON_TOKEN_OPEN_CURLY_BRACE_STRING "{"
+#define JSON_TOKEN_CLOSE_CURLY_BRACE_STRING "}"
+#define JSON_TOKEN_OPEN_BRACKET_STRING "["
+#define JSON_TOKEN_CLOSE_BRACKET_STRING "]"
+#define JSON_TOKEN_COLON_STRING ":"
+#define JSON_TOKEN_COMMA_STRING ","
 
-enum TokenType
+enum JSONTokenType
 {
-    TokenEOF,
-    TokenColon,
-    TokenOpenCurlyBrace,
-    TokenCloseCurlyBrace,
-    TokenOpenBracket,
-    TokenCloseBracket,
-    TokenComma,
-    TokenString,
-    TokenNumber,
-    TokenBool,
-    TokenNULL,
-    TokenIllegal,
+    JSONTokenEOF,
+    JSONTokenColon,
+    JSONTokenOpenCurlyBrace,
+    JSONTokenCloseCurlyBrace,
+    JSONTokenOpenBracket,
+    JSONTokenCloseBracket,
+    JSONTokenComma,
+    JSONTokenString,
+    JSONTokenNumber,
+    JSONTokenBool,
+    JSONTokenNULL,
+    JSONTokenIllegal,
 };
 
 typedef struct
 {
-    enum TokenType type;
+    enum JSONTokenType type;
     u_int32_t start;
     u_int32_t end;
     u_int32_t line;
     char *literal;
-} Token;
+} JSONToken;
 
 typedef struct
 {
@@ -156,40 +156,40 @@ typedef struct
     u_int32_t position;
     u_int32_t read_position;
     u_int32_t line;
-} Lexer;
+} JSONLexer;
 
-extern Lexer *LexerInit(char *);
-extern void FreeLexer(Lexer *);
-extern Token *Lex(Lexer *);
-extern void PrintToken(Token *, bool);
-extern void FreeToken(Token *);
-extern bool IsTokenValueType(Token *, bool);
+extern JSONLexer *JSONLexerInit(char *);
+extern void FreeJSONLexer(JSONLexer *);
+extern JSONToken *Lex(JSONLexer *);
+extern void PrintJSONToken(JSONToken *, bool);
+extern void FreeJSONToken(JSONToken *);
+extern bool IsJSONTokenValueType(JSONToken *, bool);
 
-extern void LexerDebugTest(char *, bool);
+extern void JSONLexerDebugTest(char *, bool);
 
-extern Token *NewToken(enum TokenType, u_int32_t, u_int32_t, u_int32_t, char *);
+extern JSONToken *NewJSONToken(enum JSONTokenType, u_int32_t, u_int32_t, u_int32_t, char *);
 
 // ————————— LEXER END —————————
 
 // ————————— PARSER START —————————
 typedef struct
 {
-    Lexer *lexer;
-    Token *current_token;
-    Token *peek_token;
+    JSONLexer *lexer;
+    JSONToken *current_token;
+    JSONToken *peek_token;
     bool input_error;
     bool memory_error;
     char *error_message;
     int64_t list_nested;
     int64_t obj_nested;
-} Parser;
+} JSONParser;
 
-extern Parser *ParserInit(Lexer *);
-extern void PrintParserError(Parser *);
-extern void FreeParser(Parser *);
-extern void PrintErrorLine(Parser *);
+extern JSONParser *JSONParserInit(JSONLexer *);
+extern void PrintJSONParserError(JSONParser *);
+extern void FreeJSONParser(JSONParser *);
+extern void PrintJSONParserErrorLine(JSONParser *);
 extern void FreeJSONValue(JSONValue *, bool);
-extern JSON *ParseJSON(Parser *);
+extern JSON *ParseJSON(JSONParser *);
 extern JSONValue *JSONValueReplicate(JSONValue *);
 extern JSONValue *JSONValueInit(enum JSONValueType, void *, char *);
 

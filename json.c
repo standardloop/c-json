@@ -41,17 +41,17 @@ extern JSON *StringToJSON(char *input_str)
         return NULL;
     }
 
-    // LexerDebugTest(input_str, true);
-    Lexer *lexer = LexerInit(input_str);
+    // JSONLexerDebugTest(input_str, true);
+    JSONLexer *lexer = JSONLexerInit(input_str);
     if (lexer == NULL)
     {
         return NULL;
     }
 
-    Parser *parser = ParserInit(lexer);
+    JSONParser *parser = JSONParserInit(lexer);
     if (parser == NULL)
     {
-        FreeLexer(lexer);
+        FreeJSONLexer(lexer);
         return NULL;
     }
     JSON *json = ParseJSON(parser);
