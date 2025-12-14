@@ -125,7 +125,7 @@ static bool isDigitOrMinusSign(char test)
     return false;
 }
 
-extern JSONToken *Lex(JSONLexer *lexer)
+extern JSONToken *JSONLex(JSONLexer *lexer)
 {
     JSONToken *token = NULL;
     advanceChar(lexer);
@@ -572,7 +572,7 @@ extern void JSONLexerDebugTest(char *input_str, bool exit_after)
 
     while (ALWAYS)
     {
-        JSONToken *token = Lex(lexer);
+        JSONToken *token = JSONLex(lexer);
         PrintJSONToken(token, true);
         if (token->type == JSONTokenEOF)
         {

@@ -3,8 +3,8 @@
 
 #define STANDARDLOOP_JSON_H_MAJOR_VERSION 0
 #define STANDARDLOOP_JSON_H_MINOR_VERSION 0
-#define STANDARDLOOP_JSON_H_PATCH_VERSION 3
-#define STANDARDLOOP_JSON_H_VERSION "0.0.3"
+#define STANDARDLOOP_JSON_H_PATCH_VERSION 4
+#define STANDARDLOOP_JSON_H_VERSION "0.0.4"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,13 +18,13 @@
 
 enum JSONValueType
 {
-    OBJ_t,
-    NUMBER_INT_t,
-    NUMBER_DOUBLE_t,
-    STRING_t,
-    BOOL_t,
-    NULL_t,
-    LIST_t,
+    JSONOBJ_t,
+    JSONNUMBER_INT_t,
+    JSONNUMBER_DOUBLE_t,
+    JSONSTRING_t,
+    JSONBOOL_t,
+    JSONNULL_t,
+    JSONLIST_t,
 };
 
 typedef struct jsonValue
@@ -45,7 +45,7 @@ typedef struct
 extern JSON *JSONInit();
 extern JSON *StringToJSON(char *);
 extern JSON *JSONFromFile(char *);
-extern char *JSONToString(JSON *);
+extern char *JSONToString(JSON *, bool);
 
 extern void FreeJSON(JSON *);
 extern void PrintJSON(JSON *);
@@ -160,7 +160,7 @@ typedef struct
 
 extern JSONLexer *JSONLexerInit(char *);
 extern void FreeJSONLexer(JSONLexer *);
-extern JSONToken *Lex(JSONLexer *);
+extern JSONToken *JSONLex(JSONLexer *);
 extern void PrintJSONToken(JSONToken *, bool);
 extern void FreeJSONToken(JSONToken *);
 extern bool IsJSONTokenValueType(JSONToken *, bool);

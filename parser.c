@@ -50,7 +50,7 @@ extern JSONParser *JSONParserInit(JSONLexer *lexer)
     return parser;
 }
 
-extern void FreeParser(JSONParser *parser)
+extern void FreeJSONParser(JSONParser *parser)
 {
 
     if (parser != NULL)
@@ -113,7 +113,7 @@ static void nextJSONToken(JSONParser *parser)
             parser->obj_nested--;
         }
     }
-    parser->peek_token = Lex(parser->lexer);
+    parser->peek_token = JSONLex(parser->lexer);
 }
 
 static bool parseListErrorHelper(JSONParser *parser)
@@ -227,7 +227,7 @@ static JSONValue *parseList(JSONParser *parser)
         }
     }
 
-    json_value->value_type = LIST_t;
+    json_value->value_type = JSONLIST_t;
     json_value->value = list;
     return json_value;
 }
@@ -238,15 +238,15 @@ extern void FreeJSONValue(JSONValue *json_value, bool deep)
     {
         if (deep && json_value->value != NULL)
         {
-            if (json_value->value_type == LIST_t)
+            if (json_value->value_type == JSONLIST_t)
             {
                 FreeDynamicArray(json_value->value);
             }
-            else if (json_value->value_type == OBJ_t)
+            else if (json_value->value_type == JSONOBJ_t)
             {
                 FreeHashMap(json_value->value);
             }
-            else if (json_value->value_type != NULL_t)
+            else if (json_value->value_type != JSONNULL_t)
             {
                 free(json_value->value);
             }
@@ -352,7 +352,7 @@ static JSONValue *parseObj(JSONParser *parser)
         }
 
         JSONValue *obj_key = parse(parser);
-        if (obj_key != NULL && (obj_key->value == NULL || obj_key->value_type != STRING_t))
+        if (obj_key != NULL && (obj_key->value == NULL || obj_key->value_type != JSONSTRING_t))
         {
             FreeHashMap(map);
             FreeJSONValue(obj_key, true);
@@ -403,7 +403,7 @@ static JSONValue *parseObj(JSONParser *parser)
             FreeJSONValue(obj_key, false);
         }
     }
-    json_value->value_type = OBJ_t;
+    json_value->value_type = JSONOBJ_t;
     json_value->value = map;
     return json_value;
 }
@@ -416,16 +416,16 @@ static JSONValue *initQuickJSONValue(enum JSONValueType value_type, void *value)
     {
         return NULL;
     }
-    if (value_type == STRING_t)
+    if (value_type == JSONSTRING_t)
     {
         json_value->value = value;
     }
-    else if (value_type == NULL_t)
+    else if (value_type == JSONNULL_t)
     {
         json_value->value = NULL;
         free(value);
     }
-    else if (value_type == BOOL_t)
+    else if (value_type == JSONBOOL_t)
     {
         bool *new_bool = malloc(sizeof(bool));
         if (((char *)value)[0] == 't')
@@ -439,14 +439,14 @@ static JSONValue *initQuickJSONValue(enum JSONValueType value_type, void *value)
         json_value->value = new_bool;
         free(value);
     }
-    else if (value_type == NUMBER_DOUBLE_t)
+    else if (value_type == JSONNUMBER_DOUBLE_t)
     {
         double *new_double = malloc(sizeof(double));
         *new_double = atof((char *)value);
         json_value->value = new_double;
         free(value);
     }
-    else if (value_type == NUMBER_INT_t)
+    else if (value_type == JSONNUMBER_INT_t)
     {
         int64_t *new_int = malloc(sizeof(int64_t));
         *new_int = (int64_t)atof((char *)value);
@@ -486,11 +486,11 @@ static JSONValue *parseNumber(JSONParser *parser)
     // For now all scientific notation with be made into a floating point
     if (isCharInString(parser->current_token->literal, DOT_CHAR) || isCharInString(parser->current_token->literal, 'e') || isCharInString(parser->current_token->literal, 'E'))
     {
-        return initQuickJSONValue(NUMBER_DOUBLE_t, parser->current_token->literal);
+        return initQuickJSONValue(JSONNUMBER_DOUBLE_t, parser->current_token->literal);
     }
     else
     {
-        return initQuickJSONValue(NUMBER_INT_t, parser->current_token->literal);
+        return initQuickJSONValue(JSONNUMBER_INT_t, parser->current_token->literal);
     }
 }
 
@@ -533,7 +533,7 @@ static JSONValue *parse(JSONParser *parser)
     else if (parser->current_token->type == JSONTokenString)
     {
         // printf("JSONTokenString\n");
-        return_value = initQuickJSONValue(STRING_t, parser->current_token->literal);
+        return_value = initQuickJSONValue(JSONSTRING_t, parser->current_token->literal);
     }
     else if (parser->current_token->type == JSONTokenNumber)
     {
@@ -541,12 +541,12 @@ static JSONValue *parse(JSONParser *parser)
     }
     else if (parser->current_token->type == JSONTokenBool)
     {
-        return_value = initQuickJSONValue(BOOL_t, parser->current_token->literal);
+        return_value = initQuickJSONValue(JSONBOOL_t, parser->current_token->literal);
     }
     else if (parser->current_token->type == JSONTokenNULL)
     {
         // printf("test\n");
-        return_value = initQuickJSONValue(NULL_t, parser->current_token->literal);
+        return_value = initQuickJSONValue(JSONNULL_t, parser->current_token->literal);
     }
     else if (parser->current_token->type == JSONTokenIllegal)
     {
@@ -602,7 +602,7 @@ extern JSON *ParseJSON(JSONParser *parser)
     if (json == NULL)
     {
         printf("[ERROR]: Not enough memory for JSON\n");
-        FreeParser(parser);
+        FreeJSONParser(parser);
         return NULL;
     }
     json->root = parse(parser);
@@ -612,11 +612,11 @@ extern JSON *ParseJSON(JSONParser *parser)
     {
         PrintErrorLine(parser);
         PrintParserError(parser);
-        FreeParser(parser);
+        FreeJSONParser(parser);
         FreeJSON(json);
         return NULL;
     }
-    FreeParser(parser);
+    FreeJSONParser(parser);
     return json;
 }
 
@@ -642,27 +642,27 @@ extern JSONValue *JSONValueReplicate(JSONValue *json_value)
         return NULL;
     }
     void *value = NULL;
-    if (json_value->value_type == NUMBER_DOUBLE_t)
+    if (json_value->value_type == JSONNUMBER_DOUBLE_t)
     {
         value = (double *)malloc(sizeof(double) * 1);
         memcpy(value, json_value->value, sizeof(double) * 1);
     }
-    else if (json_value->value_type == NUMBER_INT_t)
+    else if (json_value->value_type == JSONNUMBER_INT_t)
     {
         value = (int *)malloc(sizeof(int) * 1);
         memcpy(value, json_value->value, sizeof(int) * 1);
     }
-    else if (json_value->value_type == STRING_t)
+    else if (json_value->value_type == JSONSTRING_t)
     {
         size_t value_len = strlen((char *)json_value->value) + 1;
         value = (char *)malloc(sizeof(char) * value_len);
         memcpy(value, json_value->value, sizeof(char) * value_len);
     }
-    else if (json_value->value_type == LIST_t)
+    else if (json_value->value_type == JSONLIST_t)
     {
         value = (DynamicArray *)DynamicArrayReplicate((DynamicArray *)json_value->value);
     }
-    else if (json_value->value_type == OBJ_t)
+    else if (json_value->value_type == JSONOBJ_t)
     {
         value = (HashMap *)HashMapReplicate((HashMap *)json_value->value); // WIP
     }

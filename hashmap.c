@@ -94,7 +94,7 @@ static inline bool isMapFull(HashMap *map)
 
 extern void HashMapInsert(HashMap *map, JSONValue *entry)
 {
-    if (map == NULL || entry->key == NULL || (entry->value == NULL && entry->value_type != NULL_t))
+    if (map == NULL || entry->key == NULL || (entry->value == NULL && entry->value_type != JSONNULL_t))
     {
         return;
     }
@@ -451,7 +451,7 @@ extern HashMap *HashMapReplicate(HashMap *map)
 
 extern char *ObjToString(HashMap *map)
 {
-    // FIXME map->entriess == NULL ?
+    // FIXME map->entries == NULL ?
     if (map == NULL)
     {
         return NULL;

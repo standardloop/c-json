@@ -20,7 +20,7 @@ int main(void)
     // PrintJSON(json);
     // FreeJSON(json);
 
-    char *json_string = JSONToString(json);
+    char *json_string = JSONToString(json, true);
     if (json_string == NULL)
     {
         return EXIT_FAILURE;

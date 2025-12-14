@@ -16,7 +16,7 @@ vars:
   DYLIB_NAME: libstandardloop-json.dylib
   DYLIB_PATH: /usr/local/lib/standardloop/
   DYLIB_INCLUDE_PATH: /usr/local/include/standardloop/
-  RELEASE_VERSION: 0.0.3
+  RELEASE_VERSION: 0.0.4
 
 # Inputs
 # - REPO_NAME
@@ -43,7 +43,7 @@ tasks:
       - cat json.h | grep -q {{.RELEASE_VERSION}}
       - cat json.h | grep -q "MAJOR_VERSION 0"
       - cat json.h | grep -q "MINOR_VERSION 0"
-      - cat json.h | grep -q "PATCH_VERSION 3"
+      - cat json.h | grep -q "PATCH_VERSION 4"
 
   dependencies:
     deps:
@@ -189,5 +189,3 @@ tasks:
       - leaks --atExit -- ./{{.LAB_EXECUTABLE_NAME}}
       - rm libstandardloop-util.dylib
       - rm libstandardloop-json.dylib
-    # env:
-    #   MallocStackLogging: YES

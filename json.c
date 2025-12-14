@@ -97,7 +97,7 @@ extern JSON *JSONFromFile(char *filename)
     return json_from_string;
 }
 
-extern char *JSONToString(JSON *json)
+extern char *JSONToString(JSON *json, bool free_json)
 {
     if (json == NULL)
     {
@@ -109,7 +109,10 @@ extern char *JSONToString(JSON *json)
         FreeJSON(json);
         return NULL;
     }
-    FreeJSON(json);
+    if (free_json)
+    {
+        FreeJSON(json);
+    }
     return json_as_string;
 }
 
@@ -131,22 +134,22 @@ extern char *JSONValueToString(JSONValue *json_value)
     char *json_value_string = NULL;
     switch (json_value->value_type)
     {
-    case LIST_t:
+    case JSONLIST_t:
         json_value_string = ListToString((DynamicArray *)json_value->value);
         break;
-    case OBJ_t:
+    case JSONOBJ_t:
         json_value_string = ObjToString((HashMap *)json_value->value);
         break;
-    case NUMBER_INT_t:
+    case JSONNUMBER_INT_t:
         json_value_string = Int64ToString(*(int64_t *)json_value->value);
         break;
-    case NUMBER_DOUBLE_t:
+    case JSONNUMBER_DOUBLE_t:
         json_value_string = doubleToString(*(double *)json_value->value);
         break;
-    case STRING_t:
+    case JSONSTRING_t:
         json_value_string = PutQuotesAroundString(json_value->value, false);
         break;
-    case BOOL_t:
+    case JSONBOOL_t:
         if (*(bool *)json_value->value == true)
         {
             json_value_string = malloc(sizeof(char) * 5);
@@ -158,7 +161,7 @@ extern char *JSONValueToString(JSONValue *json_value)
             strcpy(json_value_string, JSON_BOOL_FALSE);
         }
         break;
-    case NULL_t:
+    case JSONNULL_t:
         json_value_string = malloc(sizeof(char) * 5);
         strcpy(json_value_string, JSON_NULL);
         break;
@@ -178,11 +181,11 @@ extern void FreeJSON(JSON *json)
     {
         if (json->root->value != NULL)
         {
-            if (json->root->value_type == LIST_t)
+            if (json->root->value_type == JSONLIST_t)
             {
                 FreeDynamicArray(json->root->value);
             }
-            else if (json->root->value_type == OBJ_t)
+            else if (json->root->value_type == JSONOBJ_t)
             {
                 FreeHashMap(json->root->value);
             }
@@ -199,11 +202,11 @@ extern void PrintJSON(JSON *json)
     {
         return;
     }
-    if (json->root->value_type == LIST_t)
+    if (json->root->value_type == JSONLIST_t)
     {
         PrintDynamicArray(json->root->value);
     }
-    else if (json->root->value_type == OBJ_t)
+    else if (json->root->value_type == JSONOBJ_t)
     {
         PrintHashMap(json->root->value);
     }
@@ -217,25 +220,25 @@ extern void PrintJSONValue(JSONValue *json_value)
     }
     switch (json_value->value_type)
     {
-    case OBJ_t:
+    case JSONOBJ_t:
         printJSONObjValue((HashMap *)json_value->value);
         break;
-    case NUMBER_INT_t:
+    case JSONNUMBER_INT_t:
         printJSONNumberIntValue((int64_t *)json_value->value);
         break;
-    case NUMBER_DOUBLE_t:
+    case JSONNUMBER_DOUBLE_t:
         printJSONNumberDoubleValue((double *)json_value->value);
         break;
-    case STRING_t:
+    case JSONSTRING_t:
         printJSONStringValue((char *)json_value->value);
         break;
-    case BOOL_t:
+    case JSONBOOL_t:
         printJSONBoolValue((bool *)json_value->value);
         break;
-    case NULL_t:
+    case JSONNULL_t:
         printJSONNULLValue();
         break;
-    case LIST_t:
+    case JSONLIST_t:
         printJSONListValue((DynamicArray *)json_value->value);
         break;
     default:
