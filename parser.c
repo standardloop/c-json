@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <ctype.h>
+#include <errno.h>
 
 #include "./json.h"
 
@@ -32,7 +33,7 @@ extern JSONParser *JSONParserInit(JSONLexer *lexer)
     if (parser == NULL)
     {
         FreeJSONLexer(lexer);
-        printf("[ERROR]: couldn't allocate memory for JSONParser\n");
+        errno = ENOMEM;
         return NULL;
     }
 
@@ -498,13 +499,10 @@ static JSONValue *parse(JSONParser *parser)
 {
     if (parser == NULL)
     {
+        errno = EINVAL;
         return NULL;
     }
-    // printf("[JOSH]: %d\n", parser->peek_token->type);
-    // printf("[JOSH]: %s\n", parser->peek_token->literal);
-
     nextJSONToken(parser);
-    // PrintJSONToken(parser->current_token, false);
     JSONValue *return_value = NULL;
 
     if (parser->current_token->type == JSONTokenOpenCurlyBrace)
@@ -601,8 +599,8 @@ extern JSON *ParseJSON(JSONParser *parser)
     JSON *json = malloc(sizeof(JSON));
     if (json == NULL)
     {
-        printf("[ERROR]: Not enough memory for JSON\n");
         FreeJSONParser(parser);
+        errno = ENOMEM;
         return NULL;
     }
     json->root = parse(parser);

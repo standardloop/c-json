@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <limits.h>
 #include <math.h>
+#include <errno.h>
 
 #include <standardloop/util.h>
 
@@ -26,7 +27,7 @@ extern JSON *JSONInit()
     JSON *json = malloc(sizeof(JSON));
     if (json == NULL)
     {
-        // print error
+        errno = ENOMEM;
         return NULL;
     }
     json->root = NULL;
@@ -37,7 +38,7 @@ extern JSON *StringToJSON(char *input_str)
 {
     if (input_str == NULL)
     {
-        printf("[ERROR]: input StringToJSON is NULL\n");
+        errno = EINVAL;
         return NULL;
     }
 
@@ -59,7 +60,6 @@ extern JSON *StringToJSON(char *input_str)
     {
         // need to differentitate between parsing error because JSON is invalid or
         // if we ran out of memory trying to parse it.
-        printf("[ERROR]: couldn't parse JSON");
         return NULL;
     }
 
@@ -68,29 +68,27 @@ extern JSON *StringToJSON(char *input_str)
 
 extern JSON *JSONFromFile(char *filename)
 {
-
     FILE *file_ptr = fopen(filename, "rb");
-
     if (file_ptr == NULL)
     {
-        printf("[ERROR]: unable to open file \"%s\"\n", filename);
         return NULL;
     }
+
     fseek(file_ptr, 0, SEEK_END);
     u_int64_t length = ftell(file_ptr);
     fseek(file_ptr, 0, SEEK_SET);
     char *buffer = malloc(length + 1);
-    if (buffer != NULL)
+    if (buffer == NULL)
     {
-        fread(buffer, 1, length, file_ptr);
+        fclose(file_ptr);
+        errno = ENOMEM;
+        return NULL;
     }
+
+    fread(buffer, 1, length, file_ptr);
     fclose(file_ptr);
     buffer[length] = NULL_CHAR;
 
-    if (buffer == NULL)
-    {
-        return NULL;
-    }
     JSON *json_from_string = StringToJSON(buffer);
     free(buffer);
 
@@ -101,6 +99,7 @@ extern char *JSONToString(JSON *json, bool free_json)
 {
     if (json == NULL)
     {
+        errno = EINVAL;
         return NULL;
     }
     char *json_as_string = JSONValueToString(json->root);
@@ -119,11 +118,12 @@ extern char *JSONToString(JSON *json, bool free_json)
 #define FLOAT_CHAR_MAX 10
 static char *doubleToString(double num)
 {
-    // double integral;
-    // double fractional = modf(num, &integral);
-    // int64_t integral_as_int64 = (int64_t)integral;
-    // printf("%lld %lf\n", integral_as_int64, fractional);
     char *double_as_string = malloc((sizeof(char) * FLOAT_CHAR_MAX) + sizeof(char));
+    if (double_as_string == NULL)
+    {
+        errno = ENOMEM;
+        return NULL;
+    }
     (void)gcvt(num, FLOAT_CHAR_MAX, double_as_string);
     double_as_string[FLOAT_CHAR_MAX] = NULL_CHAR;
     return double_as_string;
@@ -131,6 +131,11 @@ static char *doubleToString(double num)
 
 extern char *JSONValueToString(JSONValue *json_value)
 {
+    if (json_value == NULL)
+    {
+        errno = EINVAL;
+        return NULL;
+    }
     char *json_value_string = NULL;
     switch (json_value->value_type)
     {
@@ -175,6 +180,7 @@ extern void FreeJSON(JSON *json)
 {
     if (json == NULL)
     {
+        errno = EINVAL;
         return;
     }
     if (json->root != NULL)
@@ -200,6 +206,7 @@ extern void PrintJSON(JSON *json)
 {
     if (json == NULL || json->root == NULL || json->root->value == NULL)
     {
+        errno = EINVAL;
         return;
     }
     if (json->root->value_type == JSONLIST_t)
@@ -216,6 +223,7 @@ extern void PrintJSONValue(JSONValue *json_value)
 {
     if (json_value == NULL || json_value->value == NULL)
     {
+        errno = EINVAL;
         return;
     }
     switch (json_value->value_type)
@@ -248,21 +256,42 @@ extern void PrintJSONValue(JSONValue *json_value)
 
 static void printJSONStringValue(char *value)
 {
+    if (value == NULL)
+    {
+        errno = EINVAL;
+        return;
+    }
     printf("\"%s\"", value);
 }
 
 static void printJSONNumberIntValue(int64_t *value)
 {
+    if (value == NULL)
+    {
+        errno = EINVAL;
+        return;
+    }
     printf("%lld", *value);
 }
 
 static void printJSONNumberDoubleValue(double *value)
 {
+    if (value == NULL)
+    {
+        errno = EINVAL;
+        return;
+    }
     printf("%lf", *value);
 }
 
 static void printJSONBoolValue(bool *value)
 {
+    if (value == NULL)
+    {
+        errno = EINVAL;
+        return;
+    }
+
     if (*value == true)
     {
         printf("%s", JSON_BOOL_TRUE);
@@ -280,10 +309,20 @@ static void printJSONNULLValue(void)
 
 static void printJSONListValue(DynamicArray *value)
 {
+    if (value == NULL)
+    {
+        errno = EINVAL;
+        return;
+    }
     PrintDynamicArray(value);
 }
 
 static void printJSONObjValue(HashMap *value)
 {
+    if (value == NULL)
+    {
+        errno = EINVAL;
+        return;
+    }
     PrintHashMap(value);
 }

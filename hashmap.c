@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <errno.h>
 
 #include <standardloop/util.h>
 
@@ -65,7 +66,7 @@ extern HashMap *HashMapInit(u_int32_t initial_capacity, HashFunction *hashFuncti
     HashMap *map = malloc(sizeof(HashMap));
     if (map == NULL)
     {
-        printf("[ERROR]: could not allocate memory for HashMap\n");
+        errno = ENOMEM;
         return NULL;
     }
     map->size = 0;
@@ -96,6 +97,7 @@ extern void HashMapInsert(HashMap *map, JSONValue *entry)
 {
     if (map == NULL || entry->key == NULL || (entry->value == NULL && entry->value_type != JSONNULL_t))
     {
+        errno = EINVAL;
         return;
     }
     if (isMapFull(map))
@@ -107,13 +109,10 @@ extern void HashMapInsert(HashMap *map, JSONValue *entry)
         StringToLower(entry->key);
     }
     u_int32_t index = map->hashFunction(entry->key, map->capacity);
-    // printf("[JOSH]: %d\n", (int)index);
-    assert(index < map->capacity);
+    assert(index < map->capacity); // TODO
     bool collision = hashMapEntriesInsert(map->entries, index, entry);
     if (collision)
     {
-        // printf("COLLISION!\n");
-        // fflush(stdout);
         map->collision_count++;
     }
     else
@@ -128,6 +127,7 @@ static bool hashMapEntriesInsert(JSONValue **entries, u_int32_t index, JSONValue
     // collision, no collision, or error
     if (entries == NULL || entry == NULL || entry->key == NULL)
     {
+        errno = EINVAL;
         return false;
     }
     // printf("[JOSH]: %s\n", entry->key);
@@ -190,6 +190,7 @@ extern JSONValue *HashMapGet(HashMap *map, char *key)
 {
     if (map == NULL || key == NULL)
     {
+        errno = EINVAL;
         return NULL;
     }
     u_int32_t index = map->hashFunction(key, map->capacity);
@@ -213,6 +214,11 @@ extern JSONValue *HashMapGet(HashMap *map, char *key)
 
 extern void *HashMapGetValueDirect(HashMap *map, char *key)
 {
+    if (map == NULL || key == NULL)
+    {
+        errno = EINVAL;
+        return NULL;
+    }
     JSONValue *value_obj = HashMapGet(map, key);
     if (value_obj == NULL || value_obj->value == NULL)
     {
@@ -223,6 +229,11 @@ extern void *HashMapGetValueDirect(HashMap *map, char *key)
 
 static void freeHashMapEntryList(JSONValue *entry, bool deep)
 {
+    if (entry == NULL)
+    {
+        errno = EINVAL;
+        return;
+    }
     JSONValue *temp = NULL;
     while (entry != NULL)
     {
@@ -242,21 +253,24 @@ static void freeHashMapEntryList(JSONValue *entry, bool deep)
 
 static void freeHashMapEntrySingle(JSONValue *entry, bool deep)
 {
-    if (entry != NULL)
+    if (entry == NULL)
     {
-        if (entry->key != NULL)
-        {
-            free(entry->key);
-            entry->key = NULL;
-        }
-        FreeJSONValue(entry, deep);
+        errno = EINVAL;
+        return;
     }
+    if (entry->key != NULL)
+    {
+        free(entry->key);
+        entry->key = NULL;
+    }
+    FreeJSONValue(entry, deep);
 }
 
 static void freeHashMapEntries(JSONValue **entries, u_int32_t size, bool deep, bool entry_values)
 {
     if (entries == NULL)
     {
+        errno = EINVAL;
         return;
     }
     if (deep)
@@ -277,6 +291,7 @@ extern void FreeHashMap(HashMap *map)
 {
     if (map == NULL)
     {
+        errno = EINVAL;
         return;
     }
     if (map->entries != NULL)
@@ -291,6 +306,7 @@ extern void HashMapRemove(HashMap *map, char *key)
 {
     if (map == NULL)
     {
+        errno = EINVAL;
         return;
     }
     u_int32_t index = map->hashFunction(key, map->capacity);
@@ -338,6 +354,7 @@ extern void PrintHashMap(HashMap *map)
 {
     if (map == NULL)
     {
+        errno = EINVAL;
         return;
     }
     printf("{");
@@ -362,6 +379,7 @@ static void printHashMapEntry(JSONValue *entry)
 {
     if (entry == NULL || entry->value == NULL || entry->key == NULL)
     {
+        errno = EINVAL;
         return;
     }
     JSONValue *iterator = entry;
@@ -387,6 +405,7 @@ static void hashMapResize(HashMap *map)
     // fflush(stdout);
     if (map == NULL)
     {
+        errno = EINVAL;
         return;
     }
 
@@ -437,6 +456,7 @@ extern HashMap *HashMapReplicate(HashMap *map)
 {
     if (map == NULL)
     {
+        errno = EINVAL;
         return NULL;
     }
     HashMap *deep_clone = HashMapInit(map->capacity, map->hashFunction, map->force_lowercase);
@@ -454,6 +474,7 @@ extern char *ObjToString(HashMap *map)
     // FIXME map->entries == NULL ?
     if (map == NULL)
     {
+        errno = EINVAL;
         return NULL;
     }
     size_t obj_as_string_size = 3; // "{}\0"

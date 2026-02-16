@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <ctype.h>
+#include <errno.h>
 
 #include "./json.h"
 
@@ -22,6 +23,7 @@ static void copyString(char *src, char *des, size_t len, size_t src_offset)
 {
     if (src == NULL || des == NULL || len <= 0)
     {
+        errno = EINVAL;
         return;
     }
 
@@ -54,6 +56,7 @@ extern JSONLexer *JSONLexerInit(char *input)
     JSONLexer *lexer = malloc(sizeof(JSONLexer));
     if (lexer == NULL)
     {
+        errno = ENOMEM;
         return NULL;
     }
     lexer->input = input;
@@ -106,6 +109,7 @@ extern JSONToken *NewJSONToken(enum JSONTokenType type, u_int32_t start, u_int32
     JSONToken *token = malloc(sizeof(JSONToken));
     if (token == NULL)
     {
+        errno = ENOMEM;
         return NULL;
     }
     token->type = type;
@@ -260,6 +264,7 @@ static char *makeNULLLiteral(JSONLexer *lexer)
 {
     if (lexer == NULL)
     {
+        errno = EINVAL;
         return NULL;
     }
     u_int32_t start_position = lexer->position;
@@ -482,6 +487,7 @@ extern void PrintJSONToken(JSONToken *token, bool print_literal)
 {
     if (token == NULL)
     {
+        errno = EINVAL;
         return;
     }
     printf("Line: %u Place: %u - %u ", token->line, token->start, token->end);
@@ -544,26 +550,32 @@ extern void PrintJSONToken(JSONToken *token, bool print_literal)
 
 extern void FreeJSONToken(JSONToken *token)
 {
-    if (token != NULL)
+    if (token == NULL)
     {
-        // if (token->type == JSONTokenString || token->type == JSONTokenNumber ||
-        //     token->type == JSONTokenBool || token->type == JSONTokenNULL)
-        // {
-        //     if (token->literal != NULL)
-        //     {
-        //         free(token->literal);
-        //     }
-        // }
-        free(token);
+        errno = EINVAL;
+        return;
     }
+
+    // if (token->type == JSONTokenString || token->type == JSONTokenNumber ||
+    //     token->type == JSONTokenBool || token->type == JSONTokenNULL)
+    // {
+    //     if (token->literal != NULL)
+    //     {
+    //         free(token->literal);
+    //     }
+    // }
+    free(token);
 }
 
 extern void FreeJSONLexer(JSONLexer *lexer)
 {
-    if (lexer != NULL)
+    if (lexer == NULL)
     {
-        free(lexer);
+        errno = EINVAL;
+        return;
     }
+
+    free(lexer);
 }
 
 extern void JSONLexerDebugTest(char *input_str, bool exit_after)

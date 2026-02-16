@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <errno.h>
 
 #include "./json.h"
 
@@ -20,7 +21,7 @@ extern DynamicArray *DynamicArrayInit(u_int32_t initial_capacity)
     DynamicArray *dynamic_array = malloc(sizeof(DynamicArray));
     if (dynamic_array == NULL)
     {
-        printf("[ERROR]: could not allocate memory for DynamicArray\n");
+        errno = ENOMEM;
         return NULL;
     }
     dynamic_array->size = 0;
@@ -29,7 +30,7 @@ extern DynamicArray *DynamicArrayInit(u_int32_t initial_capacity)
     if (dynamic_array->list == NULL)
     {
         FreeDynamicArray(dynamic_array);
-        printf("[ERROR]: could not allocate memory for DynamicArray list\n");
+        errno = ENOMEM;
         return NULL;
     }
     return dynamic_array;
