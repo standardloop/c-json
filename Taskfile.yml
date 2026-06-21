@@ -52,7 +52,7 @@ tasks:
   dependencies:util:
     vars:
       REPO_NAME: c-util
-      DYLIB_VERSION: 0.0.6
+      DYLIB_VERSION: 0.0.7
       DYLIB_NAME: util
     cmds:
       - sudo -v
