@@ -296,6 +296,7 @@ static char *makeNULLLiteral(JSONLexer *lexer)
 
     if (strcmp(null_literal, JSON_NULL) != 0)
     {
+        free(null_literal);
         return NULL;
     }
     return null_literal;
