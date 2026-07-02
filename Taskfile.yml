@@ -2,7 +2,7 @@
 version: '3'
 
 vars:
-  CC: gcc
+  CC: clang
   CC_FLAGS: "-Werror -Wextra -Wall -Wfree-nonheap-object -std=c17"
   LAB_EXECUTABLE_NAME: lab
   SOURCE_FILES:
