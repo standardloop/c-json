@@ -1,10 +1,8 @@
 # c-json
 
-https://github.com/standardloop/c-json
-
+[https://github.com/standardloop/c-json]([https://github.com/standardloop/c-json])
 
 [![GitHub Release](https://img.shields.io/github/v/release/standardloop/c-json?sort=semver)](https://github.com/standardloop/c-json/releases) ![Platform: macOS](https://img.shields.io/badge/platform-macOS-000000?style=flat&logo=apple&logoColor=white) ![C Version](https://img.shields.io/badge/C_Standard-C17-00599C?logo=c&logoColor=white)
-
 
 ## Background
 
@@ -90,13 +88,14 @@ int main(void)
 
 ## Building
 
-
 ### To see all avaiable
+
 ```sh
 $ task --list-all
 ```
 
 ### To build and run a test (lab) program
+
 ```sh
 $ task
 ```
