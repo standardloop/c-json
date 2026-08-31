@@ -6,10 +6,10 @@
 #define STANDARDLOOP_JSON_H_PATCH_VERSION 6
 #define STANDARDLOOP_JSON_H_VERSION "0.0.6"
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 
 // ————————— JSON START —————————
 #define JSON_BOOL_TRUE "true"
@@ -49,6 +49,8 @@ extern char *JSONToString(JSON *, bool);
 
 extern void FreeJSON(JSON *);
 extern void PrintJSON(JSON *);
+
+extern void TestJSON();
 
 extern void PrintJSONValue(JSONValue *);
 // ————————— JSON END —————————
@@ -167,7 +169,8 @@ extern bool IsJSONTokenValueType(JSONToken *, bool);
 
 extern void JSONLexerDebugTest(char *, bool);
 
-extern JSONToken *NewJSONToken(enum JSONTokenType, u_int32_t, u_int32_t, u_int32_t, char *);
+extern JSONToken *NewJSONToken(enum JSONTokenType, u_int32_t, u_int32_t,
+                               u_int32_t, char *);
 
 // ————————— LEXER END —————————
 

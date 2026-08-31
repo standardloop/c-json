@@ -1,9 +1,9 @@
+#include <ctype.h>
+#include <errno.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
-#include <ctype.h>
-#include <errno.h>
 
 #include "./json.h"
 
@@ -130,25 +130,33 @@ static bool parseListErrorHelper(JSONParser *parser)
         parser->error_message = "Illegal token found";
         return true;
     }
-    if (parser->peek_token->type == JSONTokenEOF && parser->current_token->type != JSONTokenCloseBracket)
+    if (parser->peek_token->type == JSONTokenEOF &&
+        parser->current_token->type != JSONTokenCloseBracket)
     {
         parser->input_error = true;
         parser->error_message = "Closing Bracket not found";
         return true;
     }
-    if (parser->current_token->type == JSONTokenCloseBracket && parser->peek_token->type != JSONTokenEOF && parser->peek_token->type != JSONTokenCloseBracket && parser->peek_token->type != JSONTokenCloseCurlyBrace && parser->peek_token->type != JSONTokenComma)
+    if (parser->current_token->type == JSONTokenCloseBracket &&
+        parser->peek_token->type != JSONTokenEOF &&
+        parser->peek_token->type != JSONTokenCloseBracket &&
+        parser->peek_token->type != JSONTokenCloseCurlyBrace &&
+        parser->peek_token->type != JSONTokenComma)
     {
         parser->input_error = true;
         parser->error_message = "Unexpected token after Closing Bracket";
         return true;
     }
-    if (parser->current_token->type == JSONTokenCloseBracket && parser->peek_token->type == JSONTokenEOF && (parser->list_nested != 0 || parser->obj_nested != 0))
+    if (parser->current_token->type == JSONTokenCloseBracket &&
+        parser->peek_token->type == JSONTokenEOF &&
+        (parser->list_nested != 0 || parser->obj_nested != 0))
     {
         parser->input_error = true;
         parser->error_message = "Invalid JSONToken after Closing Bracket";
         return true;
     }
-    if (parser->current_token->type == JSONTokenComma && !IsJSONTokenValueType(parser->peek_token, true))
+    if (parser->current_token->type == JSONTokenComma &&
+        !IsJSONTokenValueType(parser->peek_token, true))
     {
         parser->input_error = true;
         parser->error_message = "Value expected after comma";
@@ -162,20 +170,24 @@ static bool parseListErrorHelper(JSONParser *parser)
 
 static inline bool parseListLoopChecker(JSONParser *parser)
 {
-    if (parser->current_token->type == JSONTokenCloseBracket && parser->peek_token->type == JSONTokenComma)
+    if (parser->current_token->type == JSONTokenCloseBracket &&
+        parser->peek_token->type == JSONTokenComma)
     {
         nextJSONToken(parser); // skip comma
         return true;
     }
-    if (parser->current_token->type == JSONTokenCloseBracket && parser->peek_token->type == JSONTokenEOF && parser->list_nested == 0)
+    if (parser->current_token->type == JSONTokenCloseBracket &&
+        parser->peek_token->type == JSONTokenEOF && parser->list_nested == 0)
     {
         return true;
     }
-    if (parser->current_token->type == JSONTokenCloseBracket && parser->peek_token->type == JSONTokenCloseCurlyBrace)
+    if (parser->current_token->type == JSONTokenCloseBracket &&
+        parser->peek_token->type == JSONTokenCloseCurlyBrace)
     {
         return true;
     }
-    if (parser->current_token->type == JSONTokenCloseBracket && parser->peek_token->type == JSONTokenCloseBracket)
+    if (parser->current_token->type == JSONTokenCloseBracket &&
+        parser->peek_token->type == JSONTokenCloseBracket)
     {
         return true;
     }
@@ -188,7 +200,8 @@ static JSONValue *parseList(JSONParser *parser)
     if (json_value == NULL)
     {
         parser->memory_error = true;
-        parser->error_message = "[ERROR]: not enough memory for creating JSONValue inside parseList";
+        parser->error_message = "[ERROR]: not enough memory for creating "
+                                "JSONValue inside parseList";
         return NULL;
     }
     if (parser->current_token->type != JSONTokenOpenBracket)
@@ -200,7 +213,8 @@ static JSONValue *parseList(JSONParser *parser)
     if (list == NULL)
     {
         parser->memory_error = true;
-        parser->error_message = "[ERROR]: not enough memory for creating DynamicArray inside parseList";
+        parser->error_message = "[ERROR]: not enough memory for creating "
+                                "DynamicArray inside parseList";
         return NULL;
     }
     while (ALWAYS)
@@ -270,19 +284,26 @@ static bool parseObjErrorHelper(JSONParser *parser)
         parser->error_message = "Illegal token found";
         return true;
     }
-    if (parser->peek_token->type == JSONTokenEOF && parser->current_token->type != JSONTokenCloseCurlyBrace)
+    if (parser->peek_token->type == JSONTokenEOF &&
+        parser->current_token->type != JSONTokenCloseCurlyBrace)
     {
         parser->input_error = true;
         parser->error_message = "Closing Brace not found";
         return true;
     }
-    if (parser->peek_token->type == JSONTokenEOF && parser->current_token->type == JSONTokenCloseCurlyBrace && (parser->obj_nested != 0 || parser->list_nested != 0))
+    if (parser->peek_token->type == JSONTokenEOF &&
+        parser->current_token->type == JSONTokenCloseCurlyBrace &&
+        (parser->obj_nested != 0 || parser->list_nested != 0))
     {
         parser->input_error = true;
         parser->error_message = "Unmatch brackets or braces";
         return true;
     }
-    if (parser->current_token->type == JSONTokenCloseCurlyBrace && parser->peek_token->type != JSONTokenEOF && parser->peek_token->type != JSONTokenCloseBracket && parser->peek_token->type != JSONTokenCloseCurlyBrace && parser->peek_token->type != JSONTokenComma)
+    if (parser->current_token->type == JSONTokenCloseCurlyBrace &&
+        parser->peek_token->type != JSONTokenEOF &&
+        parser->peek_token->type != JSONTokenCloseBracket &&
+        parser->peek_token->type != JSONTokenCloseCurlyBrace &&
+        parser->peek_token->type != JSONTokenComma)
     {
         parser->input_error = true;
         parser->error_message = "Unexpected token after Closing Brace";
@@ -294,21 +315,25 @@ static bool parseObjErrorHelper(JSONParser *parser)
 
 static bool parseObjLoopChecker(JSONParser *parser)
 {
-    if (parser->current_token->type == JSONTokenCloseCurlyBrace && parser->peek_token->type == JSONTokenComma)
+    if (parser->current_token->type == JSONTokenCloseCurlyBrace &&
+        parser->peek_token->type == JSONTokenComma)
     {
         nextJSONToken(parser);
         return true;
     }
-    if (parser->current_token->type == JSONTokenCloseCurlyBrace && parser->peek_token->type == JSONTokenCloseCurlyBrace)
+    if (parser->current_token->type == JSONTokenCloseCurlyBrace &&
+        parser->peek_token->type == JSONTokenCloseCurlyBrace)
     {
         nextJSONToken(parser);
         return true;
     }
-    if (parser->current_token->type == JSONTokenCloseCurlyBrace && parser->peek_token->type == JSONTokenEOF)
+    if (parser->current_token->type == JSONTokenCloseCurlyBrace &&
+        parser->peek_token->type == JSONTokenEOF)
     {
         return true;
     }
-    if (parser->current_token->type == JSONTokenCloseCurlyBrace && parser->peek_token->type == JSONTokenCloseBracket)
+    if (parser->current_token->type == JSONTokenCloseCurlyBrace &&
+        parser->peek_token->type == JSONTokenCloseBracket)
     {
         return true;
     }
@@ -325,7 +350,8 @@ static JSONValue *parseObj(JSONParser *parser)
     if (json_value == NULL)
     {
         parser->memory_error = true;
-        parser->error_message = "[ERROR]: not enough memory for creating JSONValue inside parseObj";
+        parser->error_message =
+            "[ERROR]: not enough memory for creating JSONValue inside parseObj";
         return NULL;
     }
 
@@ -333,7 +359,8 @@ static JSONValue *parseObj(JSONParser *parser)
     if (map == NULL)
     {
         parser->memory_error = true;
-        parser->error_message = "[ERROR]: not enough memory for creating HashMap inside parseObj";
+        parser->error_message =
+            "[ERROR]: not enough memory for creating HashMap inside parseObj";
         return NULL;
     }
     while (ALWAYS)
@@ -353,7 +380,8 @@ static JSONValue *parseObj(JSONParser *parser)
         }
 
         JSONValue *obj_key = parse(parser);
-        if (obj_key != NULL && (obj_key->value == NULL || obj_key->value_type != JSONSTRING_t))
+        if (obj_key != NULL &&
+            (obj_key->value == NULL || obj_key->value_type != JSONSTRING_t))
         {
             FreeHashMap(map);
             FreeJSONValue(obj_key, true);
@@ -375,7 +403,8 @@ static JSONValue *parseObj(JSONParser *parser)
                     FreeJSONValue(obj_key, true);
                     FreeJSONValue(json_value, false);
                     parser->input_error = true;
-                    parser->error_message = "Invalid JSONToken after colon, expecting value";
+                    parser->error_message =
+                        "Invalid JSONToken after colon, expecting value";
                     return NULL;
                 }
                 JSONValue *obj_value = parse(parser);
@@ -485,13 +514,17 @@ static JSONValue *parseNumber(JSONParser *parser)
     // FIXME:
     // there is an issue here where number such as 1e-2 are actually decimals
     // For now all scientific notation with be made into a floating point
-    if (isCharInString(parser->current_token->literal, DOT_CHAR) || isCharInString(parser->current_token->literal, 'e') || isCharInString(parser->current_token->literal, 'E'))
+    if (isCharInString(parser->current_token->literal, DOT_CHAR) ||
+        isCharInString(parser->current_token->literal, 'e') ||
+        isCharInString(parser->current_token->literal, 'E'))
     {
-        return initQuickJSONValue(JSONNUMBER_DOUBLE_t, parser->current_token->literal);
+        return initQuickJSONValue(JSONNUMBER_DOUBLE_t,
+                                  parser->current_token->literal);
     }
     else
     {
-        return initQuickJSONValue(JSONNUMBER_INT_t, parser->current_token->literal);
+        return initQuickJSONValue(JSONNUMBER_INT_t,
+                                  parser->current_token->literal);
     }
 }
 
@@ -531,7 +564,8 @@ static JSONValue *parse(JSONParser *parser)
     else if (parser->current_token->type == JSONTokenString)
     {
         // printf("JSONTokenString\n");
-        return_value = initQuickJSONValue(JSONSTRING_t, parser->current_token->literal);
+        return_value =
+            initQuickJSONValue(JSONSTRING_t, parser->current_token->literal);
     }
     else if (parser->current_token->type == JSONTokenNumber)
     {
@@ -539,12 +573,14 @@ static JSONValue *parse(JSONParser *parser)
     }
     else if (parser->current_token->type == JSONTokenBool)
     {
-        return_value = initQuickJSONValue(JSONBOOL_t, parser->current_token->literal);
+        return_value =
+            initQuickJSONValue(JSONBOOL_t, parser->current_token->literal);
     }
     else if (parser->current_token->type == JSONTokenNULL)
     {
         // printf("test\n");
-        return_value = initQuickJSONValue(JSONNULL_t, parser->current_token->literal);
+        return_value =
+            initQuickJSONValue(JSONNULL_t, parser->current_token->literal);
     }
     else if (parser->current_token->type == JSONTokenIllegal)
     {
@@ -564,8 +600,12 @@ extern void PrintErrorLine(JSONParser *parser)
         return;
     }
 
-    char *json_str_iterator = parser->lexer->input + parser->current_token->start - PRINT_ERROR_LINE_PREFIX_OFFSET;
-    for (u_int32_t i = parser->current_token->start - PRINT_ERROR_LINE_PREFIX_OFFSET; i < parser->current_token->end + PRINT_ERROR_LINE_SUFFIX_OFFSET; i++)
+    char *json_str_iterator = parser->lexer->input +
+                              parser->current_token->start -
+                              PRINT_ERROR_LINE_PREFIX_OFFSET;
+    for (u_int32_t i =
+             parser->current_token->start - PRINT_ERROR_LINE_PREFIX_OFFSET;
+         i < parser->current_token->end + PRINT_ERROR_LINE_SUFFIX_OFFSET; i++)
     {
         if (json_str_iterator == NULL || *json_str_iterator == NULL_CHAR)
         {
@@ -576,7 +616,9 @@ extern void PrintErrorLine(JSONParser *parser)
     }
     printf("\n");
 
-    for (u_int32_t i = parser->current_token->start - PRINT_ERROR_LINE_PREFIX_OFFSET; i < parser->current_token->end + PRINT_ERROR_LINE_SUFFIX_OFFSET; i++)
+    for (u_int32_t i =
+             parser->current_token->start - PRINT_ERROR_LINE_PREFIX_OFFSET;
+         i < parser->current_token->end + PRINT_ERROR_LINE_SUFFIX_OFFSET; i++)
     {
         if (i >= parser->current_token->start)
         {
@@ -604,8 +646,9 @@ extern JSON *ParseJSON(JSONParser *parser)
         return NULL;
     }
     json->root = parse(parser);
-    // probably want the error to be on JSON obj so it can be read before being freed
-    // right now it just prints to stdout, but for cerver, we would want access to that error message
+    // probably want the error to be on JSON obj so it can be read before being
+    // freed right now it just prints to stdout, but for cerver, we would want
+    // access to that error message
     if (json->root == NULL)
     {
         PrintErrorLine(parser);
@@ -658,11 +701,13 @@ extern JSONValue *JSONValueReplicate(JSONValue *json_value)
     }
     else if (json_value->value_type == JSONLIST_t)
     {
-        value = (DynamicArray *)DynamicArrayReplicate((DynamicArray *)json_value->value);
+        value = (DynamicArray *)DynamicArrayReplicate(
+            (DynamicArray *)json_value->value);
     }
     else if (json_value->value_type == JSONOBJ_t)
     {
-        value = (HashMap *)HashMapReplicate((HashMap *)json_value->value); // WIP
+        value =
+            (HashMap *)HashMapReplicate((HashMap *)json_value->value); // WIP
     }
     return JSONValueInit(json_value->value_type, value, NULL);
 }

@@ -1,9 +1,9 @@
+#include <assert.h>
+#include <errno.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
-#include <assert.h>
-#include <errno.h>
 
 #include <standardloop/util.h>
 
@@ -61,7 +61,8 @@ static JSONValue **hashMapEntriesInit(u_int32_t capacity)
     return entries;
 }
 
-extern HashMap *HashMapInit(u_int32_t initial_capacity, HashFunction *hashFunction, bool force_lowercase)
+extern HashMap *HashMapInit(u_int32_t initial_capacity,
+                            HashFunction *hashFunction, bool force_lowercase)
 {
     HashMap *map = malloc(sizeof(HashMap));
     if (map == NULL)
@@ -95,7 +96,8 @@ static inline bool isMapFull(HashMap *map)
 
 extern void HashMapInsert(HashMap *map, JSONValue *entry)
 {
-    if (map == NULL || entry->key == NULL || (entry->value == NULL && entry->value_type != JSONNULL_t))
+    if (map == NULL || entry->key == NULL ||
+        (entry->value == NULL && entry->value_type != JSONNULL_t))
     {
         errno = EINVAL;
         return;
@@ -121,7 +123,8 @@ extern void HashMapInsert(HashMap *map, JSONValue *entry)
     }
 }
 
-static bool hashMapEntriesInsert(JSONValue **entries, u_int32_t index, JSONValue *entry)
+static bool hashMapEntriesInsert(JSONValue **entries, u_int32_t index,
+                                 JSONValue *entry)
 {
     // FIXME: may have to use enum for return values
     // collision, no collision, or error
@@ -140,7 +143,8 @@ static bool hashMapEntriesInsert(JSONValue **entries, u_int32_t index, JSONValue
         return false;
     }
     // printf("%s -> %s\n", collision->key, entry->key);
-    // If duplicate key, update (in future could maybe make this a feature flag for the init function)
+    // If duplicate key, update (in future could maybe make this a feature flag
+    // for the init function)
     if (collision->key != NULL)
     {
         size_t collision_key_len = strlen(collision->key);
@@ -266,7 +270,8 @@ static void freeHashMapEntrySingle(JSONValue *entry, bool deep)
     FreeJSONValue(entry, deep);
 }
 
-static void freeHashMapEntries(JSONValue **entries, u_int32_t size, bool deep, bool entry_values)
+static void freeHashMapEntries(JSONValue **entries, u_int32_t size, bool deep,
+                               bool entry_values)
 {
     if (entries == NULL)
     {
@@ -427,9 +432,12 @@ static void hashMapResize(HashMap *map)
 
         while (iterator != NULL)
         {
-            JSONValue *new_entry = JSONValueInit(iterator->value_type, iterator->value, iterator->key);
-            u_int32_t new_index = map->hashFunction(iterator->key, new_capacity);
-            bool collision = hashMapEntriesInsert(new_entries, new_index, new_entry);
+            JSONValue *new_entry = JSONValueInit(
+                iterator->value_type, iterator->value, iterator->key);
+            u_int32_t new_index =
+                map->hashFunction(iterator->key, new_capacity);
+            bool collision =
+                hashMapEntriesInsert(new_entries, new_index, new_entry);
             if (!collision)
             {
                 new_size++;
@@ -459,7 +467,8 @@ extern HashMap *HashMapReplicate(HashMap *map)
         errno = EINVAL;
         return NULL;
     }
-    HashMap *deep_clone = HashMapInit(map->capacity, map->hashFunction, map->force_lowercase);
+    HashMap *deep_clone =
+        HashMapInit(map->capacity, map->hashFunction, map->force_lowercase);
     deep_clone->collision_count = map->collision_count;
     deep_clone->size = map->collision_count;
     for (u_int32_t i = 0; i < map->capacity; i++)
@@ -504,7 +513,8 @@ extern char *ObjToString(HashMap *map)
 
             char *entry_value = JSONValueToString(map_entry);
             size_t entry_value_len = strlen(entry_value);
-            if ((map_entry->next == NULL && entry_count < map->size - 1) || map_entry->next != NULL)
+            if ((map_entry->next == NULL && entry_count < map->size - 1) ||
+                map_entry->next != NULL)
             {
                 needs_comma = true;
             }

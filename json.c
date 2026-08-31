@@ -1,11 +1,10 @@
+#include <ctype.h>
+#include <errno.h>
+#include <limits.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
-#include <ctype.h>
-#include <limits.h>
-#include <math.h>
-#include <errno.h>
 
 #include <standardloop/util.h>
 
@@ -58,8 +57,8 @@ extern JSON *StringToJSON(char *input_str)
     JSON *json = ParseJSON(parser);
     if (json == NULL)
     {
-        // need to differentitate between parsing error because JSON is invalid or
-        // if we ran out of memory trying to parse it.
+        // need to differentitate between parsing error because JSON is invalid
+        // or if we ran out of memory trying to parse it.
         return NULL;
     }
 
@@ -118,7 +117,8 @@ extern char *JSONToString(JSON *json, bool free_json)
 #define FLOAT_CHAR_MAX 10
 static char *doubleToString(double num)
 {
-    char *double_as_string = malloc((sizeof(char) * FLOAT_CHAR_MAX) + sizeof(char));
+    char *double_as_string =
+        malloc((sizeof(char) * FLOAT_CHAR_MAX) + sizeof(char));
     if (double_as_string == NULL)
     {
         errno = ENOMEM;

@@ -1,5 +1,5 @@
 ---
-version: '3'
+version: "3"
 
 vars:
   CC: clang
@@ -11,7 +11,12 @@ vars:
     - parser.c
     - hashmap.c
     - dynamicarray.c
-  DYN_LIBS_USED_PATH: -L/usr/local/lib/standardloop
+  TEST_EXECUTABLE_NAME: test
+  TEST_SOURCE_FILES:
+    - json.test.c
+    - lexer.test.c
+    - parser.test.c
+  DYN_LIBS_USED_PATH: "-I/usr/local/include -L/usr/local/lib/standardloop"
   DYN_LIBS_USED: "-lstandardloop-util"
   DYLIB_NAME: libstandardloop-json.dylib
   DYLIB_PATH: /usr/local/lib/standardloop/
@@ -52,7 +57,7 @@ tasks:
   dependencies:util:
     vars:
       REPO_NAME: c-util
-      DYLIB_VERSION: 0.0.7
+      DYLIB_VERSION: 0.0.8
       DYLIB_NAME: util
     cmds:
       - sudo -v
@@ -87,7 +92,7 @@ tasks:
       - "*.c"
     generates:
       - "{{.DYLIB_NAME}}"
-  
+
   release:move-files:
     deps:
       - release:build
@@ -97,12 +102,12 @@ tasks:
       - sudo cp json.h {{.DYLIB_INCLUDE_PATH}}
 
   release:clean:
-    allow_failure: true
+    ignore_error: true
     cmds:
       - sudo -v
       - sudo rm -f {{.DYLIB_PATH}}/{{.DYLIB_NAME}}
       - sudo rm -f {{.DYLIB_INCLUDE_PATH}}/json.h
-    
+
   # local test
   remote:download:
     run: once
@@ -144,7 +149,7 @@ tasks:
       - "*.c"
     generates:
       - "{{.LAB_EXECUTABLE_NAME}}"
-  
+
   lab:sanitize:
     deps:
       - lab:run-sanitize
@@ -173,7 +178,7 @@ tasks:
       - lab:build
     cmds:
       - ./{{.LAB_EXECUTABLE_NAME}}
-  
+
   lab:run-sanitize:
     deps:
       - lab:build-sanitize
@@ -189,3 +194,35 @@ tasks:
       - leaks --atExit -- ./{{.LAB_EXECUTABLE_NAME}}
       - rm libstandardloop-util.dylib
       - rm libstandardloop-json.dylib
+
+  fmt:
+    silent: true
+    cmds:
+      - find . \( -name "*.c" -o -name "*.h" \) -exec clang-format -style=file -i {} +
+
+  test:
+    deps:
+      - test:run
+
+  test:build:
+    run: once
+    desc: "Build the test program."
+    cmds:
+      - |
+        {{.CC}} {{.CC_FLAGS}} \
+        {{.DYN_LIBS_USED_PATH}} \
+        {{.DYN_LIBS_USED}} \
+        test.c \
+        {{range .SOURCE_FILES}} {{.}} {{end}} \
+        {{range .TEST_SOURCE_FILES}} {{.}} {{end}} \
+        -o {{.TEST_EXECUTABLE_NAME}}
+    sources:
+      - "*.c"
+    generates:
+      - "{{.TEST_EXECUTABLE_NAME}}"
+
+  test:run:
+    deps:
+      - test:build
+    cmds:
+      - ./{{.TEST_EXECUTABLE_NAME}}

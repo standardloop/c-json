@@ -1,8 +1,8 @@
+#include <errno.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
-#include <errno.h>
 
 #include "./json.h"
 
@@ -36,7 +36,8 @@ extern DynamicArray *DynamicArrayInit(u_int32_t initial_capacity)
     return dynamic_array;
 }
 
-extern void DynamicArrayAddFirst(DynamicArray *dynamic_array, JSONValue *element)
+extern void DynamicArrayAddFirst(DynamicArray *dynamic_array,
+                                 JSONValue *element)
 {
     DynamicArrayAdd(dynamic_array, element, 0);
 }
@@ -50,7 +51,8 @@ extern void DynamicArrayAddLast(DynamicArray *dynamic_array, JSONValue *element)
     DynamicArrayAdd(dynamic_array, element, dynamic_array->size);
 }
 
-extern void DynamicArrayAdd(DynamicArray *dynamic_array, JSONValue *element, u_int32_t index)
+extern void DynamicArrayAdd(DynamicArray *dynamic_array, JSONValue *element,
+                            u_int32_t index)
 {
     if (dynamic_array == NULL || element == NULL)
     {
@@ -76,7 +78,8 @@ static void dynamicArrayResize(DynamicArray *dynamic_array)
         return;
     }
 
-    JSONValue **newList = malloc(sizeof(JSONValue *) * dynamic_array->capacity * DEFAULT_DYN_ARR_RESIZE_MULTIPLE);
+    JSONValue **newList = malloc(sizeof(JSONValue *) * dynamic_array->capacity *
+                                 DEFAULT_DYN_ARR_RESIZE_MULTIPLE);
     if (newList == NULL)
     {
         printf("Couldn't resize list, not enough memory!\n");
@@ -152,7 +155,8 @@ extern void PrintDynamicArray(DynamicArray *dynamic_array)
 
 extern void DynamicArrayRemove(DynamicArray *dynamic_array, u_int32_t index)
 {
-    if (dynamic_array == NULL || index >= dynamic_array->size || isDynamicArrayEmpty(dynamic_array))
+    if (dynamic_array == NULL || index >= dynamic_array->size ||
+        isDynamicArrayEmpty(dynamic_array))
     {
         return;
     }
@@ -200,7 +204,8 @@ extern DynamicArray *DynamicArrayReplicate(DynamicArray *dynamic_array)
     return deep_clone;
 }
 
-extern JSONValue *DynamicArrayGetAtIndex(DynamicArray *dynamic_array, u_int32_t index)
+extern JSONValue *DynamicArrayGetAtIndex(DynamicArray *dynamic_array,
+                                         u_int32_t index)
 {
     if (dynamic_array == NULL || dynamic_array->size < index)
     {

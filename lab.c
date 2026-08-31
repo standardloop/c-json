@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <standardloop/json.h>
-// #include "./json.h"
+// #include <standardloop/json.h>
+#include "./json.h"
 
 int main(void)
 {
