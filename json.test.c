@@ -33,7 +33,16 @@ static void testStringToJSON()
     assert(test_json->root->value_type == JSONOBJ_t);
     FreeJSON(test_json);
 
-    // test 3
+    // test 3 (WIP)
+    // test_string = "10";
+    // test_json = NULL;
+
+    // test_json = StringToJSON(test_string);
+    // assert(test_json != NULL);
+    // assert(test_json->root->value_type == JSONNUMBER_INT_t);
+    // FreeJSON(test_json);
+
+    // test 4
     test_string = "{\"foo\": \"bar\", \"bar\": \"foo\"}";
     test_json = NULL;
 
@@ -43,8 +52,11 @@ static void testStringToJSON()
     FreeJSON(test_json);
 }
 
+static void testJSONFromFile() {}
+
 extern void TestJSON()
 {
     testJSONInit();
     testStringToJSON();
+    testJSONFromFile();
 }

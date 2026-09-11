@@ -1,6 +1,8 @@
 ---
 version: "3"
 
+silent: true
+
 vars:
   CC: clang
   CC_FLAGS: "-Werror -Wextra -Wall -Wfree-nonheap-object -std=c17"
@@ -226,3 +228,22 @@ tasks:
       - test:build
     cmds:
       - ./{{.TEST_EXECUTABLE_NAME}}
+
+  docs:
+    deps:
+      - docs:moxygen
+
+  docs:doxygen:
+    desc: "https://www.doxygen.nl/"
+    cmds:
+      - mkdir -p doxygen
+      - doxygen Doxyfile
+
+  docs:moxygen:
+    desc: "https://0state.com/moxygen"
+    deps:
+      - docs:doxygen
+    cmds:
+      - moxygen doxygen/xml/ --output docs/index.md --quiet
+      - sed -i '' '/^Defined in /d' docs/index.md
+      - sed -i '' 's/#include <\(.*\)>/#include <standardloop\/\1>/g' docs/index.md
