@@ -1,3 +1,9 @@
+/**
+ * @file json.h
+ * @headerfile json.h <standardloop/json.h>
+ * @brief A C library for having a JSON variable in C.
+ */
+
 #ifndef STANDARDLOOP_JSON_H
 #define STANDARDLOOP_JSON_H
 
@@ -7,18 +13,30 @@
 #include <string.h>
 
 // ————————— JSON START —————————
+/// @cond INTERNAL
 #define JSON_BOOL_TRUE "true"
 #define JSON_BOOL_FALSE "false"
 #define JSON_NULL "null"
+/// @endcond
 
+/**
+ * @brief The JSONValueType enum that stores the types for JSON values.
+ */
 enum JSONValueType
 {
+    /** Object. ex `{}`. */
     JSONOBJ_t,
+    /** Integer Number. ex `1`. */
     JSONNUMBER_INT_t,
+    /** Double Number. ex `1.1`. */
     JSONNUMBER_DOUBLE_t,
+    /** String. ex `"hello"`. */
     JSONSTRING_t,
+    /** Boolean. ex `true`. */
     JSONBOOL_t,
+    /** Null. ex `null`. */
     JSONNULL_t,
+    /** List. ex `[]`. */
     JSONLIST_t,
 };
 

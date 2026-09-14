@@ -16,30 +16,6 @@
 
 ---
 
-### JSON_BOOL_TRUE
-
-```cpp
-#define JSON_BOOL_TRUE "true"
-```
-
----
-
-### JSON_BOOL_FALSE
-
-```cpp
-#define JSON_BOOL_FALSE "false"
-```
-
----
-
-### JSON_NULL
-
-```cpp
-#define JSON_NULL "null"
-```
-
----
-
 ### DEFAULT_MAP_SIZE
 
 ```cpp
@@ -136,15 +112,17 @@
 enum JSONValueType
 ```
 
-| Value                 | Description |
-| --------------------- | ----------- |
-| `JSONOBJ_t`           |             |
-| `JSONNUMBER_INT_t`    |             |
-| `JSONNUMBER_DOUBLE_t` |             |
-| `JSONSTRING_t`        |             |
-| `JSONBOOL_t`          |             |
-| `JSONNULL_t`          |             |
-| `JSONLIST_t`          |             |
+The [JSONValueType](#jsonvaluetype) enum that stores the types for JSON values.
+
+| Value                 | Description              |
+| --------------------- | ------------------------ |
+| `JSONOBJ_t`           | Object. ex `{}`.         |
+| `JSONNUMBER_INT_t`    | Integer Number. ex `1`.  |
+| `JSONNUMBER_DOUBLE_t` | Double Number. ex `1.1`. |
+| `JSONSTRING_t`        | String. ex `"hello"`.    |
+| `JSONBOOL_t`          | Boolean. ex `true`.      |
+| `JSONNULL_t`          | Null. ex `null`.         |
+| `JSONLIST_t`          | List. ex `[]`.           |
 
 ---
 
@@ -825,12 +803,12 @@ struct JSONValue
 
 ### Public Attributes
 
-| Return               | Name                        | Description |
-| -------------------- | --------------------------- | ----------- |
-| `char *`             | [`key`](#key)               |             |
-| `enum JSONValueType` | [`value_type`](#value_type) |             |
-| `void *`             | [`value`](#value)           |             |
-| `struct jsonValue *` | [`next`](#next)             |             |
+| Return                                 | Name                        | Description |
+| -------------------------------------- | --------------------------- | ----------- |
+| `char *`                               | [`key`](#key)               |             |
+| enum [`JSONValueType`](#jsonvaluetype) | [`value_type`](#value_type) |             |
+| `void *`                               | [`value`](#value)           |             |
+| `struct jsonValue *`                   | [`next`](#next)             |             |
 
 ---
 
@@ -847,6 +825,8 @@ char * key
 ```cpp
 enum JSONValueType value_type
 ```
+
+Type: enum [`JSONValueType`](#jsonvaluetype)
 
 ---
 
