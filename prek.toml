@@ -1,0 +1,8 @@
+fail_fast = false
+
+[[repos]]
+repo = "local"
+hooks = [
+  { id = "task-fmt", name = "Format", entry = "task fmt", language = "system", pass_filenames = false },
+  { id = "task-docs", name = "Docs", entry = "task docs", language = "system", pass_filenames = false },
+]

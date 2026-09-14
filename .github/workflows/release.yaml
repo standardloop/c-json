@@ -13,23 +13,35 @@ jobs:
       DYLIB_NAME: "libstandardloop-json.dylib"
       HEADER_NAME: "json.h"
       ZIP_NAME: "libstandardloop-json.zip"
+      CI: true
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
 
+      - name: Clean Release Tag
+        id: clean_tag
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          echo "version=${TAG#v}" >> $GITHUB_OUTPUT
+
       - name: echo vars
+        env:
+          GH_RELEASE_VERSION: ${{ github.event.release.tag_name }}
         run: |
           echo ${{ env.DYLIB_NAME }}
           echo ${{ env.HEADER_NAME }}
           echo ${{ env.ZIP_NAME }}
+          echo ${{ steps.clean_tag.outputs.version }}
 
       - name: Install Task
         uses: go-task/setup-task@v2
 
       - name: Build the dylib
+        env:
+          GH_RELEASE_VERSION: ${{ steps.clean_tag.outputs.version }}
         run: |
-          task release:build
+          task release
 
       - name: Archive dylib
         run: |

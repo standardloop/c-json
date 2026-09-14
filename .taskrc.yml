@@ -1,0 +1,10 @@
+remote:
+  insecure: false
+  offline: false
+  timeout: "30s"
+  # cache-expiry: "24h"
+  cache-dir: ~/.task
+  trusted-hosts:
+    - github.com
+    - gitlab.com
+    - raw.githubusercontent.com

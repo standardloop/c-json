@@ -94,23 +94,25 @@ int main(void)
 $ task --list-all
 ```
 
-### To build and run a test (lab) program
+### To build a test program
 
 ```sh
 $ task
 ```
 
-## Using as a dynamic library
-
-```sh
-$ clang -Werror -Wextra -Wall -Wfree-nonheap-object -std=c17 \
-    lab.c \
-    -L/usr/local/lib/standardloop \
-    -lstandardloop-json \
-    -o lab
-```
-
 ## Checking for Leaks
 
 - The `taskfile` has a task to compile the code with address sanitizers.
-- The `taskfile` has a task to run the program with macOS `leaks`.
+- See `LEAKS.md`
+
+## Docs
+
+Docs are generated a first generated with `doxygen` as `xml` and then `moxygen` reads the xml to output markdown in the `docs/` folder.
+
+This repo uses reusable tasks from https://github.com/standardloop/taskfiles/
+
+## Precommit
+
+This repo uses [prek](https://github.com/j178/prek).
+
+Please run `prek install`.

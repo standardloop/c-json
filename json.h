@@ -1,11 +1,6 @@
 #ifndef STANDARDLOOP_JSON_H
 #define STANDARDLOOP_JSON_H
 
-#define STANDARDLOOP_JSON_H_MAJOR_VERSION 0
-#define STANDARDLOOP_JSON_H_MINOR_VERSION 0
-#define STANDARDLOOP_JSON_H_PATCH_VERSION 6
-#define STANDARDLOOP_JSON_H_VERSION "0.0.6"
-
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>

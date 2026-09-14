@@ -6,6 +6,8 @@
 
 int main(void)
 {
+    printf("starting test....\n");
     TestJSON();
+    printf("done!\n");
     return EXIT_SUCCESS;
 }
