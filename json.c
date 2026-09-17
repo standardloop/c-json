@@ -17,7 +17,7 @@ static void printJSONNumberDoubleValue(double *value);
 static void printJSONBoolValue(bool *);
 static void printJSONNULLValue(void);
 static void printJSONListValue(DynamicArray *);
-static void printJSONObjValue(HashMap *);
+static void printJSONObjValue(JSONHashMap *);
 
 static char *doubleToString(double);
 
@@ -140,10 +140,11 @@ extern char *JSONValueToString(JSONValue *json_value)
     switch (json_value->value_type)
     {
     case JSONLIST_t:
-        json_value_string = ListToString((DynamicArray *)json_value->value);
+        json_value_string =
+            DynamicArrayToString((DynamicArray *)json_value->value);
         break;
     case JSONOBJ_t:
-        json_value_string = ObjToString((HashMap *)json_value->value);
+        json_value_string = ObjToString((JSONHashMap *)json_value->value);
         break;
     case JSONNUMBER_INT_t:
         json_value_string = Int64ToString(*(int64_t *)json_value->value);
@@ -193,7 +194,7 @@ extern void FreeJSON(JSON *json)
             }
             else if (json->root->value_type == JSONOBJ_t)
             {
-                FreeHashMap(json->root->value);
+                FreeJSONHashMap(json->root->value);
             }
         }
         FreeJSONValue(json->root, false);
@@ -215,7 +216,7 @@ extern void PrintJSON(JSON *json)
     }
     else if (json->root->value_type == JSONOBJ_t)
     {
-        PrintHashMap(json->root->value);
+        PrintJSONHashMap(json->root->value);
     }
 }
 
@@ -229,7 +230,7 @@ extern void PrintJSONValue(JSONValue *json_value)
     switch (json_value->value_type)
     {
     case JSONOBJ_t:
-        printJSONObjValue((HashMap *)json_value->value);
+        printJSONObjValue((JSONHashMap *)json_value->value);
         break;
     case JSONNUMBER_INT_t:
         printJSONNumberIntValue((int64_t *)json_value->value);
@@ -317,12 +318,12 @@ static void printJSONListValue(DynamicArray *value)
     PrintDynamicArray(value);
 }
 
-static void printJSONObjValue(HashMap *value)
+static void printJSONObjValue(JSONHashMap *value)
 {
     if (value == NULL)
     {
         errno = EINVAL;
         return;
     }
-    PrintHashMap(value);
+    PrintJSONHashMap(value);
 }

@@ -12,6 +12,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <standardloop/collections.h>
+#include <standardloop/util.h>
+
 // ————————— JSON START —————————
 /// @cond INTERNAL
 #define JSON_BOOL_TRUE "true"
@@ -82,19 +85,19 @@ typedef struct
     JSONValue **entries;
     HashFunction *hashFunction;
     bool force_lowercase;
-} HashMap;
+} JSONHashMap;
 
-extern JSONValue *HashMapGet(HashMap *, char *);
-extern void *HashMapGetValueDirect(HashMap *, char *);
+extern JSONValue *JSONHashMapGet(JSONHashMap *, char *);
+extern void *JSONHashMapGetValueDirect(JSONHashMap *, char *);
 
-extern HashMap *HashMapInit(u_int32_t, HashFunction *, bool);
-extern HashMap *DefaultHashMapInit(void);
-extern HashMap *HashMapReplicate(HashMap *);
-extern void FreeHashMap(HashMap *);
-extern void HashMapInsert(HashMap *, JSONValue *);
-extern void HashMapRemove(HashMap *, char *);
-extern void PrintHashMap(HashMap *);
-extern char *ObjToString(HashMap *);
+extern JSONHashMap *JSONHashMapInit(u_int32_t, HashFunction *, bool);
+extern JSONHashMap *DefaultJSONHashMapInit(void);
+extern JSONHashMap *JSONHashMapReplicate(JSONHashMap *);
+extern void FreeJSONHashMap(JSONHashMap *);
+extern void JSONHashMapInsert(JSONHashMap *, JSONValue *);
+extern void JSONHashMapRemove(JSONHashMap *, char *);
+extern void PrintJSONHashMap(JSONHashMap *);
+extern char *ObjToString(JSONHashMap *);
 
 // ————————— HASHMAP END —————————
 
@@ -114,7 +117,7 @@ extern DynamicArray *DefaultDynamicArrayInit(void);
 extern DynamicArray *DynamicArrayInitFromStr(char *);
 extern DynamicArray *DynamicArrayReplicate(DynamicArray *);
 
-extern char *ListToString(DynamicArray *);
+extern char *DynamicArrayToString(DynamicArray *);
 extern void DynamicArrayAddFirst(DynamicArray *, JSONValue *);
 extern void DynamicArrayAddLast(DynamicArray *, JSONValue *);
 extern void DynamicArrayAdd(DynamicArray *, JSONValue *, u_int32_t);
@@ -210,9 +213,5 @@ extern JSONValue *JSONValueReplicate(JSONValue *);
 extern JSONValue *JSONValueInit(enum JSONValueType, void *, char *);
 
 // ————————— PARSER END —————————
-
-// ————————— UTIL BEGIN —————————
-#include <standardloop/util.h>
-// ————————— UTIL END —————————
 
 #endif

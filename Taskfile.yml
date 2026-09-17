@@ -21,7 +21,7 @@ vars:
     - parser.test.c
   DYLIB_NAME: libstandardloop-json.dylib
   DYLIB_HEADER: json.h
-  DYN_LIBS_USED: "-lstandardloop-util"
+  DYN_LIBS_USED: "-lstandardloop-util -lstandardloop-collections"
 
 tasks:
   default:
@@ -36,8 +36,9 @@ tasks:
       - task: c:release
 
   dependencies:
-    deps:
-      - c:dependencies:util
+    cmds:
+      - task: c:dependencies:util
+      - task: c:dependencies:collections
 
   test:
     deps:

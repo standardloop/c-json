@@ -259,7 +259,7 @@ extern void FreeJSONValue(JSONValue *json_value, bool deep)
             }
             else if (json_value->value_type == JSONOBJ_t)
             {
-                FreeHashMap(json_value->value);
+                FreeJSONHashMap(json_value->value);
             }
             else if (json_value->value_type != JSONNULL_t)
             {
@@ -355,19 +355,19 @@ static JSONValue *parseObj(JSONParser *parser)
         return NULL;
     }
 
-    HashMap *map = DefaultHashMapInit();
+    JSONHashMap *map = DefaultJSONHashMapInit();
     if (map == NULL)
     {
         parser->memory_error = true;
-        parser->error_message =
-            "[ERROR]: not enough memory for creating HashMap inside parseObj";
+        parser->error_message = "[ERROR]: not enough memory for creating "
+                                "JSONHashMap inside parseObj";
         return NULL;
     }
     while (ALWAYS)
     {
         if (parseObjErrorHelper(parser))
         {
-            FreeHashMap(map);
+            FreeJSONHashMap(map);
             FreeJSONValue(json_value, true);
             // parser->input_error; // parseObjErrorHelper writes this value
             // parser->error_message; // parseObjErrorHelper writes this value
@@ -383,7 +383,7 @@ static JSONValue *parseObj(JSONParser *parser)
         if (obj_key != NULL &&
             (obj_key->value == NULL || obj_key->value_type != JSONSTRING_t))
         {
-            FreeHashMap(map);
+            FreeJSONHashMap(map);
             FreeJSONValue(obj_key, true);
             FreeJSONValue(json_value, false);
             parser->input_error = true;
@@ -399,7 +399,7 @@ static JSONValue *parseObj(JSONParser *parser)
                 nextJSONToken(parser); // skip over colon
                 if (!IsJSONTokenValueType(parser->peek_token, true))
                 {
-                    FreeHashMap(map);
+                    FreeJSONHashMap(map);
                     FreeJSONValue(obj_key, true);
                     FreeJSONValue(json_value, false);
                     parser->input_error = true;
@@ -418,12 +418,12 @@ static JSONValue *parseObj(JSONParser *parser)
                 else
                 {
                     obj_value->key = obj_key->value;
-                    HashMapInsert(map, obj_value);
+                    JSONHashMapInsert(map, obj_value);
                 }
             }
             else
             {
-                FreeHashMap(map);
+                FreeJSONHashMap(map);
                 FreeJSONValue(obj_key, true);
                 FreeJSONValue(json_value, false);
                 parser->input_error = true;
@@ -706,8 +706,8 @@ extern JSONValue *JSONValueReplicate(JSONValue *json_value)
     }
     else if (json_value->value_type == JSONOBJ_t)
     {
-        value =
-            (HashMap *)HashMapReplicate((HashMap *)json_value->value); // WIP
+        value = (JSONHashMap *)JSONHashMapReplicate(
+            (JSONHashMap *)json_value->value); // WIP
     }
     return JSONValueInit(json_value->value_type, value, NULL);
 }

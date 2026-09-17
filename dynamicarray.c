@@ -214,7 +214,7 @@ extern JSONValue *DynamicArrayGetAtIndex(DynamicArray *dynamic_array,
     return dynamic_array->list[index];
 }
 
-extern char *ListToString(DynamicArray *dynamic_array)
+extern char *DynamicArrayToString(DynamicArray *dynamic_array)
 {
     if (dynamic_array == NULL)
     {

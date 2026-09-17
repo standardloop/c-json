@@ -5,12 +5,12 @@
 | Name                            | Description |
 | ------------------------------- | ----------- |
 | [`JSON`](#json)                 |             |
-| [`HashMap`](#hashmap)           |             |
 | [`DynamicArray`](#dynamicarray) |             |
 | [`JSONLexer`](#jsonlexer)       |             |
 | [`JSONToken`](#jsontoken)       |             |
 | [`JSONValue`](#jsonvalue)       |             |
 | [`JSONParser`](#jsonparser)     |             |
+| [`JSONHashMap`](#jsonhashmap)   |             |
 
 ## Macros
 
@@ -233,74 +233,74 @@ void PrintJSONValue(JSONValue *)
 
 ---
 
-### HashMapGet
+### JSONHashMapGet
 
 ```cpp
-JSONValue * HashMapGet(HashMap *, char *)
+JSONValue * JSONHashMapGet(JSONHashMap *, char *)
 ```
 
 ---
 
-### HashMapGetValueDirect
+### JSONHashMapGetValueDirect
 
 ```cpp
-void * HashMapGetValueDirect(HashMap *, char *)
+void * JSONHashMapGetValueDirect(JSONHashMap *, char *)
 ```
 
 ---
 
-### HashMapInit
+### JSONHashMapInit
 
 ```cpp
-HashMap * HashMapInit(u_int32_t, HashFunction *, bool)
+JSONHashMap * JSONHashMapInit(u_int32_t, HashFunction *, bool)
 ```
 
 ---
 
-### DefaultHashMapInit
+### DefaultJSONHashMapInit
 
 ```cpp
-HashMap * DefaultHashMapInit(void)
+JSONHashMap * DefaultJSONHashMapInit(void)
 ```
 
 ---
 
-### HashMapReplicate
+### JSONHashMapReplicate
 
 ```cpp
-HashMap * HashMapReplicate(HashMap *)
+JSONHashMap * JSONHashMapReplicate(JSONHashMap *)
 ```
 
 ---
 
-### FreeHashMap
+### FreeJSONHashMap
 
 ```cpp
-void FreeHashMap(HashMap *)
+void FreeJSONHashMap(JSONHashMap *)
 ```
 
 ---
 
-### HashMapInsert
+### JSONHashMapInsert
 
 ```cpp
-void HashMapInsert(HashMap *, JSONValue *)
+void JSONHashMapInsert(JSONHashMap *, JSONValue *)
 ```
 
 ---
 
-### HashMapRemove
+### JSONHashMapRemove
 
 ```cpp
-void HashMapRemove(HashMap *, char *)
+void JSONHashMapRemove(JSONHashMap *, char *)
 ```
 
 ---
 
-### PrintHashMap
+### PrintJSONHashMap
 
 ```cpp
-void PrintHashMap(HashMap *)
+void PrintJSONHashMap(JSONHashMap *)
 ```
 
 ---
@@ -308,7 +308,7 @@ void PrintHashMap(HashMap *)
 ### ObjToString
 
 ```cpp
-char * ObjToString(HashMap *)
+char * ObjToString(JSONHashMap *)
 ```
 
 ---
@@ -345,10 +345,10 @@ DynamicArray * DynamicArrayReplicate(DynamicArray *)
 
 ---
 
-### ListToString
+### DynamicArrayToString
 
 ```cpp
-char * ListToString(DynamicArray *)
+char * DynamicArrayToString(DynamicArray *)
 ```
 
 ---
@@ -571,71 +571,6 @@ struct JSON
 JSONValue * root
 ```
 
-## HashMap
-
-```cpp
-struct HashMap
-```
-
-### Public Attributes
-
-| Return           | Name                                  | Description |
-| ---------------- | ------------------------------------- | ----------- |
-| `u_int32_t`      | [`size`](#size)                       |             |
-| `u_int32_t`      | [`capacity`](#capacity)               |             |
-| `u_int32_t`      | [`collision_count`](#collision_count) |             |
-| `JSONValue **`   | [`entries`](#entries)                 |             |
-| `HashFunction *` | [`hashFunction`](#hashfunction-1)     |             |
-| `bool`           | [`force_lowercase`](#force_lowercase) |             |
-
----
-
-#### size
-
-```cpp
-u_int32_t size
-```
-
----
-
-#### capacity
-
-```cpp
-u_int32_t capacity
-```
-
----
-
-#### collision_count
-
-```cpp
-u_int32_t collision_count
-```
-
----
-
-#### entries
-
-```cpp
-JSONValue ** entries
-```
-
----
-
-#### hashFunction
-
-```cpp
-HashFunction * hashFunction
-```
-
----
-
-#### force_lowercase
-
-```cpp
-bool force_lowercase
-```
-
 ## DynamicArray
 
 ```cpp
@@ -644,11 +579,11 @@ struct DynamicArray
 
 ### Public Attributes
 
-| Return         | Name                      | Description |
-| -------------- | ------------------------- | ----------- |
-| `u_int32_t`    | [`size`](#size-1)         |             |
-| `u_int32_t`    | [`capacity`](#capacity-1) |             |
-| `JSONValue **` | [`list`](#list)           |             |
+| Return         | Name                    | Description |
+| -------------- | ----------------------- | ----------- |
+| `u_int32_t`    | [`size`](#size)         |             |
+| `u_int32_t`    | [`capacity`](#capacity) |             |
+| `JSONValue **` | [`list`](#list)         |             |
 
 ---
 
@@ -925,4 +860,69 @@ int64_t list_nested
 
 ```cpp
 int64_t obj_nested
+```
+
+## JSONHashMap
+
+```cpp
+struct JSONHashMap
+```
+
+### Public Attributes
+
+| Return           | Name                                  | Description |
+| ---------------- | ------------------------------------- | ----------- |
+| `u_int32_t`      | [`size`](#size-1)                     |             |
+| `u_int32_t`      | [`capacity`](#capacity-1)             |             |
+| `u_int32_t`      | [`collision_count`](#collision_count) |             |
+| `JSONValue **`   | [`entries`](#entries)                 |             |
+| `HashFunction *` | [`hashFunction`](#hashfunction-1)     |             |
+| `bool`           | [`force_lowercase`](#force_lowercase) |             |
+
+---
+
+#### size
+
+```cpp
+u_int32_t size
+```
+
+---
+
+#### capacity
+
+```cpp
+u_int32_t capacity
+```
+
+---
+
+#### collision_count
+
+```cpp
+u_int32_t collision_count
+```
+
+---
+
+#### entries
+
+```cpp
+JSONValue ** entries
+```
+
+---
+
+#### hashFunction
+
+```cpp
+HashFunction * hashFunction
+```
+
+---
+
+#### force_lowercase
+
+```cpp
+bool force_lowercase
 ```
