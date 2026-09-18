@@ -12,8 +12,6 @@ vars:
     - json.c
     - lexer.c
     - parser.c
-    - hashmap.c
-    - dynamicarray.c
   TEST_EXECUTABLE_NAME: test
   TEST_SOURCE_FILES:
     - json.test.c
@@ -44,11 +42,22 @@ tasks:
     deps:
       - test:run
 
+  sanitize:
+    deps:
+      - test:run-sanitize
+
   test:build-sanitize:
     deps:
       - dependencies
     cmds:
       - task: c:test:build-sanitize
+
+  test:run-sanitize:
+    deps:
+      - test:build-sanitize
+    cmds:
+      - ./{{.TEST_EXECUTABLE_NAME}}-sanitize
+
   test:build:
     deps:
       - dependencies
@@ -72,3 +81,16 @@ tasks:
   docs:
     deps:
       - c:docs:moxygen
+
+  test:leaks:
+    aliases:
+      - leaks
+    desc: "Run macOS leaks on the test program."
+    deps:
+      - test:build
+    cmds:
+      - cp /usr/local/lib/standardloop/libstandardloop-util.dylib ./
+      - cp /usr/local/lib/standardloop/libstandardloop-collections.dylib ./
+      - leaks --atExit -- ./{{.TEST_EXECUTABLE_NAME}}
+      - rm libstandardloop-util.dylib
+      - rm libstandardloop-collections.dylib

@@ -67,3 +67,4 @@ lab
 lab-sanitize
 hold.c
 doxygen/
+test-sanitize

@@ -13,6 +13,7 @@ This was built to learn about lexing, parsing, and data structures such as dynam
 ## Dependencies
 
 - https://github.com/standardloop/c-util
+- https://github.com/standardloop/c-collections
 
 ## Example Programs
 
@@ -21,7 +22,7 @@ This was built to learn about lexing, parsing, and data structures such as dynam
 ```C
 #include <stdio.h>
 #include <stdlib.h>
-#include "./json.h" // or <standardloop/json.h> if using dynamic library
+#include <standardloop/json.h>
 
 int main(void)
 {
@@ -30,8 +31,8 @@ int main(void)
     {
         return EXIT_FAILURE;
     }
-    PrintJSON(json);
-    FreeJSON(json);
+    JSONPrint(json);
+    JSONFree(json);
     return EXIT_SUCCESS;
 }
 ```
@@ -43,7 +44,7 @@ int main(void)
 #include <stdlib.h>
 #include <string.h>
 
-#include "./json.h" // or <standardloop/json.h> if using dynamic library
+#include <standardloop/json.h>
 
 int main(void)
 {
@@ -53,8 +54,8 @@ int main(void)
     {
         return EXIT_FAILURE;
     }
-    PrintJSON(json);
-    FreeJSON(json);
+    JSONPrint(json);
+    JSONFree(json);
     return EXIT_SUCCESS;
 }
 ```
@@ -66,7 +67,7 @@ int main(void)
 #include <stdlib.h>
 #include <string.h>
 
-#include "./json.h" // or <standardloop/json.h> if using dynamic library
+#include <standardloop/json.h>
 
 int main(void)
 {
@@ -75,7 +76,7 @@ int main(void)
     {
         return EXIT_FAILURE;
     }
-    char *json_string = JSONToString(json, true);
+    char *json_string = JSONToString(json);
     if (json_string == NULL)
     {
         return EXIT_FAILURE;
@@ -97,7 +98,7 @@ $ task --list-all
 ### To build a test program
 
 ```sh
-$ task
+$ task test
 ```
 
 ## Checking for Leaks

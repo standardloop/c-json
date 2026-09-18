@@ -43,94 +43,50 @@ enum JSONValueType
     JSONLIST_t,
 };
 
-typedef struct jsonValue
+typedef struct
 {
-    char *key;
     enum JSONValueType value_type;
-    void *value;
-    struct jsonValue *next;
+    union
+    {
+        List *list;
+        HashMap *obj;
+        int64_t *num_int;
+        double *num_double;
+        // void *null_json; // if null, then do need to hold it
+        char *str;
+        bool *boolean;
+    };
 } JSONValue;
 
-extern char *JSONValueToString(JSONValue *);
+extern JSONValue *JSONValueBlankInit();
+extern JSONValue *JSONValueInit(enum JSONValueType value_type, void *value);
+
+extern char *JSONValueToString(void *value);
+extern void JSONValueFree(void *value);
+extern void JSONValuePrint(void *value);
+extern void *JSONValueDuplicate(void *value);
+
+extern ItemValueOperations ItemValueJSONValueOperations;
 
 typedef struct
 {
-    JSONValue *root;
+    Item *root;
 } JSON;
+
+extern JSON *JSONInit();
+extern void JSONFree(JSON *json);
+extern void JSONPrint(JSON *json);
+extern JSONValue *JSONGetRoot(JSON *json);
+
+// ----
 
 extern JSON *JSONInit();
 extern JSON *StringToJSON(char *);
 extern JSON *JSONFromFile(char *);
-extern char *JSONToString(JSON *, bool);
-
-extern void FreeJSON(JSON *);
-extern void PrintJSON(JSON *);
+extern char *JSONToString(JSON *);
 
 extern void TestJSON();
-
-extern void PrintJSONValue(JSONValue *);
 // ————————— JSON END —————————
-
-// ————————— HASHMAP START —————————
-#define DEFAULT_MAP_SIZE 16
-#define DEFAULT_MAP_RESIZE_MULTIPLE 2
-
-typedef u_int32_t(HashFunction)(char *, u_int32_t);
-
-typedef struct
-{
-    u_int32_t size;
-    u_int32_t capacity;
-    u_int32_t collision_count;
-    JSONValue **entries;
-    HashFunction *hashFunction;
-    bool force_lowercase;
-} JSONHashMap;
-
-extern JSONValue *JSONHashMapGet(JSONHashMap *, char *);
-extern void *JSONHashMapGetValueDirect(JSONHashMap *, char *);
-
-extern JSONHashMap *JSONHashMapInit(u_int32_t, HashFunction *, bool);
-extern JSONHashMap *DefaultJSONHashMapInit(void);
-extern JSONHashMap *JSONHashMapReplicate(JSONHashMap *);
-extern void FreeJSONHashMap(JSONHashMap *);
-extern void JSONHashMapInsert(JSONHashMap *, JSONValue *);
-extern void JSONHashMapRemove(JSONHashMap *, char *);
-extern void PrintJSONHashMap(JSONHashMap *);
-extern char *ObjToString(JSONHashMap *);
-
-// ————————— HASHMAP END —————————
-
-// ————————— DYN ARRAY START —————————
-#define DEFAULT_DYN_ARR_SIZE 16
-#define DEFAULT_DYN_ARR_RESIZE_MULTIPLE 2
-
-typedef struct
-{
-    u_int32_t size;
-    u_int32_t capacity;
-    JSONValue **list;
-} DynamicArray;
-
-extern DynamicArray *DynamicArrayInit(u_int32_t);
-extern DynamicArray *DefaultDynamicArrayInit(void);
-extern DynamicArray *DynamicArrayInitFromStr(char *);
-extern DynamicArray *DynamicArrayReplicate(DynamicArray *);
-
-extern char *DynamicArrayToString(DynamicArray *);
-extern void DynamicArrayAddFirst(DynamicArray *, JSONValue *);
-extern void DynamicArrayAddLast(DynamicArray *, JSONValue *);
-extern void DynamicArrayAdd(DynamicArray *, JSONValue *, u_int32_t);
-
-extern void DynamicArrayRemove(DynamicArray *, u_int32_t);
-extern void DynamicArrayRemoveFirst(DynamicArray *);
-extern void DynamicArrayRemoveLast(DynamicArray *);
-
-extern JSONValue *DynamicArrayGetAtIndex(DynamicArray *, u_int32_t);
-
-extern void PrintDynamicArray(DynamicArray *);
-extern void FreeDynamicArray(DynamicArray *);
-// ————————— DYN ARRAY END —————————
 
 // ————————— LEXER START —————————
 #define NULL_CHAR_STRING "\0"
@@ -209,8 +165,6 @@ extern void FreeJSONParser(JSONParser *);
 extern void PrintJSONParserErrorLine(JSONParser *);
 extern void FreeJSONValue(JSONValue *, bool);
 extern JSON *ParseJSON(JSONParser *);
-extern JSONValue *JSONValueReplicate(JSONValue *);
-extern JSONValue *JSONValueInit(enum JSONValueType, void *, char *);
 
 // ————————— PARSER END —————————
 
