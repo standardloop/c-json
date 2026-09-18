@@ -6,11 +6,14 @@
 
 #include "./json.h"
 #include <standardloop/collections.h>
+#include <standardloop/testing.h>
 
 int main(void)
 {
-    printf("starting test....\n");
+    // printf("starting test....\n");
+    TestingInit();
     TestJSON();
-    printf("done!\n");
+    TestingTearDown();
+    // printf("done!\n");
     return EXIT_SUCCESS;
 }
