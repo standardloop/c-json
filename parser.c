@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <standardloop/collections.h>
+
 #include "./json.h"
 
 static void nextJSONToken(JSONParser *);
@@ -206,10 +208,10 @@ static JSONValue *parseList(JSONParser *parser)
     }
     if (parser->current_token->type != JSONTokenOpenBracket)
     {
-        FreeJSONValue(json_value, false);
+        JSONValueFree(json_value);
         return NULL;
     }
-    DynamicArray *list = DefaultDynamicArrayInit();
+    List *list = ListInitDefault();
     if (list == NULL)
     {
         parser->memory_error = true;
@@ -222,8 +224,8 @@ static JSONValue *parseList(JSONParser *parser)
         JSONValue *list_value = parse(parser);
         if (parseListErrorHelper(parser))
         {
-            FreeDynamicArray(list);
-            FreeJSONValue(json_value, false);
+            ListFree(list);
+            JSONValueFree(json_value);
             // parser->input_error; // parseListErrorHelper writes this value
             // parser->input_error; // parseListErrorHelper writes this value
             return NULL;
@@ -234,7 +236,8 @@ static JSONValue *parseList(JSONParser *parser)
         }
         else
         {
-            DynamicArrayAddLast(list, list_value);
+            ListAddLast(list,
+                        ItemInit(list_value, &ItemValueJSONValueOperations));
         }
         if (parseListLoopChecker(parser))
         {
@@ -243,32 +246,8 @@ static JSONValue *parseList(JSONParser *parser)
     }
 
     json_value->value_type = JSONLIST_t;
-    json_value->value = list;
+    json_value->list = list;
     return json_value;
-}
-
-extern void FreeJSONValue(JSONValue *json_value, bool deep)
-{
-    if (json_value != NULL)
-    {
-        if (deep && json_value->value != NULL)
-        {
-            if (json_value->value_type == JSONLIST_t)
-            {
-                FreeDynamicArray(json_value->value);
-            }
-            else if (json_value->value_type == JSONOBJ_t)
-            {
-                FreeJSONHashMap(json_value->value);
-            }
-            else if (json_value->value_type != JSONNULL_t)
-            {
-                free(json_value->value);
-            }
-            json_value->value = NULL;
-        }
-        free(json_value);
-    }
 }
 
 static bool parseObjErrorHelper(JSONParser *parser)
@@ -355,7 +334,7 @@ static JSONValue *parseObj(JSONParser *parser)
         return NULL;
     }
 
-    JSONHashMap *map = DefaultJSONHashMapInit();
+    HashMap *map = HashMapInitDefault();
     if (map == NULL)
     {
         parser->memory_error = true;
@@ -367,8 +346,8 @@ static JSONValue *parseObj(JSONParser *parser)
     {
         if (parseObjErrorHelper(parser))
         {
-            FreeJSONHashMap(map);
-            FreeJSONValue(json_value, true);
+            HashMapFree(map);
+            JSONValueFree(json_value);
             // parser->input_error; // parseObjErrorHelper writes this value
             // parser->error_message; // parseObjErrorHelper writes this value
             return NULL;
@@ -381,17 +360,17 @@ static JSONValue *parseObj(JSONParser *parser)
 
         JSONValue *obj_key = parse(parser);
         if (obj_key != NULL &&
-            (obj_key->value == NULL || obj_key->value_type != JSONSTRING_t))
+            (obj_key->str == NULL || obj_key->value_type != JSONSTRING_t))
         {
-            FreeJSONHashMap(map);
-            FreeJSONValue(obj_key, true);
-            FreeJSONValue(json_value, false);
+            HashMapFree(map);
+            JSONValueFree(obj_key);
+            JSONValueFree(json_value);
             parser->input_error = true;
             parser->error_message = "Object key must be a string";
             return NULL;
         }
         // FIXME, maybe just else?
-        if (obj_key != NULL && obj_key->value != NULL)
+        if (obj_key != NULL && obj_key->str != NULL)
         {
             if (parser->peek_token->type == JSONTokenColon)
             {
@@ -399,9 +378,9 @@ static JSONValue *parseObj(JSONParser *parser)
                 nextJSONToken(parser); // skip over colon
                 if (!IsJSONTokenValueType(parser->peek_token, true))
                 {
-                    FreeJSONHashMap(map);
-                    FreeJSONValue(obj_key, true);
-                    FreeJSONValue(json_value, false);
+                    HashMapFree(map);
+                    JSONValueFree(obj_key);
+                    JSONValueFree(json_value);
                     parser->input_error = true;
                     parser->error_message =
                         "Invalid JSONToken after colon, expecting value";
@@ -417,24 +396,27 @@ static JSONValue *parseObj(JSONParser *parser)
                 }
                 else
                 {
-                    obj_value->key = obj_key->value;
-                    JSONHashMapInsert(map, obj_value);
+                    HashMapInsert(map,
+                                  HashMapItemInit(
+                                      obj_key->str,
+                                      ItemInit(obj_value,
+                                               &ItemValueJSONValueOperations)));
                 }
             }
             else
             {
-                FreeJSONHashMap(map);
-                FreeJSONValue(obj_key, true);
-                FreeJSONValue(json_value, false);
+                HashMapFree(map);
+                JSONValueFree(obj_key);
+                JSONValueFree(json_value);
                 parser->input_error = true;
                 parser->error_message = "Colon not found after key";
                 return NULL;
             }
-            FreeJSONValue(obj_key, false);
+            free(obj_key);
         }
     }
     json_value->value_type = JSONOBJ_t;
-    json_value->value = map;
+    json_value->obj = map;
     return json_value;
 }
 
@@ -448,11 +430,10 @@ static JSONValue *initQuickJSONValue(enum JSONValueType value_type, void *value)
     }
     if (value_type == JSONSTRING_t)
     {
-        json_value->value = value;
+        json_value->str = value;
     }
     else if (value_type == JSONNULL_t)
     {
-        json_value->value = NULL;
         free(value);
     }
     else if (value_type == JSONBOOL_t)
@@ -466,26 +447,26 @@ static JSONValue *initQuickJSONValue(enum JSONValueType value_type, void *value)
         {
             *new_bool = false;
         }
-        json_value->value = new_bool;
+        json_value->boolean = new_bool;
         free(value);
     }
     else if (value_type == JSONNUMBER_DOUBLE_t)
     {
         double *new_double = malloc(sizeof(double));
         *new_double = atof((char *)value);
-        json_value->value = new_double;
+        json_value->num_double = new_double;
         free(value);
     }
     else if (value_type == JSONNUMBER_INT_t)
     {
         int64_t *new_int = malloc(sizeof(int64_t));
         *new_int = (int64_t)atof((char *)value);
-        json_value->value = new_int;
+        json_value->num_int = new_int;
         free(value);
     }
     else
     {
-        json_value->value = NULL;
+        // json_value->value = NULL;
         // free(value); // FIXME
     }
     json_value->value_type = value_type;
@@ -638,14 +619,14 @@ extern JSON *ParseJSON(JSONParser *parser)
     {
         return NULL;
     }
-    JSON *json = malloc(sizeof(JSON));
+    JSON *json = JSONInit();
     if (json == NULL)
     {
         FreeJSONParser(parser);
         errno = ENOMEM;
         return NULL;
     }
-    json->root = parse(parser);
+    json->root = ItemInit(parse(parser), &ItemValueJSONValueOperations);
     // probably want the error to be on JSON obj so it can be read before being
     // freed right now it just prints to stdout, but for cerver, we would want
     // access to that error message
@@ -654,60 +635,9 @@ extern JSON *ParseJSON(JSONParser *parser)
         PrintErrorLine(parser);
         PrintParserError(parser);
         FreeJSONParser(parser);
-        FreeJSON(json);
+        JSONFree(json);
         return NULL;
     }
     FreeJSONParser(parser);
     return json;
-}
-
-extern JSONValue *JSONValueInit(enum JSONValueType type, void *value, char *key)
-{
-    JSONValue *json_value = malloc(sizeof(JSONValue));
-    if (json_value == NULL)
-    {
-        return NULL;
-    }
-    json_value->key = key;
-    json_value->value_type = type;
-    json_value->value = value;
-    json_value->next = NULL;
-    return json_value;
-}
-
-// FIXME, object support
-extern JSONValue *JSONValueReplicate(JSONValue *json_value)
-{
-    if (json_value == NULL)
-    {
-        return NULL;
-    }
-    void *value = NULL;
-    if (json_value->value_type == JSONNUMBER_DOUBLE_t)
-    {
-        value = (double *)malloc(sizeof(double) * 1);
-        memcpy(value, json_value->value, sizeof(double) * 1);
-    }
-    else if (json_value->value_type == JSONNUMBER_INT_t)
-    {
-        value = (int *)malloc(sizeof(int) * 1);
-        memcpy(value, json_value->value, sizeof(int) * 1);
-    }
-    else if (json_value->value_type == JSONSTRING_t)
-    {
-        size_t value_len = strlen((char *)json_value->value) + 1;
-        value = (char *)malloc(sizeof(char) * value_len);
-        memcpy(value, json_value->value, sizeof(char) * value_len);
-    }
-    else if (json_value->value_type == JSONLIST_t)
-    {
-        value = (DynamicArray *)DynamicArrayReplicate(
-            (DynamicArray *)json_value->value);
-    }
-    else if (json_value->value_type == JSONOBJ_t)
-    {
-        value = (JSONHashMap *)JSONHashMapReplicate(
-            (JSONHashMap *)json_value->value); // WIP
-    }
-    return JSONValueInit(json_value->value_type, value, NULL);
 }

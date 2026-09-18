@@ -2,51 +2,15 @@
 
 ## Classes
 
-| Name                            | Description |
-| ------------------------------- | ----------- |
-| [`JSON`](#json)                 |             |
-| [`JSONV2`](#jsonv2)             |             |
-| [`DynamicArray`](#dynamicarray) |             |
-| [`JSONLexer`](#jsonlexer)       |             |
-| [`JSONToken`](#jsontoken)       |             |
-| [`JSONValue`](#jsonvalue)       |             |
-| [`JSONParser`](#jsonparser)     |             |
-| [`JSONHashMap`](#jsonhashmap)   |             |
-| [`JSONValueV2`](#jsonvaluev2)   |             |
+| Name                        | Description |
+| --------------------------- | ----------- |
+| [`JSON`](#json)             |             |
+| [`JSONLexer`](#jsonlexer)   |             |
+| [`JSONToken`](#jsontoken)   |             |
+| [`JSONValue`](#jsonvalue)   |             |
+| [`JSONParser`](#jsonparser) |             |
 
 ## Macros
-
----
-
-### DEFAULT_MAP_SIZE
-
-```cpp
-#define DEFAULT_MAP_SIZE 16
-```
-
----
-
-### DEFAULT_MAP_RESIZE_MULTIPLE
-
-```cpp
-#define DEFAULT_MAP_RESIZE_MULTIPLE 2
-```
-
----
-
-### DEFAULT_DYN_ARR_SIZE
-
-```cpp
-#define DEFAULT_DYN_ARR_SIZE 16
-```
-
----
-
-### DEFAULT_DYN_ARR_RESIZE_MULTIPLE
-
-```cpp
-#define DEFAULT_DYN_ARR_RESIZE_MULTIPLE 2
-```
 
 ---
 
@@ -149,72 +113,54 @@ enum JSONTokenType
 | `JSONTokenNULL`            |             |
 | `JSONTokenIllegal`         |             |
 
-## Typedefs
+## Functions
 
 ---
 
-### HashFunction
+### JSONValueBlankInit
 
 ```cpp
-using HashFunction = u_int32_t
+JSONValue * JSONValueBlankInit()
 ```
 
-## Functions
+---
+
+### JSONValueInit
+
+```cpp
+JSONValue * JSONValueInit(enum JSONValueType value_type, void * value)
+```
 
 ---
 
 ### JSONValueToString
 
 ```cpp
-char * JSONValueToString(JSONValue *)
+char * JSONValueToString(void * value)
 ```
 
 ---
 
-### JSONValueV2BlankInit
+### JSONValueFree
 
 ```cpp
-JSONValueV2 * JSONValueV2BlankInit()
+void JSONValueFree(void * value)
 ```
 
 ---
 
-### JSONValueV2Init
+### JSONValuePrint
 
 ```cpp
-JSONValueV2 * JSONValueV2Init(enum JSONValueType value_type, void * value)
+void JSONValuePrint(void * value)
 ```
 
 ---
 
-### JSONValueV2ToString
+### JSONValueDuplicate
 
 ```cpp
-char * JSONValueV2ToString(void * value)
-```
-
----
-
-### JSONValueV2Free
-
-```cpp
-void JSONValueV2Free(void * value)
-```
-
----
-
-### JSONValueV2Print
-
-```cpp
-void JSONValueV2Print(void * value)
-```
-
----
-
-### JSONValueV2Duplicate
-
-```cpp
-void * JSONValueV2Duplicate(void * value)
+void * JSONValueDuplicate(void * value)
 ```
 
 ---
@@ -223,6 +169,30 @@ void * JSONValueV2Duplicate(void * value)
 
 ```cpp
 JSON * JSONInit()
+```
+
+---
+
+### JSONFree
+
+```cpp
+void JSONFree(JSON * json)
+```
+
+---
+
+### JSONPrint
+
+```cpp
+void JSONPrint(JSON * json)
+```
+
+---
+
+### JSONGetRoot
+
+```cpp
+JSONValue * JSONGetRoot(JSON * json)
 ```
 
 ---
@@ -246,23 +216,7 @@ JSON * JSONFromFile(char *)
 ### JSONToString
 
 ```cpp
-char * JSONToString(JSON *, bool)
-```
-
----
-
-### FreeJSON
-
-```cpp
-void FreeJSON(JSON *)
-```
-
----
-
-### PrintJSON
-
-```cpp
-void PrintJSON(JSON *)
+char * JSONToString(JSON *)
 ```
 
 ---
@@ -271,206 +225,6 @@ void PrintJSON(JSON *)
 
 ```cpp
 void TestJSON()
-```
-
----
-
-### PrintJSONValue
-
-```cpp
-void PrintJSONValue(JSONValue *)
-```
-
----
-
-### JSONHashMapGet
-
-```cpp
-JSONValue * JSONHashMapGet(JSONHashMap *, char *)
-```
-
----
-
-### JSONHashMapGetValueDirect
-
-```cpp
-void * JSONHashMapGetValueDirect(JSONHashMap *, char *)
-```
-
----
-
-### JSONHashMapInit
-
-```cpp
-JSONHashMap * JSONHashMapInit(u_int32_t, HashFunction *, bool)
-```
-
----
-
-### DefaultJSONHashMapInit
-
-```cpp
-JSONHashMap * DefaultJSONHashMapInit(void)
-```
-
----
-
-### JSONHashMapReplicate
-
-```cpp
-JSONHashMap * JSONHashMapReplicate(JSONHashMap *)
-```
-
----
-
-### FreeJSONHashMap
-
-```cpp
-void FreeJSONHashMap(JSONHashMap *)
-```
-
----
-
-### JSONHashMapInsert
-
-```cpp
-void JSONHashMapInsert(JSONHashMap *, JSONValue *)
-```
-
----
-
-### JSONHashMapRemove
-
-```cpp
-void JSONHashMapRemove(JSONHashMap *, char *)
-```
-
----
-
-### PrintJSONHashMap
-
-```cpp
-void PrintJSONHashMap(JSONHashMap *)
-```
-
----
-
-### ObjToString
-
-```cpp
-char * ObjToString(JSONHashMap *)
-```
-
----
-
-### DynamicArrayInit
-
-```cpp
-DynamicArray * DynamicArrayInit(u_int32_t)
-```
-
----
-
-### DefaultDynamicArrayInit
-
-```cpp
-DynamicArray * DefaultDynamicArrayInit(void)
-```
-
----
-
-### DynamicArrayInitFromStr
-
-```cpp
-DynamicArray * DynamicArrayInitFromStr(char *)
-```
-
----
-
-### DynamicArrayReplicate
-
-```cpp
-DynamicArray * DynamicArrayReplicate(DynamicArray *)
-```
-
----
-
-### DynamicArrayToString
-
-```cpp
-char * DynamicArrayToString(DynamicArray *)
-```
-
----
-
-### DynamicArrayAddFirst
-
-```cpp
-void DynamicArrayAddFirst(DynamicArray *, JSONValue *)
-```
-
----
-
-### DynamicArrayAddLast
-
-```cpp
-void DynamicArrayAddLast(DynamicArray *, JSONValue *)
-```
-
----
-
-### DynamicArrayAdd
-
-```cpp
-void DynamicArrayAdd(DynamicArray *, JSONValue *, u_int32_t)
-```
-
----
-
-### DynamicArrayRemove
-
-```cpp
-void DynamicArrayRemove(DynamicArray *, u_int32_t)
-```
-
----
-
-### DynamicArrayRemoveFirst
-
-```cpp
-void DynamicArrayRemoveFirst(DynamicArray *)
-```
-
----
-
-### DynamicArrayRemoveLast
-
-```cpp
-void DynamicArrayRemoveLast(DynamicArray *)
-```
-
----
-
-### DynamicArrayGetAtIndex
-
-```cpp
-JSONValue * DynamicArrayGetAtIndex(DynamicArray *, u_int32_t)
-```
-
----
-
-### PrintDynamicArray
-
-```cpp
-void PrintDynamicArray(DynamicArray *)
-```
-
----
-
-### FreeDynamicArray
-
-```cpp
-void FreeDynamicArray(DynamicArray *)
 ```
 
 ---
@@ -585,20 +339,14 @@ void FreeJSONValue(JSONValue *, bool)
 JSON * ParseJSON(JSONParser *)
 ```
 
----
-
-### JSONValueReplicate
-
-```cpp
-JSONValue * JSONValueReplicate(JSONValue *)
-```
+## Variables
 
 ---
 
-### JSONValueInit
+### ItemValueJSONValueOperations
 
 ```cpp
-JSONValue * JSONValueInit(enum JSONValueType, void *, char *)
+ItemValueOperations ItemValueJSONValueOperations
 ```
 
 ## JSON
@@ -609,29 +357,9 @@ struct JSON
 
 ### Public Attributes
 
-| Return        | Name            | Description |
-| ------------- | --------------- | ----------- |
-| `JSONValue *` | [`root`](#root) |             |
-
----
-
-#### root
-
-```cpp
-JSONValue * root
-```
-
-## JSONV2
-
-```cpp
-struct JSONV2
-```
-
-### Public Attributes
-
-| Return   | Name              | Description |
-| -------- | ----------------- | ----------- |
-| `Item *` | [`root`](#root-1) |             |
+| Return   | Name            | Description |
+| -------- | --------------- | ----------- |
+| `Item *` | [`root`](#root) |             |
 
 ---
 
@@ -639,44 +367,6 @@ struct JSONV2
 
 ```cpp
 Item * root
-```
-
-## DynamicArray
-
-```cpp
-struct DynamicArray
-```
-
-### Public Attributes
-
-| Return         | Name                    | Description |
-| -------------- | ----------------------- | ----------- |
-| `u_int32_t`    | [`size`](#size)         |             |
-| `u_int32_t`    | [`capacity`](#capacity) |             |
-| `JSONValue **` | [`list`](#list)         |             |
-
----
-
-#### size
-
-```cpp
-u_int32_t size
-```
-
----
-
-#### capacity
-
-```cpp
-u_int32_t capacity
-```
-
----
-
-#### list
-
-```cpp
-JSONValue ** list
 ```
 
 ## JSONLexer
@@ -808,20 +498,10 @@ struct JSONValue
 
 ### Public Attributes
 
-| Return                                 | Name                        | Description |
-| -------------------------------------- | --------------------------- | ----------- |
-| `char *`                               | [`key`](#key)               |             |
-| enum [`JSONValueType`](#jsonvaluetype) | [`value_type`](#value_type) |             |
-| `void *`                               | [`value`](#value)           |             |
-| `struct jsonValue *`                   | [`next`](#next)             |             |
-
----
-
-#### key
-
-```cpp
-char * key
-```
+| Return                                                               | Name                                                                                                     | Description |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ----------- |
+| enum [`JSONValueType`](#jsonvaluetype)                               | [`value_type`](#value_type)                                                                              |             |
+| `union JSONValue::@372020044153077151131055174206216317330213243071` | [`@101112273240373251367232114052174162075306057323`](#101112273240373251367232114052174162075306057323) |             |
 
 ---
 
@@ -835,18 +515,75 @@ Type: enum [`JSONValueType`](#jsonvaluetype)
 
 ---
 
-#### value
+#### @101112273240373251367232114052174162075306057323
 
 ```cpp
-void * value
+union JSONValue::@372020044153077151131055174206216317330213243071 @101112273240373251367232114052174162075306057323
+```
+
+## [union].**unnamed0**
+
+```cpp
+union [union].__unnamed0__
+```
+
+### Public Attributes
+
+| Return      | Name                        | Description |
+| ----------- | --------------------------- | ----------- |
+| `List *`    | [`list`](#list)             |             |
+| `HashMap *` | [`obj`](#obj)               |             |
+| `int64_t *` | [`num_int`](#num_int)       |             |
+| `double *`  | [`num_double`](#num_double) |             |
+| `char *`    | [`str`](#str)               |             |
+| `bool *`    | [`boolean`](#boolean)       |             |
+
+---
+
+#### list
+
+```cpp
+List * list
 ```
 
 ---
 
-#### next
+#### obj
 
 ```cpp
-struct jsonValue * next
+HashMap * obj
+```
+
+---
+
+#### num_int
+
+```cpp
+int64_t * num_int
+```
+
+---
+
+#### num_double
+
+```cpp
+double * num_double
+```
+
+---
+
+#### str
+
+```cpp
+char * str
+```
+
+---
+
+#### boolean
+
+```cpp
+bool * boolean
 ```
 
 ## JSONParser
@@ -932,102 +669,6 @@ int64_t list_nested
 int64_t obj_nested
 ```
 
-## JSONHashMap
-
-```cpp
-struct JSONHashMap
-```
-
-### Public Attributes
-
-| Return           | Name                                  | Description |
-| ---------------- | ------------------------------------- | ----------- |
-| `u_int32_t`      | [`size`](#size-1)                     |             |
-| `u_int32_t`      | [`capacity`](#capacity-1)             |             |
-| `u_int32_t`      | [`collision_count`](#collision_count) |             |
-| `JSONValue **`   | [`entries`](#entries)                 |             |
-| `HashFunction *` | [`hashFunction`](#hashfunction-1)     |             |
-| `bool`           | [`force_lowercase`](#force_lowercase) |             |
-
----
-
-#### size
-
-```cpp
-u_int32_t size
-```
-
----
-
-#### capacity
-
-```cpp
-u_int32_t capacity
-```
-
----
-
-#### collision_count
-
-```cpp
-u_int32_t collision_count
-```
-
----
-
-#### entries
-
-```cpp
-JSONValue ** entries
-```
-
----
-
-#### hashFunction
-
-```cpp
-HashFunction * hashFunction
-```
-
----
-
-#### force_lowercase
-
-```cpp
-bool force_lowercase
-```
-
-## JSONValueV2
-
-```cpp
-struct JSONValueV2
-```
-
-### Public Attributes
-
-| Return                                                                 | Name                                                                                                     | Description |
-| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ----------- |
-| enum [`JSONValueType`](#jsonvaluetype)                                 | [`value_type`](#value_type-1)                                                                            |             |
-| `union JSONValueV2::@372020044153077151131055174206216317330213243071` | [`@101112273240373251367232114052174162075306057323`](#101112273240373251367232114052174162075306057323) |             |
-
----
-
-#### value_type
-
-```cpp
-enum JSONValueType value_type
-```
-
-Type: enum [`JSONValueType`](#jsonvaluetype)
-
----
-
-#### @101112273240373251367232114052174162075306057323
-
-```cpp
-union JSONValueV2::@372020044153077151131055174206216317330213243071 @101112273240373251367232114052174162075306057323
-```
-
 ## [union].**unnamed0**
 
 ```cpp
@@ -1038,72 +679,7 @@ union [union].__unnamed0__
 
 | Return      | Name                        | Description |
 | ----------- | --------------------------- | ----------- |
-| `List *`    | [`list`](#list-1)           |             |
-| `HashMap *` | [`obj`](#obj)               |             |
-| `int64_t *` | [`num_int`](#num_int)       |             |
-| `double *`  | [`num_double`](#num_double) |             |
-| `char *`    | [`str`](#str)               |             |
-| `bool *`    | [`boolean`](#boolean)       |             |
-
----
-
-#### list
-
-```cpp
-List * list
-```
-
----
-
-#### obj
-
-```cpp
-HashMap * obj
-```
-
----
-
-#### num_int
-
-```cpp
-int64_t * num_int
-```
-
----
-
-#### num_double
-
-```cpp
-double * num_double
-```
-
----
-
-#### str
-
-```cpp
-char * str
-```
-
----
-
-#### boolean
-
-```cpp
-bool * boolean
-```
-
-## [union].**unnamed0**
-
-```cpp
-union [union].__unnamed0__
-```
-
-### Public Attributes
-
-| Return      | Name                        | Description |
-| ----------- | --------------------------- | ----------- |
-| `List *`    | [`list`](#list-1)           |             |
+| `List *`    | [`list`](#list)             |             |
 | `HashMap *` | [`obj`](#obj)               |             |
 | `int64_t *` | [`num_int`](#num_int)       |             |
 | `double *`  | [`num_double`](#num_double) |             |

@@ -5,12 +5,38 @@
 
 #include "./json.h"
 
+static void testJSONSimple()
+{
+    JSONValue *json_v = JSONValueInit(JSONSTRING_t, strdup("testing"));
+    assert(json_v != NULL);
+    assert(json_v->value_type == JSONSTRING_t);
+    assert(json_v->str != NULL);
+    assert(strcmp(json_v->str, "testing") == 0);
+
+    Item *json_item = ItemInit(json_v, &ItemValueJSONValueOperations);
+    assert(json_item != NULL);
+
+    JSON *json = JSONInit();
+    assert(json != NULL);
+    json->root = json_item;
+
+    JSONFree(json);
+    // ---
+
+    JSON *json_2 = JSONInit();
+    assert(json_2 != NULL);
+    json_2->root = ItemInit(JSONValueInit(JSONOBJ_t, HashMapInitDefault()),
+                            &ItemValueJSONValueOperations);
+
+    JSONFree(json_2);
+}
+
 static void testJSONInit()
 {
     JSON *test = JSONInit();
     assert(test != NULL);
     assert(test->root == NULL);
-    FreeJSON(test);
+    JSONFree(test);
 }
 
 static void testStringToJSON()
@@ -21,8 +47,8 @@ static void testStringToJSON()
 
     test_json = StringToJSON("[]");
     assert(test_json != NULL);
-    assert(test_json->root->value_type == JSONLIST_t);
-    FreeJSON(test_json);
+    assert(JSONGetRoot(test_json)->value_type == JSONLIST_t);
+    JSONFree(test_json);
 
     // test 2
     test_string = "{}";
@@ -30,8 +56,8 @@ static void testStringToJSON()
 
     test_json = StringToJSON(test_string);
     assert(test_json != NULL);
-    assert(test_json->root->value_type == JSONOBJ_t);
-    FreeJSON(test_json);
+    assert(JSONGetRoot(test_json)->value_type == JSONOBJ_t);
+    JSONFree(test_json);
 
     // test 3 (WIP)
     // test_string = "10";
@@ -48,14 +74,15 @@ static void testStringToJSON()
 
     test_json = StringToJSON(test_string);
     assert(test_json != NULL);
-    assert(test_json->root->value_type == JSONOBJ_t);
-    FreeJSON(test_json);
+    assert(JSONGetRoot(test_json)->value_type == JSONOBJ_t);
+    JSONFree(test_json);
 }
 
 static void testJSONFromFile() {}
 
 extern void TestJSON()
 {
+    testJSONSimple();
     testJSONInit();
     testStringToJSON();
     testJSONFromFile();

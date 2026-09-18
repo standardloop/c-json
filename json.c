@@ -11,61 +11,6 @@
 
 #include "./json.h"
 
-static void printJSONStringValue(char *);
-static void printJSONNumberIntValue(int64_t *value);
-static void printJSONNumberDoubleValue(double *value);
-
-static void printJSONBoolValue(bool *);
-static void printJSONNULLValue(void);
-static void printJSONListValue(DynamicArray *);
-static void printJSONObjValue(JSONHashMap *);
-
-static char *doubleToString(double);
-
-extern JSON *JSONInit()
-{
-    JSON *json = malloc(sizeof(JSON));
-    if (json == NULL)
-    {
-        errno = ENOMEM;
-        return NULL;
-    }
-    json->root = NULL;
-    return json;
-}
-
-extern JSON *StringToJSON(char *input_str)
-{
-    if (input_str == NULL)
-    {
-        errno = EINVAL;
-        return NULL;
-    }
-
-    // JSONLexerDebugTest(input_str, true);
-    JSONLexer *lexer = JSONLexerInit(input_str);
-    if (lexer == NULL)
-    {
-        return NULL;
-    }
-
-    JSONParser *parser = JSONParserInit(lexer);
-    if (parser == NULL)
-    {
-        FreeJSONLexer(lexer);
-        return NULL;
-    }
-    JSON *json = ParseJSON(parser);
-    if (json == NULL)
-    {
-        // need to differentitate between parsing error because JSON is invalid
-        // or if we ran out of memory trying to parse it.
-        return NULL;
-    }
-
-    return json;
-}
-
 extern JSON *JSONFromFile(char *filename)
 {
     FILE *file_ptr = fopen(filename, "rb");
@@ -95,7 +40,7 @@ extern JSON *JSONFromFile(char *filename)
     return json_from_string;
 }
 
-extern char *JSONToString(JSON *json, bool free_json)
+extern char *JSONToString(JSON *json)
 {
     if (json == NULL)
     {
@@ -105,237 +50,19 @@ extern char *JSONToString(JSON *json, bool free_json)
     char *json_as_string = JSONValueToString(json->root);
     if (json_as_string == NULL)
     {
-        FreeJSON(json);
+        JSONFree(json);
         return NULL;
-    }
-    if (free_json)
-    {
-        FreeJSON(json);
     }
     return json_as_string;
 }
 
-#define FLOAT_CHAR_MAX 10
-static char *doubleToString(double num)
-{
-    char *double_as_string =
-        malloc((sizeof(char) * FLOAT_CHAR_MAX) + sizeof(char));
-    if (double_as_string == NULL)
-    {
-        errno = ENOMEM;
-        return NULL;
-    }
-    (void)gcvt(num, FLOAT_CHAR_MAX, double_as_string);
-    double_as_string[FLOAT_CHAR_MAX] = NULL_CHAR;
-    return double_as_string;
-}
-
-extern char *JSONValueToString(JSONValue *json_value)
-{
-    if (json_value == NULL)
-    {
-        errno = EINVAL;
-        return NULL;
-    }
-    char *json_value_string = NULL;
-    switch (json_value->value_type)
-    {
-    case JSONLIST_t:
-        json_value_string =
-            DynamicArrayToString((DynamicArray *)json_value->value);
-        break;
-    case JSONOBJ_t:
-        json_value_string = ObjToString((JSONHashMap *)json_value->value);
-        break;
-    case JSONNUMBER_INT_t:
-        json_value_string = Int64ToString(*(int64_t *)json_value->value);
-        break;
-    case JSONNUMBER_DOUBLE_t:
-        json_value_string = doubleToString(*(double *)json_value->value);
-        break;
-    case JSONSTRING_t:
-        json_value_string = PutQuotesAroundString(json_value->value, false);
-        break;
-    case JSONBOOL_t:
-        if (*(bool *)json_value->value == true)
-        {
-            json_value_string = malloc(sizeof(char) * 5);
-            strcpy(json_value_string, JSON_BOOL_TRUE);
-        }
-        else if (*(bool *)json_value->value == false)
-        {
-            json_value_string = malloc(sizeof(char) * 6);
-            strcpy(json_value_string, JSON_BOOL_FALSE);
-        }
-        break;
-    case JSONNULL_t:
-        json_value_string = malloc(sizeof(char) * 5);
-        strcpy(json_value_string, JSON_NULL);
-        break;
-    default:
-        break;
-    }
-    return json_value_string;
-}
-
-extern void FreeJSON(JSON *json)
-{
-    if (json == NULL)
-    {
-        errno = EINVAL;
-        return;
-    }
-    if (json->root != NULL)
-    {
-        if (json->root->value != NULL)
-        {
-            if (json->root->value_type == JSONLIST_t)
-            {
-                FreeDynamicArray(json->root->value);
-            }
-            else if (json->root->value_type == JSONOBJ_t)
-            {
-                FreeJSONHashMap(json->root->value);
-            }
-        }
-        FreeJSONValue(json->root, false);
-    }
-    free(json);
-}
-
-// Pretty Print can be handled by piping into jq
-extern void PrintJSON(JSON *json)
-{
-    if (json == NULL || json->root == NULL || json->root->value == NULL)
-    {
-        errno = EINVAL;
-        return;
-    }
-    if (json->root->value_type == JSONLIST_t)
-    {
-        PrintDynamicArray(json->root->value);
-    }
-    else if (json->root->value_type == JSONOBJ_t)
-    {
-        PrintJSONHashMap(json->root->value);
-    }
-}
-
-extern void PrintJSONValue(JSONValue *json_value)
-{
-    if (json_value == NULL || json_value->value == NULL)
-    {
-        errno = EINVAL;
-        return;
-    }
-    switch (json_value->value_type)
-    {
-    case JSONOBJ_t:
-        printJSONObjValue((JSONHashMap *)json_value->value);
-        break;
-    case JSONNUMBER_INT_t:
-        printJSONNumberIntValue((int64_t *)json_value->value);
-        break;
-    case JSONNUMBER_DOUBLE_t:
-        printJSONNumberDoubleValue((double *)json_value->value);
-        break;
-    case JSONSTRING_t:
-        printJSONStringValue((char *)json_value->value);
-        break;
-    case JSONBOOL_t:
-        printJSONBoolValue((bool *)json_value->value);
-        break;
-    case JSONNULL_t:
-        printJSONNULLValue();
-        break;
-    case JSONLIST_t:
-        printJSONListValue((DynamicArray *)json_value->value);
-        break;
-    default:
-        break;
-    }
-}
-
-static void printJSONStringValue(char *value)
-{
-    if (value == NULL)
-    {
-        errno = EINVAL;
-        return;
-    }
-    printf("\"%s\"", value);
-}
-
-static void printJSONNumberIntValue(int64_t *value)
-{
-    if (value == NULL)
-    {
-        errno = EINVAL;
-        return;
-    }
-    printf("%lld", *value);
-}
-
-static void printJSONNumberDoubleValue(double *value)
-{
-    if (value == NULL)
-    {
-        errno = EINVAL;
-        return;
-    }
-    printf("%lf", *value);
-}
-
-static void printJSONBoolValue(bool *value)
-{
-    if (value == NULL)
-    {
-        errno = EINVAL;
-        return;
-    }
-
-    if (*value == true)
-    {
-        printf("%s", JSON_BOOL_TRUE);
-    }
-    else if (*value == false)
-    {
-        printf("%s", JSON_BOOL_FALSE);
-    }
-}
-
-static void printJSONNULLValue(void)
-{
-    printf("%s", JSON_NULL);
-}
-
-static void printJSONListValue(DynamicArray *value)
-{
-    if (value == NULL)
-    {
-        errno = EINVAL;
-        return;
-    }
-    PrintDynamicArray(value);
-}
-
-static void printJSONObjValue(JSONHashMap *value)
-{
-    if (value == NULL)
-    {
-        errno = EINVAL;
-        return;
-    }
-    PrintJSONHashMap(value);
-}
-
-extern char *JSONValueV2ToString(void *value)
+extern char *JSONValueToString(void *value)
 {
     if (value == NULL)
     {
         return NULL;
     }
-    JSONValueV2 *json_v_ptr = (JSONValueV2 *)value;
+    JSONValue *json_v_ptr = (JSONValue *)value;
     if (json_v_ptr->value_type == JSONOBJ_t)
     {
         return HashMapToString(json_v_ptr->obj);
@@ -375,13 +102,13 @@ extern char *JSONValueV2ToString(void *value)
     return NULL;
 }
 
-extern void JSONValueV2Free(void *value)
+extern void JSONValueFree(void *value)
 {
     if (value == NULL)
     {
         return;
     }
-    JSONValueV2 *json_v_ptr = (JSONValueV2 *)value;
+    JSONValue *json_v_ptr = (JSONValue *)value;
     if (json_v_ptr->value_type == JSONOBJ_t)
     {
         HashMapFree(json_v_ptr->obj);
@@ -413,9 +140,9 @@ extern void JSONValueV2Free(void *value)
     free(json_v_ptr);
 }
 
-extern JSONValueV2 *JSONValueV2BlankInit()
+extern JSONValue *JSONValueBlankInit()
 {
-    JSONValueV2 *self = malloc(sizeof(JSONValueV2));
+    JSONValue *self = malloc(sizeof(JSONValue));
     if (self == NULL)
     {
         return NULL;
@@ -424,9 +151,9 @@ extern JSONValueV2 *JSONValueV2BlankInit()
     return self;
 }
 
-extern JSONValueV2 *JSONValueV2Init(enum JSONValueType value_type, void *value)
+extern JSONValue *JSONValueInit(enum JSONValueType value_type, void *value)
 {
-    JSONValueV2 *self = JSONValueV2BlankInit();
+    JSONValue *self = JSONValueBlankInit();
     if (self == NULL)
     {
         return NULL;
@@ -463,13 +190,13 @@ extern JSONValueV2 *JSONValueV2Init(enum JSONValueType value_type, void *value)
     return self;
 }
 
-extern void JSONValueV2Print(void *value)
+extern void JSONValuePrint(void *value)
 {
     if (value == NULL)
     {
         return;
     }
-    JSONValueV2 *json_v_ptr = (JSONValueV2 *)value;
+    JSONValue *json_v_ptr = (JSONValue *)value;
     if (json_v_ptr->value_type == JSONOBJ_t)
     {
         HashMapPrint(json_v_ptr->obj);
@@ -507,15 +234,87 @@ extern void JSONValueV2Print(void *value)
     }
 }
 
-extern void *JSONValueV2Duplicate(void *value)
+extern void *JSONValueDuplicate(void *value)
 {
     // TODO
     (void)value;
     return NULL;
 }
 
-ItemValueOperations ItemValueLinkedListOperations = {
-    .toStringFunction = JSONValueV2ToString,
-    .freeFunction = JSONValueV2Free,
-    .printFunction = JSONValueV2Print,
-    .duplicateFunction = JSONValueV2Duplicate};
+ItemValueOperations ItemValueJSONValueOperations = {
+    .toStringFunction = JSONValueToString,
+    .freeFunction = JSONValueFree,
+    .printFunction = JSONValuePrint,
+    .duplicateFunction = JSONValueDuplicate};
+
+extern JSON *JSONInit()
+{
+    JSON *self = malloc(sizeof(JSON));
+    if (self == NULL)
+    {
+        return NULL;
+    }
+    self->root = NULL;
+    return self;
+}
+
+extern void JSONFree(JSON *json)
+{
+    if (json != NULL)
+    {
+        if (json->root != NULL)
+        {
+            ItemFree(json->root);
+        }
+        free(json);
+    }
+}
+
+extern void JSONPrint(JSON *json)
+{
+    if (json != NULL)
+    {
+        ItemPrint(json->root);
+    }
+}
+
+extern JSON *StringToJSON(char *input_str)
+{
+    if (input_str == NULL)
+    {
+        errno = EINVAL;
+        return NULL;
+    }
+
+    // JSONLexerDebugTest(input_str, true);
+    JSONLexer *lexer = JSONLexerInit(input_str);
+    if (lexer == NULL)
+    {
+        return NULL;
+    }
+
+    JSONParser *parser = JSONParserInit(lexer);
+    if (parser == NULL)
+    {
+        FreeJSONLexer(lexer);
+        return NULL;
+    }
+    JSON *json = ParseJSON(parser);
+    if (json == NULL)
+    {
+        // need to differentitate between parsing error because JSON is invalid
+        // or if we ran out of memory trying to parse it.
+        return NULL;
+    }
+
+    return json;
+}
+
+extern JSONValue *JSONGetRoot(JSON *json)
+{
+    if (json == NULL)
+    {
+        return NULL;
+    }
+    return (JSONValue *)json->root->value;
+}

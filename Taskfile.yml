@@ -12,8 +12,6 @@ vars:
     - json.c
     - lexer.c
     - parser.c
-    - hashmap.c
-    - dynamicarray.c
   TEST_EXECUTABLE_NAME: test
   TEST_SOURCE_FILES:
     - json.test.c
