@@ -5,12 +5,14 @@
 | Name                            | Description |
 | ------------------------------- | ----------- |
 | [`JSON`](#json)                 |             |
+| [`JSONV2`](#jsonv2)             |             |
 | [`DynamicArray`](#dynamicarray) |             |
 | [`JSONLexer`](#jsonlexer)       |             |
 | [`JSONToken`](#jsontoken)       |             |
 | [`JSONValue`](#jsonvalue)       |             |
 | [`JSONParser`](#jsonparser)     |             |
 | [`JSONHashMap`](#jsonhashmap)   |             |
+| [`JSONValueV2`](#jsonvaluev2)   |             |
 
 ## Macros
 
@@ -165,6 +167,54 @@ using HashFunction = u_int32_t
 
 ```cpp
 char * JSONValueToString(JSONValue *)
+```
+
+---
+
+### JSONValueV2BlankInit
+
+```cpp
+JSONValueV2 * JSONValueV2BlankInit()
+```
+
+---
+
+### JSONValueV2Init
+
+```cpp
+JSONValueV2 * JSONValueV2Init(enum JSONValueType value_type, void * value)
+```
+
+---
+
+### JSONValueV2ToString
+
+```cpp
+char * JSONValueV2ToString(void * value)
+```
+
+---
+
+### JSONValueV2Free
+
+```cpp
+void JSONValueV2Free(void * value)
+```
+
+---
+
+### JSONValueV2Print
+
+```cpp
+void JSONValueV2Print(void * value)
+```
+
+---
+
+### JSONValueV2Duplicate
+
+```cpp
+void * JSONValueV2Duplicate(void * value)
 ```
 
 ---
@@ -571,6 +621,26 @@ struct JSON
 JSONValue * root
 ```
 
+## JSONV2
+
+```cpp
+struct JSONV2
+```
+
+### Public Attributes
+
+| Return   | Name              | Description |
+| -------- | ----------------- | ----------- |
+| `Item *` | [`root`](#root-1) |             |
+
+---
+
+#### root
+
+```cpp
+Item * root
+```
+
 ## DynamicArray
 
 ```cpp
@@ -925,4 +995,165 @@ HashFunction * hashFunction
 
 ```cpp
 bool force_lowercase
+```
+
+## JSONValueV2
+
+```cpp
+struct JSONValueV2
+```
+
+### Public Attributes
+
+| Return                                                                 | Name                                                                                                     | Description |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ----------- |
+| enum [`JSONValueType`](#jsonvaluetype)                                 | [`value_type`](#value_type-1)                                                                            |             |
+| `union JSONValueV2::@372020044153077151131055174206216317330213243071` | [`@101112273240373251367232114052174162075306057323`](#101112273240373251367232114052174162075306057323) |             |
+
+---
+
+#### value_type
+
+```cpp
+enum JSONValueType value_type
+```
+
+Type: enum [`JSONValueType`](#jsonvaluetype)
+
+---
+
+#### @101112273240373251367232114052174162075306057323
+
+```cpp
+union JSONValueV2::@372020044153077151131055174206216317330213243071 @101112273240373251367232114052174162075306057323
+```
+
+## [union].**unnamed0**
+
+```cpp
+union [union].__unnamed0__
+```
+
+### Public Attributes
+
+| Return      | Name                        | Description |
+| ----------- | --------------------------- | ----------- |
+| `List *`    | [`list`](#list-1)           |             |
+| `HashMap *` | [`obj`](#obj)               |             |
+| `int64_t *` | [`num_int`](#num_int)       |             |
+| `double *`  | [`num_double`](#num_double) |             |
+| `char *`    | [`str`](#str)               |             |
+| `bool *`    | [`boolean`](#boolean)       |             |
+
+---
+
+#### list
+
+```cpp
+List * list
+```
+
+---
+
+#### obj
+
+```cpp
+HashMap * obj
+```
+
+---
+
+#### num_int
+
+```cpp
+int64_t * num_int
+```
+
+---
+
+#### num_double
+
+```cpp
+double * num_double
+```
+
+---
+
+#### str
+
+```cpp
+char * str
+```
+
+---
+
+#### boolean
+
+```cpp
+bool * boolean
+```
+
+## [union].**unnamed0**
+
+```cpp
+union [union].__unnamed0__
+```
+
+### Public Attributes
+
+| Return      | Name                        | Description |
+| ----------- | --------------------------- | ----------- |
+| `List *`    | [`list`](#list-1)           |             |
+| `HashMap *` | [`obj`](#obj)               |             |
+| `int64_t *` | [`num_int`](#num_int)       |             |
+| `double *`  | [`num_double`](#num_double) |             |
+| `char *`    | [`str`](#str)               |             |
+| `bool *`    | [`boolean`](#boolean)       |             |
+
+---
+
+#### list
+
+```cpp
+List * list
+```
+
+---
+
+#### obj
+
+```cpp
+HashMap * obj
+```
+
+---
+
+#### num_int
+
+```cpp
+int64_t * num_int
+```
+
+---
+
+#### num_double
+
+```cpp
+double * num_double
+```
+
+---
+
+#### str
+
+```cpp
+char * str
+```
+
+---
+
+#### boolean
+
+```cpp
+bool * boolean
 ```

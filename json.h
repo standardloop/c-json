@@ -58,6 +58,34 @@ typedef struct
     JSONValue *root;
 } JSON;
 
+typedef struct
+{
+    enum JSONValueType value_type;
+    union
+    {
+        List *list;
+        HashMap *obj;
+        int64_t *num_int;
+        double *num_double;
+        // void *null_json; // if null, then do need to hold it
+        char *str;
+        bool *boolean;
+    };
+} JSONValueV2;
+
+extern JSONValueV2 *JSONValueV2BlankInit();
+extern JSONValueV2 *JSONValueV2Init(enum JSONValueType value_type, void *value);
+
+extern char *JSONValueV2ToString(void *value);
+extern void JSONValueV2Free(void *value);
+extern void JSONValueV2Print(void *value);
+extern void *JSONValueV2Duplicate(void *value);
+
+typedef struct
+{
+    Item *root;
+} JSONV2;
+
 extern JSON *JSONInit();
 extern JSON *StringToJSON(char *);
 extern JSON *JSONFromFile(char *);

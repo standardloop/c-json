@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <standardloop/collections.h>
 #include <standardloop/util.h>
 
 #include "./json.h"
@@ -327,3 +328,194 @@ static void printJSONObjValue(JSONHashMap *value)
     }
     PrintJSONHashMap(value);
 }
+
+extern char *JSONValueV2ToString(void *value)
+{
+    if (value == NULL)
+    {
+        return NULL;
+    }
+    JSONValueV2 *json_v_ptr = (JSONValueV2 *)value;
+    if (json_v_ptr->value_type == JSONOBJ_t)
+    {
+        return HashMapToString(json_v_ptr->obj);
+    }
+    else if (json_v_ptr->value_type == JSONLIST_t)
+    {
+        return ListToString(json_v_ptr->list);
+    }
+    else if (json_v_ptr->value_type == JSONNUMBER_INT_t)
+    {
+        return IntToString(json_v_ptr->num_int);
+    }
+    else if (json_v_ptr->value_type == JSONNUMBER_DOUBLE_t)
+    {
+        // FIXME
+        return NULL;
+    }
+    else if (json_v_ptr->value_type == JSONSTRING_t)
+    {
+        return StringToString(json_v_ptr->str);
+    }
+    else if (json_v_ptr->value_type == JSONBOOL_t)
+    {
+        if (*json_v_ptr->boolean == true)
+        {
+            return strdup(JSON_BOOL_TRUE);
+        }
+        else if (*json_v_ptr->boolean == false)
+        {
+            return strdup(JSON_BOOL_FALSE);
+        }
+    }
+    else if (json_v_ptr->value_type == JSONNULL_t)
+    {
+        return strdup(JSON_NULL);
+    }
+    return NULL;
+}
+
+extern void JSONValueV2Free(void *value)
+{
+    if (value == NULL)
+    {
+        return;
+    }
+    JSONValueV2 *json_v_ptr = (JSONValueV2 *)value;
+    if (json_v_ptr->value_type == JSONOBJ_t)
+    {
+        HashMapFree(json_v_ptr->obj);
+    }
+    else if (json_v_ptr->value_type == JSONLIST_t)
+    {
+        ListFree(json_v_ptr->list);
+    }
+    else if (json_v_ptr->value_type == JSONNUMBER_INT_t)
+    {
+        free(json_v_ptr->num_int);
+    }
+    else if (json_v_ptr->value_type == JSONNUMBER_DOUBLE_t)
+    {
+        free(json_v_ptr->num_double);
+    }
+    else if (json_v_ptr->value_type == JSONSTRING_t)
+    {
+        free(json_v_ptr->str);
+    }
+    else if (json_v_ptr->value_type == JSONBOOL_t)
+    {
+        free(json_v_ptr->boolean);
+    }
+    else if (json_v_ptr->value_type == JSONNULL_t)
+    {
+        // nothing to free, we don't store null
+    }
+    free(json_v_ptr);
+}
+
+extern JSONValueV2 *JSONValueV2BlankInit()
+{
+    JSONValueV2 *self = malloc(sizeof(JSONValueV2));
+    if (self == NULL)
+    {
+        return NULL;
+    }
+
+    return self;
+}
+
+extern JSONValueV2 *JSONValueV2Init(enum JSONValueType value_type, void *value)
+{
+    JSONValueV2 *self = JSONValueV2BlankInit();
+    if (self == NULL)
+    {
+        return NULL;
+    }
+    self->value_type = value_type;
+    if (value_type == JSONOBJ_t)
+    {
+        self->obj = value;
+    }
+    else if (value_type == JSONLIST_t)
+    {
+        self->list = value;
+    }
+    else if (value_type == JSONNUMBER_INT_t)
+    {
+        self->num_int = value;
+    }
+    else if (value_type == JSONNUMBER_DOUBLE_t)
+    {
+        self->num_double = value;
+    }
+    else if (value_type == JSONSTRING_t)
+    {
+        self->str = value;
+    }
+    else if (value_type == JSONBOOL_t)
+    {
+        self->boolean = value;
+    }
+    else if (value_type == JSONNULL_t)
+    {
+        // nothing to store here
+    }
+    return self;
+}
+
+extern void JSONValueV2Print(void *value)
+{
+    if (value == NULL)
+    {
+        return;
+    }
+    JSONValueV2 *json_v_ptr = (JSONValueV2 *)value;
+    if (json_v_ptr->value_type == JSONOBJ_t)
+    {
+        HashMapPrint(json_v_ptr->obj);
+    }
+    else if (json_v_ptr->value_type == JSONLIST_t)
+    {
+        ListPrint(json_v_ptr->list);
+    }
+    else if (json_v_ptr->value_type == JSONNUMBER_INT_t)
+    {
+        printf("%lld", *json_v_ptr->num_int);
+    }
+    else if (json_v_ptr->value_type == JSONNUMBER_DOUBLE_t)
+    {
+        printf("%lf", *json_v_ptr->num_double);
+    }
+    else if (json_v_ptr->value_type == JSONSTRING_t)
+    {
+        printf("\"%s\"", json_v_ptr->str);
+    }
+    else if (json_v_ptr->value_type == JSONBOOL_t)
+    {
+        if (*json_v_ptr->boolean == true)
+        {
+            printf("%s", JSON_BOOL_TRUE);
+        }
+        else if (*json_v_ptr->boolean == false)
+        {
+            printf("%s", JSON_BOOL_FALSE);
+        }
+    }
+    else if (json_v_ptr->value_type == JSONNULL_t)
+    {
+        printf("%s", JSON_NULL);
+    }
+}
+
+extern void *JSONValueV2Duplicate(void *value)
+{
+    // TODO
+    (void)value;
+    return NULL;
+}
+
+ItemValueOperations ItemValueLinkedListOperations = {
+    .toStringFunction = JSONValueV2ToString,
+    .freeFunction = JSONValueV2Free,
+    .printFunction = JSONValueV2Print,
+    .duplicateFunction = JSONValueV2Duplicate};
