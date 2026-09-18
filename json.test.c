@@ -7,6 +7,8 @@
 
 static void testJSONSimple()
 {
+    printf("testJSONSimple\n");
+
     JSONValue *json_v = JSONValueInit(JSONSTRING_t, strdup("testing"));
     assert(json_v != NULL);
     assert(json_v->value_type == JSONSTRING_t);
@@ -33,6 +35,7 @@ static void testJSONSimple()
 
 static void testJSONInit()
 {
+    printf("testJSONInit\n");
     JSON *test = JSONInit();
     assert(test != NULL);
     assert(test->root == NULL);
@@ -41,6 +44,7 @@ static void testJSONInit()
 
 static void testStringToJSON()
 {
+    printf("testStringToJSON\n");
     // test 1
     char *test_string = "[]";
     JSON *test_json = NULL;
@@ -75,10 +79,21 @@ static void testStringToJSON()
     test_json = StringToJSON(test_string);
     assert(test_json != NULL);
     assert(JSONGetRoot(test_json)->value_type == JSONOBJ_t);
+
     JSONFree(test_json);
 }
 
-static void testJSONFromFile() {}
+static void testJSONFromFile()
+{
+    printf("testJSONFromFile\n");
+
+    JSON *json_simple_array =
+        JSONFromFile("./testfiles/simple/simple-array.json");
+    assert(json_simple_array != NULL);
+    assert(JSONGetRoot(json_simple_array)->value_type == JSONLIST_t);
+
+    JSONFree(json_simple_array);
+}
 
 extern void TestJSON()
 {
