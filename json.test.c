@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <standardloop/testing.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -91,11 +90,11 @@ static void testStringToJSON()
     test_json = NULL;
 
     test_json = StringToJSON(test_string);
-    TestCaseVerify(false,
+    TestCaseVerify(true,
                    "ensure StringToJSON(\"test\") returns a non NULL ptr ",
                    test_json != NULL);
     TestCaseVerify(
-        false,
+        true,
         "ensure the root value of the pointer has a value type of JSONSTRING_t",
         test_json != NULL &&
             JSONGetRoot(test_json)->value_type == JSONSTRING_t);
@@ -124,55 +123,56 @@ static void testJSONFromFile()
 
     // ------------------------------------------------------------
     test = JSONFromFile("./testfiles/simple/simple-array.json");
-    assert(test != NULL);
-    assert(JSONGetRoot(test)->value_type == JSONLIST_t);
+    TestCaseVerify(true, "", test != NULL);
+    TestCaseVerify(true, "", JSONGetRoot(test)->value_type == JSONLIST_t);
 
     JSONFree(test);
     test = NULL;
 
     // ------------------------------------------------------------
     test = JSONFromFile("./testfiles/simple/simple-obj.json");
-    assert(test != NULL);
-    assert(JSONGetRoot(test)->value_type == JSONOBJ_t);
+    TestCaseVerify(true, "", test != NULL);
+    TestCaseVerify(true, "", JSONGetRoot(test)->value_type == JSONOBJ_t);
 
     JSONFree(test);
     test = NULL;
 
     // ------------------------------------------------------------
     test = JSONFromFile("./testfiles/simple/simple-bool.json");
-    assert(test != NULL);
-    assert(JSONGetRoot(test)->value_type == JSONBOOL_t);
+    TestCaseVerify(true, "", test != NULL);
+    TestCaseVerify(true, "", JSONGetRoot(test)->value_type == JSONBOOL_t);
 
     JSONFree(test);
     test = NULL;
 
     // ------------------------------------------------------------
     test = JSONFromFile("./testfiles/simple/simple-double.json");
-    assert(test != NULL);
-    assert(JSONGetRoot(test)->value_type == JSONNUMBER_DOUBLE_t);
+    TestCaseVerify(true, "", test != NULL);
+    TestCaseVerify(true, "",
+                   JSONGetRoot(test)->value_type == JSONNUMBER_DOUBLE_t);
 
     JSONFree(test);
 
     // ------------------------------------------------------------
     test = JSONFromFile("./testfiles/simple/simple-int.json");
-    assert(test != NULL);
-    assert(JSONGetRoot(test)->value_type == JSONNUMBER_INT_t);
-
-    JSONFree(test);
-    test = NULL;
-
-    // ------------------------------------------------------------
-    test = JSONFromFile("./testfiles/simple/simple-int.json");
-    assert(test != NULL);
-    assert(JSONGetRoot(test)->value_type == JSONNUMBER_INT_t);
+    TestCaseVerify(true, "", test != NULL);
+    TestCaseVerify(true, "", JSONGetRoot(test)->value_type == JSONNUMBER_INT_t);
 
     JSONFree(test);
     test = NULL;
 
     // ------------------------------------------------------------
     test = JSONFromFile("./testfiles/simple/simple-int.json");
-    assert(test != NULL);
-    assert(JSONGetRoot(test)->value_type == JSONNUMBER_INT_t);
+    TestCaseVerify(true, "", test != NULL);
+    TestCaseVerify(true, "", JSONGetRoot(test)->value_type == JSONNUMBER_INT_t);
+
+    JSONFree(test);
+    test = NULL;
+
+    // ------------------------------------------------------------
+    test = JSONFromFile("./testfiles/simple/simple-int.json");
+    TestCaseVerify(true, "", test != NULL);
+    TestCaseVerify(true, "", JSONGetRoot(test)->value_type == JSONNUMBER_INT_t);
 
     JSONFree(test);
     test = NULL;

@@ -87,24 +87,28 @@ int main(void)
 }
 ```
 
-## Building
+## Available Tasks
 
-### To see all avaiable
-
-```sh
-$ task --list-all
-```
-
-### To build a test program
+<!-- TASKS_START -->
 
 ```sh
-$ task test
+task: Available tasks for this project:
+* default
+* release
+* dependencies
+* test
+* sanitize
+* test:build-sanitize
+* test:run-sanitize
+* test:build
+* test:run
+* clean
+* fmt
+* docs
+* test:leaks            Run macOS leaks on the test program.
 ```
 
-## Checking for Leaks
-
-- The `taskfile` has a task to compile the code with address sanitizers.
-- See `LEAKS.md`
+<!-- TASKS_END -->
 
 ## Docs
 

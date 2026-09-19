@@ -4,8 +4,8 @@ version: "3"
 # silent: true
 
 includes:
-  # c: https://raw.githubusercontent.com/standardloop/taskfiles/refs/heads/main/c.yml # can pin in future
-  c: ../taskfiles/c.yml
+  c: https://raw.githubusercontent.com/standardloop/taskfiles/refs/heads/main/c.yml # can pin in future
+  # c: ../taskfiles/c.yml
 
 vars:
   SOURCE_FILES:
@@ -81,8 +81,9 @@ tasks:
       - c:fmt
 
   docs:
-    deps:
-      - c:docs:moxygen
+    silent: true
+    cmds:
+      - task: c:docs
 
   test:leaks:
     aliases:
